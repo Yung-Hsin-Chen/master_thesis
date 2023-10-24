@@ -1,0 +1,14 @@
+# Document
+*.aux
+*.bbl
+*.blg
+*.glo
+*.idx
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+
+# Others
+*.DS_Store
