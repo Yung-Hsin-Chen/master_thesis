@@ -2,11 +2,11 @@
 \include{settings/preamble}
 %\include{Settings/hyphenation}
 \begin{document}
- \addtocontents{lof}{%
-   \protect\renewcommand*{\protect\addvspace}[1]{}%
- }
- \addtocontents{lot}{%
-   \protect\renewcommand*{\protect\addvspace}[1]{}%
+\addtocontents{lof}{%
+\protect\renewcommand*{\protect\addvspace}[1]{}%
+}
+\addtocontents{lot}{%
+\protect\renewcommand*{\protect\addvspace}[1]{}%
 }
 
 \include{chapters/titlepage}
@@ -24,10 +24,12 @@
 
 \include{chapters/chap1_introduction} % Introduction
 % State of the art in this research area
-
-% etc...
+\include{chapters/chap2_related_work}
+\include{chapters/chap3_method}
+\include{chapters/chap4_experiment}
 \include{chapters/chap5_results} % Some results
-\include{chapters/chap6_conclusion} % Conclusion
+\include{chapters/chap6_discussion} % Conclusion
+\include{chapters/chap7_conclusion}
 
 \include{chapters/glossary}
 \include{chapters/references}
