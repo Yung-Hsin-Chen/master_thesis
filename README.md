@@ -1,2 +1,1 @@
-# master_thesis
-TrOCR meets CharBERT
+# TrOCR meets CharBERT
