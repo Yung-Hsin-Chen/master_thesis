@@ -2,4 +2,4 @@ FROM texlive/texlive:latest
 
 WORKDIR /work  
 
-COPY ./Document/ /work/Document/
+COPY ./report/ /work/report/
