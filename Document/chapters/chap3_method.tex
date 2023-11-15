@@ -1,18 +1,31 @@
-\newchap{Method}
+\newchap{Methodology}
 \label{chap:3_method}
-\section{Motivation}
-Some words on your motivation would be nice.
+In this chapter, I will introduce the model which consists of TrOCR and CharBERT by combining the ideas of CharBERT and Candidate Fusion mentioned in \autoref{chap:2_related_work}. First, I will describe the design concept of the model. Next, I will elaborate on the architectures of the models developed in this study.
 
-\section{Research Questions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                       Design Concept                                       %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Design Concept}
+\label{sec:3_design_concept}
+In \autoref{chap:2_related_work}, CharBERT and Candidate Fusion are introduced. CharBERT mitigates the problems of incomplete modelling and fragile representation by including the character encoding in addition to the subword level information. Furthermore, having NLM as the pre-training task makes CharBERT effective at correcting character level typos, which is a desired feature for post-OCR correcting. 
 
-The research questions that shall be answered in this thesis, are:
-\begin{enumerate}
- \item What do I do?
- \item How do I do it?
- \item And why?
-\end{enumerate}
+Even though CharBERT outperforms RoBERTa most of the time, the improvements are not significant. RoBERTa is still considered a strong LM, comparing to CharBERT. Thus, it is still necessary to inspect the power of CharBERT by replacing it with RoBERTa and observe the results.
 
-\section{Thesis Structure}
-In this first chapter \ldots\\
-Chapter 2 introduces \ldots\\
-Chapter 3 \ldots
+On the other hand, Candidate Fusion claims that having an interaction between the recogniser and the LM can enhance the performance of OCR. Thus, having TrOCR as the recogniser and CharBERT as the LM, combining them is expected have an improvement on the OCR accuracy. 
+
+CharBERT serves as a corrector in the model. However, it does not have strong semantic understandings. Thus, an additional LM with strong semantic understandings can also be added to the recogniser to perfect the model's capabilities in image recognition, semantics and robust in the presence of typos.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                     Model Architecture                                     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Model Architecture}
+\label{sec:3_model_architecture}
+To fully explore the effect of each component, namely RoBERTa, CharBERT and the language model, on the recogniser, TrOCR, an ablation study will be carried out. Thus, these component will be integrated into TrOCR one by one. In this section, I will first mention the functionalities each component served in TrOCR, and then the three different integrated models will be introduced.
+\subsection{Recogniser - TrOCR}
+\label{subsec:3_recogniser_trocr}
+
+\subsection{Corrector - CharBERT}
+\label{subsec:3_corrector_charbert}
+
+\subsection{Language Model - tbd}
+\label{subsec:3_language_model_tbd}
