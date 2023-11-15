@@ -9,18 +9,11 @@
 *.lot
 *.out
 *.toc
-<<<<<<< HEAD
-*.ilg
-*.ind
-*.fls
-*.fdb_latexmk
-=======
 *.fls
 *.ilg
 *.ind
 *.fdb_latexmk
 *.synctex.gz
->>>>>>> write_method_experiment
 
 # Others
 *.DS_Store
