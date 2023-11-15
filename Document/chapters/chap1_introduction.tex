@@ -1,20 +1,19 @@
-
 \newchap{Introduction}
 \label{chap:1_intro}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                         Motivation                                         %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Motivation}
-Some words on your motivation would be nice.
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                     Research Questions                                     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Research Questions}
-
-The research questions that shall be answered in this thesis, are:
+In this study, we aim to investigate and address the following key research questions. 
 \begin{enumerate}
- \item What do I do?
- \item How do I do it?
- \item And why?
+    \item In the Candidate Fusion paper, they claimed that fusing the recogniser and LM can make the LM adjust to the domain-specific data. Can fusing TrOCR and CharBERT achieve the same conclusion? In other words, can CharBERT adjust to historical texts even it was trained on modern texts?
+    \item In the CharBERT paper, they claimed that, by using the character level information in addition to the subword level information, the problems of incomplete modelling and fragile 
+    representation can be solved. However, the results shown in the paper did not show significant performance improvement over RoBERTa (a strong baseline LM model). Is this statement valid? Can TrOCR combined with CharBERT achieve the claim?
+    \item Which layers should be frozen to results in better performance and why?
+    \item Does TrOCR decoder change its beam search output with the presence of the language model?
 \end{enumerate}
-
-\section{Thesis Structure}
-In this first chapter \ldots\\
-Chapter 2 introduces \ldots\\
-Chapter 3 \ldots
 
