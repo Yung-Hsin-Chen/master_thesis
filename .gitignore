@@ -9,6 +9,10 @@
 *.lot
 *.out
 *.toc
+*.ilg
+*.ind
+*.fls
+*.fdb_latexmk
 
 # Others
 *.DS_Store
