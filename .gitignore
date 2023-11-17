@@ -1,4 +1,4 @@
-# Document
+# Report
 *.aux
 *.bbl
 *.blg
@@ -14,6 +14,17 @@
 *.ind
 *.fdb_latexmk
 *.synctex.gz
+
+# Data
+data/raw/GW/ground_truth
+data/raw/GW/line_image
+data/raw/IAM/ground_truth
+data/raw/IAM/line_image
+
+# Ignore Pipenv and Poetry lock files
+Pipfile.lock
+poetry.lock
+Pipfile
 
 # Others
 *.DS_Store

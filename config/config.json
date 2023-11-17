@@ -1,0 +1,29 @@
+{
+    "punctuation_abbrev": {
+        "s_pt": ".",
+        "s_cm": ",",
+        "s_mi": "-",
+        "s_sq": ";",
+        "s_qt": "'",
+        "s_qo": ":",
+        "s_bl": "(",
+        "s_br": ")",
+        "s_lb": "£",
+        "s_GW": "GW",
+        "s_5th": "5th",
+        "s_7th": "7th",
+        "s_8th": "8th",
+        "s_1st": "1st",
+        "s_0th": "0th",
+        "s_2nd": "2nd",
+        "s_6th": "6th",
+        "s_3rd": "3rd",
+        "s_1th": "1th",
+        "s_9th": "9th"
+    },
+    "GW_symbol_replacement": {
+        "-": "",
+        "|": " ",
+        "s_": ""
+    }
+}
