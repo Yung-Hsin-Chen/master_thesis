@@ -16,10 +16,10 @@
 *.synctex.gz
 
 # Data
-data/raw/GW/ground_truth
-data/raw/GW/line_image
-data/raw/IAM/ground_truth
-data/raw/IAM/line_image
+# data/raw/GW/ground_truth/
+# data/raw/GW/line_image/
+# data/raw/IAM/ground_truth/
+data/raw/IAM/line_image/
 
 # Ignore Pipenv and Poetry lock files
 Pipfile.lock
