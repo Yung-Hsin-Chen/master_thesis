@@ -16,7 +16,7 @@
 *.synctex.gz
 
 # Data
-# data/raw/GW/ground_truth/
+# data/raw/GW/ground_truth/transcription.txt
 # data/raw/GW/line_image/
 # data/raw/IAM/ground_truth/
 data/raw/IAM/line_image/
