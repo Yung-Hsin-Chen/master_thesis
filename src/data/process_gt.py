@@ -1,7 +1,13 @@
+from config.config import configure_logging
+import logging
 import json
 import os
 import xml.etree.ElementTree as ET
 import h5py
+
+# Configure logging
+configure_logging()
+logger = logging.getLogger(__name__)
 
 # Store processed data dictionary into HDF5
 def store_processed_data(data_name: str, data: dict) -> None:
@@ -96,12 +102,15 @@ def load_IAM_gt() -> None:
 
 # Load ground truth depending on the input of the data name
 def process_gt() -> None:
+    logger.info("Start processing GW raw data...")
     load_GW_gt()
+
+    logger.info("Start processing IAM raw data...")
     load_IAM_gt()
     # TODO Expand German dataset
+    logger.info("Data processed and is stored in data/processed/.")
     return
 
 if __name__=="__main__":
-    print("Processing raw data...\n")
+    # print(os.getcwd())
     process_gt()
-    print("Data processed and is stored in data/processed/.")
