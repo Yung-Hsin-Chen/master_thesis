@@ -72,7 +72,7 @@ def load_IAM_gt() -> None:
                 line_id = line_element.get("id")
                 IAM_gt[line_id] = line_text
     destination_folder = os.path.join(".", "data", "processed", "IAM", "ground_truth")
-    store_processed_data("GW_gt", IAM_gt, destination_folder)
+    store_processed_data("IAM_gt", IAM_gt, destination_folder)
     return
 
 # Load ground truth depending on the input of the data name
