@@ -145,17 +145,20 @@ def get_resize_dim() -> tuple:
 
 def get_data_loader(batch_size: int, test_size: float) -> List[DataLoader]:
     """
-    Load the data, align them, and then get data loaders of training, validation and testing for English and German.
+    Loads and prepares data for training, validation, and testing, and returns corresponding DataLoaders.
 
     Parameters
     -----------
     batch_size: int
+        The batch size for the DataLoaders.
     test_size: float
+        The proportion of the dataset to include in the test split (0.0 to 1.0).
 
     Returns
     --------
-    List[DataLoader]: List[DataLoader]
-        A list of data loaders.
+    List[DataLoader]
+        A list containing DataLoader instances for training, validation, and testing.
+
     """
     # Load and prepare data for splitting
     data = load_data()
