@@ -1,8 +1,8 @@
-import h5py
 import os
+import json
 
 # Store processed data dictionary into HDF5
-def store_processed_data(data_name: str, data: dict) -> None:
+def store_processed_data(data_name: str, data: dict, path: str) -> None:
     """
     Store the processed data dictionary into HDF5 in data/processed.
 
@@ -13,19 +13,17 @@ def store_processed_data(data_name: str, data: dict) -> None:
         The name of the data, can be "GW", "IAM" or "" with "_gt" or "_image" as the ending.
     data: dict
         The keys are the indices, while the values are the corresponding ground truth text or image path.
+    path: str
+        The destination folder to store the data
 
     Returns
     --------
     None
     """
-    # TODO include the GERMAN dataset name in docstring
-    folder = {"gt": "ground_truth", "image": "line_image"}
-    processed_path = os.path.join(".", "data", "processed", data_name[:data_name.find("_")], folder[data_name[data_name.find("_")+1:]])
     # Ensure the folder exists; create it if it doesn't
-    os.makedirs(processed_path, exist_ok=True)
+    os.makedirs(path, exist_ok=True)
     # Store the processed data dictionary as h5
-    file_name = os.path.join(processed_path, data_name+".h5")
-    with h5py.File(file_name, "w") as h5_file:
-        for key, value in data.items():
-            h5_file[key] = value
+    file_name = os.path.join(path, data_name+".json")
+    with open(file_name, "w") as json_file:
+        json.dump(data, json_file)
     return

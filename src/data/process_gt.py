@@ -40,7 +40,8 @@ def load_GW_gt() -> None:
         for k,v in symbol_replacement.items():
             line = line.replace(k, v)
         GW_gt[page] = line.strip()
-    store_processed_data("GW_gt", GW_gt)
+    destination_folder = os.path.join(".", "data", "processed", "GW", "ground_truth")
+    store_processed_data("GW_gt", GW_gt, destination_folder)
     return
 
 # Load and process IAM data ground truth
@@ -70,7 +71,8 @@ def load_IAM_gt() -> None:
                 line_text = line_element.get("text")
                 line_id = line_element.get("id")
                 IAM_gt[line_id] = line_text
-    store_processed_data("IAM_gt", IAM_gt)
+    destination_folder = os.path.join(".", "data", "processed", "IAM", "ground_truth")
+    store_processed_data("GW_gt", IAM_gt, destination_folder)
     return
 
 # Load ground truth depending on the input of the data name

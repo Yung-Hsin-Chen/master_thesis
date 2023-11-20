@@ -27,7 +27,8 @@ def load_image_to_tensor(data_name: str) -> None:
     files = [file for file in files if file != ".DS_Store"]
     for file in files:
         images[os.path.splitext(file)[0]] = os.path.join(folder, file)
-    store_processed_data(data_name, images)
+    destination_folder = os.path.join(".", "data", "processed", data_name[:data_name.find("_")], "line_image")
+    store_processed_data(data_name, images, destination_folder)
     return
 
 # Load images depending on the input of the data name
@@ -46,8 +47,8 @@ def process_image() -> None:
     """
     logger.info("Start processing all raw image data...")
     # TODO Expand German dataset
-    for data in ["GW_image", "IAM_image"]:
-        load_image_to_tensor(data)
+    for data_name in ["GW_image", "IAM_image"]:
+        load_image_to_tensor(data_name)
     logger.info("All image data processed and is stored in data/processed/.")
     return
 
