@@ -160,6 +160,10 @@ def get_data_loader(batch_size: int, test_size: float) -> List[DataLoader]:
         A list containing DataLoader instances for training, validation, and testing.
 
     """
+    # Assert data types and value range 
+    assert isinstance(batch_size, int)
+    assert isinstance(test_size, float)
+    assert 0 < test_size < 1
     # Load and prepare data for splitting
     data = load_data()
     en_data = align_image_gt(data["en_image"], data["en_gt"])
@@ -168,6 +172,10 @@ def get_data_loader(batch_size: int, test_size: float) -> List[DataLoader]:
     train_en_image, val_en_image, train_en_gt, val_en_gt = train_test_split(train_en_image, train_en_gt, test_size=test_size, random_state=42)
     # Define data transformations
     resize_height, resize_width = get_resize_dim()
+    # Assert data types 
+    assert isinstance(resize_height, int)
+    assert isinstance(resize_width, int)
+    # Define transformation
     transform = transforms.Compose([
         transforms.Resize((resize_height, resize_width)),
         transforms.ToTensor()
