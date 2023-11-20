@@ -1,6 +1,5 @@
 from src.utils.helpers import *
 import pytest
-from unittest.mock import mock_open, patch
 import json
 import os
 
