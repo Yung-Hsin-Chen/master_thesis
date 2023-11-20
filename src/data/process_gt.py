@@ -1,45 +1,18 @@
 from config.config import configure_logging
+from src.utils.helpers import store_processed_data
 import logging
 import json
 import os
 import xml.etree.ElementTree as ET
-import h5py
 
 # Configure logging
 configure_logging()
 logger = logging.getLogger(__name__)
 
-# Store processed data dictionary into HDF5
-def store_processed_data(data_name: str, data: dict) -> None:
-    """
-    Store the processed data dictionary into HDF5 in data/processed.
-
-    Parameters
-    -----------
-    data_name: str
-        The name of the data, can be "GW", "IAM" or "".
-    data: dict
-        The keys are the indices, while the values are the corresponding ground truth text.
-
-    Returns
-    --------
-    None
-    """
-    # TODO include the GERMAN dataset name in docstring
-    processed_path = os.path.join(".", "data", "processed", data_name, "ground_truth")
-    # Ensure the folder exists; create it if it doesn't
-    os.makedirs(processed_path, exist_ok=True)
-    # Store the processed data dictionary as h5
-    file_name = os.path.join(processed_path, data_name+"_gt.h5")
-    with h5py.File(file_name, "w") as h5_file:
-        for key, value in data.items():
-            h5_file[key] = value
-    return
-
 # Load and process GW data ground truth
 def load_GW_gt() -> None:
     """
-    Load and Process GW dataset ground truth.
+    Load, process GW dataset ground truth, and then store the data in data/processed.
 
     Parameters
     -----------
@@ -67,13 +40,13 @@ def load_GW_gt() -> None:
         for k,v in symbol_replacement.items():
             line = line.replace(k, v)
         GW_gt[page] = line.strip()
-    store_processed_data("GW", GW_gt)
+    store_processed_data("GW_gt", GW_gt)
     return
 
 # Load and process IAM data ground truth
 def load_IAM_gt() -> None:
     """
-    Load and Process IAM dataset ground truth.
+    Load, process IAM dataset ground truth, and then store the data in data/processed.
 
     Parameters
     -----------
@@ -97,20 +70,30 @@ def load_IAM_gt() -> None:
                 line_text = line_element.get("text")
                 line_id = line_element.get("id")
                 IAM_gt[line_id] = line_text
-    store_processed_data("IAM", IAM_gt)
+    store_processed_data("IAM_gt", IAM_gt)
     return
 
 # Load ground truth depending on the input of the data name
 def process_gt() -> None:
-    logger.info("Start processing GW raw data...")
-    load_GW_gt()
+    """
+    # TODO Fill German dataset in
+    Process the ground truth of GW, IAM and "" datasets and store them data/processed/.
 
-    logger.info("Start processing IAM raw data...")
+    Parameters
+    -----------
+    None
+
+    Returns
+    --------
+    None
+    """
+    logger.info("Start processing GW raw ground truth data...")
+    load_GW_gt()
+    logger.info("Start processing IAM raw ground truth data...")
     load_IAM_gt()
     # TODO Expand German dataset
-    logger.info("Data processed and is stored in data/processed/.")
+    logger.info("All ground truth data processed and is stored in data/processed/.")
     return
 
 if __name__=="__main__":
-    # print(os.getcwd())
     process_gt()
