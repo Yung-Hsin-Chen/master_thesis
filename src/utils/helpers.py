@@ -19,7 +19,8 @@ def store_processed_data(data_name: str, data: dict) -> None:
     None
     """
     # TODO include the GERMAN dataset name in docstring
-    processed_path = os.path.join(".", "data", "processed", data_name[:data_name.find("_")], "ground_truth")
+    folder = {"gt": "ground_truth", "image": "line_image"}
+    processed_path = os.path.join(".", "data", "processed", data_name[:data_name.find("_")], folder[data_name[data_name.find("_")+1:]])
     # Ensure the folder exists; create it if it doesn't
     os.makedirs(processed_path, exist_ok=True)
     # Store the processed data dictionary as h5
