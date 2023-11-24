@@ -1,5 +1,11 @@
 # TrOCR meets CharBERT
 
+## Data
+Data used in the project can be downloaded online.
+1. [IAM](https://fki.tic.heia-fr.ch/databases/iam-handwriting-database)
+2. [GW](https://fki.tic.heia-fr.ch/databases/washington-database)
+3. 
+
 ## Installation
 Dockerfiles are included. Thus, please ensure that Docker is installed.
 
