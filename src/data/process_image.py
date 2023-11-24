@@ -2,23 +2,16 @@ from config.config import configure_logging
 from src.utils.helpers import store_processed_data
 import logging
 import os
+from zipfile import ZipFile
 
 # Configure logging
 configure_logging()
 logger = logging.getLogger(__name__)
 
 # Load and process data image
-def load_image_to_tensor(data_name: str) -> None:
+def load_en_image(data_name: str) -> None:
     """
-    Load, process dataset images to tensor, and then store the data in data/processed.
-
-    Parameters
-    -----------
-    data_name: str
-
-    Returns
-    --------
-    None
+    Load, process English dataset images to tensor, and then store the data in data/processed.
     """
     images = dict()
     folder = os.path.join(".", "data", "raw", data_name[:data_name.find("_")], "line_image")
@@ -31,24 +24,37 @@ def load_image_to_tensor(data_name: str) -> None:
     store_processed_data(data_name, images, destination_folder)
     return
 
+def load_de_image() -> None:
+    """
+    Load, process Bullinger dataset line images, and then store the data in data/processed.
+    """
+    bullinger_image = dict()
+    root_path = os.path.join(".", "data", "raw", "Bullinger")
+    # Open the ZIP file
+    for mode in ["train", "val", "test"]:
+        for zip_filename in os.listdir(os.path.join(root_path, mode)):
+            if zip_filename.endswith(".zip"):
+                with ZipFile(os.path.join(root_path, mode, zip_filename), "r") as zip_file:
+                    # List the contents of the ZIP file
+                    file_list = zip_file.namelist()
+                    file_list = [filename for filename in file_list if filename.endswith(".png") and "de" in filename.split(os.path.sep)]
+                    for filename in file_list:
+                        key = mode+"_"+os.path.splitext(filename)[0]
+                        bullinger_image[key] = filename
+    destination_folder = os.path.join(".", "data", "processed", "Bullinger", "line_image")
+    store_processed_data("bullinger_image", bullinger_image, destination_folder)
+    return
+
 # Load images depending on the input of the data name
 def process_image() -> None:
     """
-    # TODO Fill German dataset in
-    Process the images of GW, IAM and "" datasets and store them data/processed/.
-
-    Parameters
-    -----------
-    None
-
-    Returns
-    --------
-    None
+    Process the images of GW, IAM and "Bullinger" datasets and store them data/processed/.
     """
-    logger.info("Start processing all raw image data...")
-    # TODO Expand German dataset
+    logger.info("Start processing English raw image data...")
     for data_name in ["GW_image", "IAM_image"]:
-        load_image_to_tensor(data_name)
+        load_en_image(data_name)
+    logger.info("Start processing German raw image data...")
+    load_de_image()
     logger.info("All image data processed and is stored in data/processed/.")
     return
 

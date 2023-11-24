@@ -4,6 +4,7 @@ import logging
 import json
 import os
 import xml.etree.ElementTree as ET
+from zipfile import ZipFile
 
 # Configure logging
 configure_logging()
@@ -13,14 +14,6 @@ logger = logging.getLogger(__name__)
 def load_GW_gt() -> None:
     """
     Load, process GW dataset ground truth, and then store the data in data/processed.
-
-    Parameters
-    -----------
-    None
-
-    Returns
-    --------
-    None
     """
     # Load the punctuation abbreviation dictionary
     config_path = os.path.join(".", "config", "config.json")
@@ -48,14 +41,6 @@ def load_GW_gt() -> None:
 def load_IAM_gt() -> None:
     """
     Load, process IAM dataset ground truth, and then store the data in data/processed.
-
-    Parameters
-    -----------
-    None
-
-    Returns
-    --------
-    None
     """
     IAM_gt = dict()
     # Parse the XML file
@@ -75,6 +60,28 @@ def load_IAM_gt() -> None:
     store_processed_data("IAM_gt", IAM_gt, destination_folder)
     return
 
+def load_bullinger_gt() -> None:
+    """
+    Load, process Bullinger dataset ground truth, and then store the data in data/processed.
+    """
+    bullinger_gt = dict()
+    root_path = os.path.join(".", "data", "raw", "Bullinger")
+    # Open the ZIP file
+    for mode in ["train", "val", "test"]:
+        for zip_filename in os.listdir(os.path.join(root_path, mode)):
+            if zip_filename.endswith(".zip"):
+                with ZipFile(os.path.join(root_path, mode, zip_filename), "r") as zip_file:
+                    # List the contents of the ZIP file
+                    file_list = zip_file.namelist()
+                    file_list = [filename for filename in file_list if filename.endswith(".txt") and "de" in filename.split(os.path.sep)]
+                    for filename in file_list:
+                        with zip_file.open(filename) as gt:
+                            key = mode+"_"+os.path.splitext(filename)[0]
+                            bullinger_gt[key] = gt.read().decode("utf-8")
+    destination_folder = os.path.join(".", "data", "processed", "Bullinger", "ground_truth")
+    store_processed_data("bullinger_gt", bullinger_gt, destination_folder)
+    return
+
 # Load ground truth depending on the input of the data name
 def process_gt() -> None:
     """
@@ -90,10 +97,11 @@ def process_gt() -> None:
     None
     """
     logger.info("Start processing GW raw ground truth data...")
-    load_GW_gt()
+    # load_GW_gt()
     logger.info("Start processing IAM raw ground truth data...")
-    load_IAM_gt()
-    # TODO Expand German dataset
+    # load_IAM_gt()
+    logger.info("Start processing Bullinger raw ground truth data...")
+    load_bullinger_gt()
     logger.info("All ground truth data processed and is stored in data/processed/.")
     return
 

@@ -4,9 +4,11 @@ from torchvision import datasets, transforms
 from sklearn.model_selection import train_test_split
 import yaml
 from PIL import Image
-from typing import List
+from typing import List, Tuple
 import os
 import json
+from zipfile import ZipFile
+import shutil
 
 # Define a custom dataset class 
 class CustomDataset(Dataset):
@@ -40,10 +42,11 @@ class CustomDataset(Dataset):
     ------
     Ensure that the PIL library is installed (`pip install Pillow`) for working with images.
     """
-    def __init__(self, data, labels, transform=None):
+    def __init__(self, data: dict, labels: dict, transform=None, data_name=None):
         self.data = data
         self.labels = labels
         self.transform = transform
+        self.data_name = data_name
 
     def __len__(self):
         """
@@ -70,11 +73,26 @@ class CustomDataset(Dataset):
         sample, label: Tuple
             A tuple containing the data sample and its corresponding label.
         """
-        sample = self.data[index]
-        sample = Image.open(sample)
+        sample_path = self.data[index]
+        # print(sample_path)
+        if self.data_name:
+            root_path = os.path.join(".", "data", "raw", "Bullinger")
+            extract_folder = os.path.join(root_path, "extracted_folder")
+            # Open the ZIP file
+            mode = index.split("_")[0]
+            if not os.path.exists(extract_folder):
+                for zip_filename in os.listdir(os.path.join(root_path, mode)):
+                    if zip_filename.endswith(".zip"):
+                        with ZipFile(os.path.join(root_path, mode, zip_filename), "r") as zip_file:
+                            zip_file.extractall(extract_folder)
+            sample_path = os.path.join(extract_folder, sample_path)
 
-        if self.transform:
-            sample = self.transform(sample)
+        # else:
+        with open(sample_path, "rb") as file:
+            sample = Image.open(file)
+            if self.transform:
+                sample = self.transform(sample)
+            
 
         label = self.labels[index]
 
@@ -97,6 +115,9 @@ def load_data() -> dict:
     file_path = os.path.join(".", "data", "processed", "IAM", "ground_truth", "IAM_gt.json")
     with open(file_path, "r") as json_file:
         IAM_gt = json.load(json_file)
+    file_path = os.path.join(".", "data", "processed", "Bullinger", "ground_truth", "bullinger_gt.json")
+    with open(file_path, "r") as json_file:
+        bullinger_gt = json.load(json_file)
     # Load image data
     file_path = os.path.join(".", "data", "processed", "GW", "line_image", "GW_image.json")
     with open(file_path, "r") as json_file:
@@ -104,33 +125,14 @@ def load_data() -> dict:
     file_path = os.path.join(".", "data", "processed", "IAM", "line_image", "IAM_image.json")
     with open(file_path, "r") as json_file:
         IAM_image = json.load(json_file)
-    # TODO load German data
-    GW_image.update(IAM_image)
-    GW_gt.update(IAM_gt)
-    return {"en_image": GW_image, "en_gt": GW_gt}
+    file_path = os.path.join(".", "data", "processed", "Bullinger", "line_image", "bullinger_image.json")
+    with open(file_path, "r") as json_file:
+        bullinger_image = json.load(json_file)
+    return {"GW_image": GW_image, "GW_gt": GW_gt,
+            "IAM_image": IAM_image, "IAM_gt": IAM_gt,
+            "bullinger_image": bullinger_image, "bullinger_gt": bullinger_gt}
 
-def align_image_gt(image: dict, gt: dict) -> dict:
-    """
-    Align images and their respective ground truth by the file name.
-
-    Parameters
-    -----------
-    image: dict
-    gt: dict
-        The file names are keys and the data contents as values.
-
-    Returns
-    --------
-    {"en_image": image_list, "en_gt": gt_list}: dict
-        The keys are the name of the dataset, and the values are the data in lists.
-        The file names of each sample are taken out.
-    """
-    file_names = list(gt.keys())
-    image_list = [image[file_name] for file_name in file_names]
-    gt_list = [gt[file_name] for file_name in file_names]
-    return {"en_image": image_list, "en_gt": gt_list}
-
-def get_resize_dim() -> tuple:
+def resize_data() -> tuple:
     """
     Get the resize height and the resize weight from config_const.yaml.
 
@@ -143,7 +145,56 @@ def get_resize_dim() -> tuple:
         resize_data = yaml.safe_load(config_file)["training"]
     return resize_data["resize_height"], resize_data["resize_width"]
 
-def get_data_loader(batch_size: int, test_size: float) -> List[DataLoader]:
+def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List, List, List]]:
+    folds = []
+    # Get indices for GW
+    def get_indices_GW():
+        base_path = os.path.join(".", "data", "raw", "GW", "cv")
+        # Open the file in read mode
+        for cv_dir in ["cv1", "cv2", "cv3", "cv4"]:
+            one_fold = tuple()
+            for cv_file in ["train.txt", "valid.txt", "test.txt"]:
+                with open(os.path.join(base_path, cv_dir, cv_file), "r") as file:
+                    lines = file.readlines()
+                lines = [i.rstrip("\n") for i in lines]
+                one_fold = one_fold + (lines,)
+            folds.append(one_fold)
+        return folds
+    # Get indices for IAM
+    def get_indices_IAM():
+        indices_list = list(image.keys())
+        # Split the indices into training, validation and testing sets for each fold
+        num_folds = 4
+        for fold in range(num_folds):
+            train_indices, test_indices = train_test_split(indices_list, test_size=0.25, random_state=42)
+            train_indices, val_indices = train_test_split(train_indices, test_size=1/3, random_state=42)
+            folds.append((train_indices, val_indices, test_indices))
+        return folds
+    # Get indices for Bullinger
+    def get_indices_bullinger():
+        indices_list = list(image.keys())
+        train_indices = [index for index in indices_list if index.split("_")[0]=="train"]
+        val_indices = [index for index in indices_list if index.split("_")[0]=="val"]
+        test_indices = [index for index in indices_list if index.split("_")[0]=="test"]
+        folds = [(train_indices, val_indices, test_indices)]
+        return folds
+    # A dictionary to map data_name to the corresponding function
+    functions = {"GW": get_indices_GW, "IAM": get_indices_IAM, "Bullinger": get_indices_bullinger}
+    return functions.get(data_name, lambda: "Invalid data_name")()
+
+def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, transform, data_name=None) -> dict:
+    data_loaders = dict()
+    custom_dataset = CustomDataset(data=image, labels=gt, transform=transform, data_name=data_name)
+    # Create instances of my custom dataset for training, validation and testing purposes
+    for index, fold in enumerate(folds):
+        # Create DataLoader for training, validation, and test sets
+        train_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[0]))
+        val_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[1]))
+        test_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[2]))
+        data_loaders["cv"+str(index+1)] = (train_loader, val_loader, test_loader)
+    return data_loaders
+
+def get_data_loader(batch_size: int) -> tuple:
     """
     Loads and prepares data for training, validation, and testing, and returns corresponding DataLoaders.
 
@@ -162,16 +213,14 @@ def get_data_loader(batch_size: int, test_size: float) -> List[DataLoader]:
     """
     # Assert data types and value range 
     assert isinstance(batch_size, int)
-    assert isinstance(test_size, float)
-    assert 0 < test_size < 1
     # Load and prepare data for splitting
     data = load_data()
-    en_data = align_image_gt(data["en_image"], data["en_gt"])
-    # Split data into train, validation and test datasets
-    train_en_image, test_en_image, train_en_gt, test_en_gt = train_test_split(en_data["en_image"], en_data["en_gt"], test_size=test_size, random_state=42)
-    train_en_image, val_en_image, train_en_gt, val_en_gt = train_test_split(train_en_image, train_en_gt, test_size=test_size, random_state=42)
+    # Split IAM data into train, validation and test datasets, and get the indices
+    GW_folds = get_split_indices("GW", data["GW_image"], data["GW_gt"])
+    IAM_folds = get_split_indices("IAM", data["IAM_image"], data["IAM_gt"])
+    bullinger_folds = get_split_indices("Bullinger", data["bullinger_image"], data["bullinger_gt"])
     # Define data transformations
-    resize_height, resize_width = get_resize_dim()
+    resize_height, resize_width = resize_data()
     # Assert data types 
     assert isinstance(resize_height, int)
     assert isinstance(resize_width, int)
@@ -180,19 +229,26 @@ def get_data_loader(batch_size: int, test_size: float) -> List[DataLoader]:
         transforms.Resize((resize_height, resize_width)),
         transforms.ToTensor()
     ])
-    # Create instances of my custom dataset for training, validation and testing purposes
-    train_en_dataset = CustomDataset(data=train_en_image, labels=train_en_gt, transform=transform)
-    val_en_dataset = CustomDataset(data=val_en_image, labels=val_en_gt, transform=transform)
-    test_en_dataset = CustomDataset(data=test_en_image, labels=test_en_gt, transform=transform)
-    # Create a DataLoader
-    train_en_loader = DataLoader(dataset=train_en_dataset, batch_size=batch_size, shuffle=True)
-    val_en_loader = DataLoader(dataset=val_en_dataset, batch_size=batch_size, shuffle=True)
-    test_en_loader = DataLoader(dataset=test_en_dataset, batch_size=batch_size, shuffle=True)
-    return [train_en_loader, val_en_loader, test_en_loader]
+    # Load the data loaders for all datasets
+    GW_data_loaders = process_data_loader(data["GW_image"], data["GW_gt"], GW_folds, batch_size, transform)
+    IAM_data_loaders = process_data_loader(data["IAM_image"], data["IAM_gt"], IAM_folds, batch_size, transform)
+    bullinger_data_loaders = process_data_loader(data["bullinger_image"], data["bullinger_gt"], bullinger_folds, batch_size, transform, "Bullinger")
+    return GW_data_loaders, IAM_data_loaders, bullinger_data_loaders
 
 if __name__=="__main__":
-    train_en_loader, val_en_loader, test_en_loader = get_data_loader(512, 0.2)
-    # Iterate through the DataLoader
-    for batch_idx, (data, labels) in enumerate(train_en_loader):
-        # "data" contains input data, and "labels" contains corresponding labels
-        print(f"Batch {batch_idx}: Data shape: {data.shape}, Labels shape: {len(labels)}")
+    GW_data_loaders, IAM_data_loaders, bullinger_data_loaders = get_data_loader(512)
+    test_loader = bullinger_data_loaders["cv1"][0]
+    for batch in test_loader:
+        # Extract the image tensor from the batch (adjust based on your actual data structure)
+        images = batch[0]
+        # Check if images is a tensor and has the expected shape (3 channels for RGB images)
+        if isinstance(images, torch.Tensor):
+            print("Images are present in the batch.")
+        else:
+            print("No images found in the batch.")
+    shutil.rmtree(os.path.join(".", "data", "raw", "Bullinger", "extracted_folder"))
+    # train_en_loader, val_en_loader, test_en_loader = get_data_loader(512, 0.2)
+    # # Iterate through the DataLoader
+    # for batch_idx, (data, labels) in enumerate(train_en_loader):
+    #     "data" contains input data, and "labels" contains corresponding labels
+    #     print(f"Batch {batch_idx}: Data shape: {data.shape}, Labels shape: {len(labels)}")
