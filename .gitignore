@@ -18,8 +18,11 @@
 # Data
 data/raw/GW/ground_truth/
 data/raw/GW/line_image/
+data/raw/GW/cv/
 data/raw/IAM/ground_truth/
 data/raw/IAM/line_image/
+data/raw/ICFHR_2016/
+data/raw/Bullinger/
 
 # Ignore Pipenv and Poetry lock files
 Pipfile.lock
