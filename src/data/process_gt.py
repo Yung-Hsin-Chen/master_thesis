@@ -49,7 +49,7 @@ def load_IAM_gt() -> None:
         file_path = os.path.join(gt_root_path, filename)
         tree = ET.parse(file_path)
         root = tree.getroot()
-        handwritten_part = root.find('.//handwritten-part')
+        handwritten_part = root.find(".//handwritten-part")
         if handwritten_part is not None:
             for line_element in handwritten_part.findall(".//line"):
                 # Access text and id content of the <line> element
@@ -82,26 +82,42 @@ def load_bullinger_gt() -> None:
     store_processed_data("bullinger_gt", bullinger_gt, destination_folder)
     return
 
+def load_icfhr_gt() -> None:
+    icfhr_gt = dict()
+    root_path = os.path.join(".", "data", "raw", "ICFHR_2016", "ground_truth")
+    for mode in ["train", "val", "test"]:
+        files = os.listdir(os.path.join(root_path, mode))
+        files = [file for file in files if file != ".DS_Store"]
+        for file in files:
+            path = os.path.join(root_path, mode, file)
+            # Extracting coordinates
+            tree = ET.parse(path)
+            root = tree.getroot()
+            # Get coordinate points and Unicode from TextLine elements
+            for textline in root.findall(".//{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}TextLine"):
+                # Extract id and coordinate points from the xml file
+                textline_id = textline.get("id")
+                unicode_value = textline.find(".//{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}TextEquiv/{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}Unicode").text
+                key = mode+"__"+textline_id+"__"+file.replace(".xml", "")
+                icfhr_gt[key] = unicode_value
+    destination_folder = os.path.join(".", "data", "processed", "ICFHR_2016", "ground_truth")
+    store_processed_data("icfhr_gt", icfhr_gt, destination_folder)
+    return
+
 # Load ground truth depending on the input of the data name
 def process_gt() -> None:
     """
     # TODO Fill German dataset in
     Process the ground truth of GW, IAM and "" datasets and store them data/processed/.
-
-    Parameters
-    -----------
-    None
-
-    Returns
-    --------
-    None
     """
     logger.info("Start processing GW raw ground truth data...")
-    # load_GW_gt()
+    load_GW_gt()
     logger.info("Start processing IAM raw ground truth data...")
-    # load_IAM_gt()
+    load_IAM_gt()
     logger.info("Start processing Bullinger raw ground truth data...")
     load_bullinger_gt()
+    logger.info("Start processing ICFHR 2016 raw ground truth data...")
+    load_icfhr_gt()
     logger.info("All ground truth data processed and is stored in data/processed/.")
     return
 

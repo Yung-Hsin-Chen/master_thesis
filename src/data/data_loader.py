@@ -118,6 +118,9 @@ def load_data() -> dict:
     file_path = os.path.join(".", "data", "processed", "Bullinger", "ground_truth", "bullinger_gt.json")
     with open(file_path, "r") as json_file:
         bullinger_gt = json.load(json_file)
+    file_path = os.path.join(".", "data", "processed", "ICFHR_2016", "ground_truth", "icfhr_gt.json")
+    with open(file_path, "r") as json_file:
+        icfhr_gt = json.load(json_file)
     # Load image data
     file_path = os.path.join(".", "data", "processed", "GW", "line_image", "GW_image.json")
     with open(file_path, "r") as json_file:
@@ -128,9 +131,13 @@ def load_data() -> dict:
     file_path = os.path.join(".", "data", "processed", "Bullinger", "line_image", "bullinger_image.json")
     with open(file_path, "r") as json_file:
         bullinger_image = json.load(json_file)
+    file_path = os.path.join(".", "data", "processed", "ICFHR_2016", "line_image", "icfhr_image.json")
+    with open(file_path, "r") as json_file:
+        icfhr_image = json.load(json_file)
     return {"GW_image": GW_image, "GW_gt": GW_gt,
             "IAM_image": IAM_image, "IAM_gt": IAM_gt,
-            "bullinger_image": bullinger_image, "bullinger_gt": bullinger_gt}
+            "bullinger_image": bullinger_image, "bullinger_gt": bullinger_gt,
+            "icfhr_image": icfhr_image, "icfhr_gt": icfhr_gt}
 
 def resize_data() -> tuple:
     """
@@ -164,7 +171,7 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
     def get_indices_IAM():
         indices_list = list(image.keys())
         # Split the indices into training, validation and testing sets for each fold
-        num_folds = 4
+        num_folds = 1
         for fold in range(num_folds):
             train_indices, test_indices = train_test_split(indices_list, test_size=0.25, random_state=42)
             train_indices, val_indices = train_test_split(train_indices, test_size=1/3, random_state=42)
@@ -178,8 +185,16 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
         test_indices = [index for index in indices_list if index.split("_")[0]=="test"]
         folds = [(train_indices, val_indices, test_indices)]
         return folds
+    # Get indices for ICFHR
+    def get_indices_icfhr():
+        indices_list = list(image.keys())
+        train_indices = [index for index in indices_list if index.split("__")[0]=="train"]
+        val_indices = [index for index in indices_list if index.split("__")[0]=="val"]
+        test_indices = [index for index in indices_list if index.split("__")[0]=="test"]
+        folds = [(train_indices, val_indices, test_indices)]
+        return folds
     # A dictionary to map data_name to the corresponding function
-    functions = {"GW": get_indices_GW, "IAM": get_indices_IAM, "Bullinger": get_indices_bullinger}
+    functions = {"GW": get_indices_GW, "IAM": get_indices_IAM, "Bullinger": get_indices_bullinger, "ICFHR": get_indices_icfhr}
     return functions.get(data_name, lambda: "Invalid data_name")()
 
 def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, transform, data_name=None) -> dict:
@@ -219,6 +234,7 @@ def get_data_loader(batch_size: int) -> tuple:
     GW_folds = get_split_indices("GW", data["GW_image"], data["GW_gt"])
     IAM_folds = get_split_indices("IAM", data["IAM_image"], data["IAM_gt"])
     bullinger_folds = get_split_indices("Bullinger", data["bullinger_image"], data["bullinger_gt"])
+    icfhr_folds = get_split_indices("ICFHR", data["icfhr_image"], data["icfhr_gt"])
     # Define data transformations
     resize_height, resize_width = resize_data()
     # Assert data types 
@@ -233,11 +249,12 @@ def get_data_loader(batch_size: int) -> tuple:
     GW_data_loaders = process_data_loader(data["GW_image"], data["GW_gt"], GW_folds, batch_size, transform)
     IAM_data_loaders = process_data_loader(data["IAM_image"], data["IAM_gt"], IAM_folds, batch_size, transform)
     bullinger_data_loaders = process_data_loader(data["bullinger_image"], data["bullinger_gt"], bullinger_folds, batch_size, transform, "Bullinger")
-    return GW_data_loaders, IAM_data_loaders, bullinger_data_loaders
+    icfhr_data_loaders = process_data_loader(data["icfhr_image"], data["icfhr_gt"], icfhr_folds, batch_size, transform)
+    return GW_data_loaders, IAM_data_loaders, bullinger_data_loaders, icfhr_data_loaders
 
 if __name__=="__main__":
-    GW_data_loaders, IAM_data_loaders, bullinger_data_loaders = get_data_loader(512)
-    test_loader = bullinger_data_loaders["cv1"][0]
+    GW_data_loaders, IAM_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(512)
+    test_loader = icfhr_data_loaders["cv1"][0]
     for batch in test_loader:
         # Extract the image tensor from the batch (adjust based on your actual data structure)
         images = batch[0]
@@ -246,7 +263,7 @@ if __name__=="__main__":
             print("Images are present in the batch.")
         else:
             print("No images found in the batch.")
-    shutil.rmtree(os.path.join(".", "data", "raw", "Bullinger", "extracted_folder"))
+    # shutil.rmtree(os.path.join(".", "data", "raw", "Bullinger", "extracted_folder"))
     # train_en_loader, val_en_loader, test_en_loader = get_data_loader(512, 0.2)
     # # Iterate through the DataLoader
     # for batch_idx, (data, labels) in enumerate(train_en_loader):
