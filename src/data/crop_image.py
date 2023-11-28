@@ -9,6 +9,29 @@ configure_logging()
 logger = logging.getLogger(__name__)
 
 def get_coordinate(input_path) -> tuple:
+    """
+    Extract text line coordinates from a PAGE XML file corresponding to a given image.
+
+    Parameters
+    -----------
+    input_path: str
+        Path to the image file (JPG format) for which coordinates are to be extracted.
+        The function assumes that a corresponding XML file exists in the same directory and follows
+        the PAGE XML format (http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15).
+
+    Returns
+    --------
+    list
+        A list of tuples, where each tuple contains the textline_id and the rectangular coordinates
+        (left, top, right, bottom) of a text line in the image.
+
+    Notes:
+    - The function replaces the image file extension with ".xml" and adjusts the path to the ground truth folder.
+    - The coordinates are extracted from the "Coords" element in the PAGE XML file.
+    - The result is a list of tuples, where each tuple contains the textline_id and corresponding rectangular coordinates.
+    - The coordinates are represented as (left, top, right, bottom).
+
+    """
     coordinate_path = input_path.replace(".JPG", ".xml").replace("page_image", "ground_truth")
     # Extracting coordinates
     tree = ET.parse(coordinate_path)
@@ -30,6 +53,29 @@ def get_coordinate(input_path) -> tuple:
 
 
 def crop_image(input_path, mode):
+    """
+    Crop the input image based on text line coordinates and save the cropped images.
+
+    Parameters
+    -----------
+    input_path: str
+        Path to the input image file (JPG format).
+    mode: str
+        Mode indicating the dataset (e.g., "train", "val", "test").
+
+    Returns
+    --------
+    dict
+        A dictionary mapping filename (mode__textline_id__original_filename) to the corresponding cropped image path.
+
+    Notes:
+    - The function uses the `get_coordinate` function to obtain text line coordinates from the corresponding XML file.
+    - The image is cropped based on the text line coordinates (left, top, right, bottom).
+    - Cropped images are saved in the "line_image" folder within the same directory as the input image.
+    - The filename format for the cropped images is "mode__textline_id__original_filename".
+    - The function returns a dictionary mapping the filename to the corresponding cropped image path.
+
+    """
     icfhr_image = dict()
     # Open the image file
     img = Image.open(input_path)
@@ -47,7 +93,7 @@ def crop_image(input_path, mode):
         cropped_img.save(output_path)
         icfhr_image[filename.replace(".JPG", "")] = output_path
     return icfhr_image
-    
+
 
 # if __name__=="__main__":
 #     logger.info("Start cropping ICFHR 2016 images to line images...")

@@ -153,6 +153,33 @@ def resize_data() -> tuple:
     return resize_data["resize_height"], resize_data["resize_width"]
 
 def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List, List, List]]:
+    """
+    Get indices for splitting the dataset into training, validation, and test sets based on the specified data_name.
+
+    Parameters
+    -----------
+    data_name: str
+        Name of the dataset, e.g., "GW", "IAM", "Bullinger", "ICFHR".
+    image: dict
+        Dictionary containing image data.
+    gt: dict
+        Dictionary containing ground truth data.
+
+    Returns
+    --------
+    List[Tuple[List, List, List]]
+        A list of tuples, where each tuple represents the indices for training, validation, and test sets.
+        The order of tuples corresponds to the number of folds (e.g., for cross-validation).
+    
+    - ValueError: If an unsupported data_name is provided.
+
+    Notes
+    ------
+    - For "GW" (George Washington) dataset, indices are read from predefined files in the "data/raw/GW/cv" directory.
+    - For "IAM" dataset, indices are split into training, validation, and test sets using train_test_split function.
+    - For "Bullinger" dataset, indices are separated based on prefixes ("train", "val", "test").
+    - For "ICFHR" dataset, indices are separated based on prefixes ("train", "val", "test").
+    """
     folds = []
     # Get indices for GW
     def get_indices_GW():
@@ -198,6 +225,30 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
     return functions.get(data_name, lambda: "Invalid data_name")()
 
 def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, transform, data_name=None) -> dict:
+    """
+    Process and create data loaders with/without a cross-validation setup.
+
+    Parameters
+    -----------
+    image: dict 
+        Dictionary containing image paths.
+    gt: dict
+        Dictionary containing ground truth text data.
+    folds: list
+        List of tuples representing indices for training, validation, and test sets.
+    batch_size: int
+    transform
+        Data transformation to be applied to the samples.
+    data_name :Optional[str]
+        Name of the dataset (default is None).
+
+    Returns
+    --------
+    dict
+        A dictionary containing data loaders for each cross-validation split.
+        The keys are in the form "cv1", "cv2", ..., "cvN".
+        The values are tuples of DataLoader objects for training, validation, and test sets.
+    """
     data_loaders = dict()
     custom_dataset = CustomDataset(data=image, labels=gt, transform=transform, data_name=data_name)
     # Create instances of my custom dataset for training, validation and testing purposes
@@ -262,7 +313,7 @@ if __name__=="__main__":
         if isinstance(images, torch.Tensor):
             print("Images are present in the batch.")
         else:
-            print("No images found in the batch.")
+            print("No images found in the batch.")g
     # shutil.rmtree(os.path.join(".", "data", "raw", "Bullinger", "extracted_folder"))
     # train_en_loader, val_en_loader, test_en_loader = get_data_loader(512, 0.2)
     # # Iterate through the DataLoader

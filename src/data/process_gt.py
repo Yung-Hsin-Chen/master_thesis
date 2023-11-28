@@ -83,6 +83,21 @@ def load_bullinger_gt() -> None:
     return
 
 def load_icfhr_gt() -> None:
+    """
+    Load ground truth data for the ICFHR 2016 dataset and store it in a processed format.
+
+    The function reads XML files containing ground truth information for training, validation, and test sets
+    and extracts text line coordinates and Unicode values. The data is then stored in a dictionary with keys
+    in the format "mode__textline_id__file_id" and values as Unicode text.
+
+    The processed data is stored in a destination folder using the `store_processed_data` function.
+
+    Notes:
+    - The XML files should follow the PAGE XML format (http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15).
+    - The processed data is stored in the "icfhr_gt" dictionary.
+    - The keys in the dictionary are in the format "mode__textline_id__file_id".
+    - The values in the dictionary are Unicode text corresponding to the extracted text from the XML files.
+    """
     icfhr_gt = dict()
     root_path = os.path.join(".", "data", "raw", "ICFHR_2016", "ground_truth")
     for mode in ["train", "val", "test"]:
