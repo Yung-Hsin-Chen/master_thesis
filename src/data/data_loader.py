@@ -9,6 +9,7 @@ import os
 import json
 from zipfile import ZipFile
 import shutil
+from src.utils.helpers import get_config_const, load_data
 
 # Define a custom dataset class 
 class CustomDataset(Dataset):
@@ -98,47 +99,6 @@ class CustomDataset(Dataset):
 
         return sample, label
 
-def load_data() -> dict:
-    """
-    Load data dictionaries from json files as dictionaries.
-
-    Returns
-    --------
-    {"en_image": GW_image, "en_gt": GW_gt}: dict
-        The keys are the name of the dataset, and the values are the data in dictionaries.
-        The data dictionaries have their file names as keys and data contents as values.
-    """
-    # Load ground truth data
-    file_path = os.path.join(".", "data", "processed", "GW", "ground_truth", "GW_gt.json")
-    with open(file_path, "r") as json_file:
-        GW_gt = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "IAM", "ground_truth", "IAM_gt.json")
-    with open(file_path, "r") as json_file:
-        IAM_gt = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "Bullinger", "ground_truth", "bullinger_gt.json")
-    with open(file_path, "r") as json_file:
-        bullinger_gt = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "ICFHR_2016", "ground_truth", "icfhr_gt.json")
-    with open(file_path, "r") as json_file:
-        icfhr_gt = json.load(json_file)
-    # Load image data
-    file_path = os.path.join(".", "data", "processed", "GW", "line_image", "GW_image.json")
-    with open(file_path, "r") as json_file:
-        GW_image = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "IAM", "line_image", "IAM_image.json")
-    with open(file_path, "r") as json_file:
-        IAM_image = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "Bullinger", "line_image", "bullinger_image.json")
-    with open(file_path, "r") as json_file:
-        bullinger_image = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "ICFHR_2016", "line_image", "icfhr_image.json")
-    with open(file_path, "r") as json_file:
-        icfhr_image = json.load(json_file)
-    return {"GW_image": GW_image, "GW_gt": GW_gt,
-            "IAM_image": IAM_image, "IAM_gt": IAM_gt,
-            "bullinger_image": bullinger_image, "bullinger_gt": bullinger_gt,
-            "icfhr_image": icfhr_image, "icfhr_gt": icfhr_gt}
-
 def resize_data() -> tuple:
     """
     Get the resize height and the resize weight from config_const.yaml.
@@ -147,10 +107,10 @@ def resize_data() -> tuple:
     --------
     resize_data["resize_height"], resize_data["resize_width"]: tuple
     """
-    # Load resize dimensions from the YAML file
-    with open(os.path.join(".", "config", "config_const.yaml"), "r") as config_file:
-        resize_data = yaml.safe_load(config_file)["training"]
-    return resize_data["resize_height"], resize_data["resize_width"]
+    # Load resize dimensions from the config file
+    resize_height, resize_width = get_config_const(("training", "resize_height", int),
+                                                ("training", "resize_width", int))
+    return resize_height, resize_width
 
 def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List, List, List]]:
     """
@@ -224,7 +184,7 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
     functions = {"GW": get_indices_GW, "IAM": get_indices_IAM, "Bullinger": get_indices_bullinger, "ICFHR": get_indices_icfhr}
     return functions.get(data_name, lambda: "Invalid data_name")()
 
-def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, transform, data_name=None) -> dict:
+def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, transform=None, data_name=None) -> dict:
     """
     Process and create data loaders with/without a cross-validation setup.
 
@@ -313,7 +273,7 @@ if __name__=="__main__":
         if isinstance(images, torch.Tensor):
             print("Images are present in the batch.")
         else:
-            print("No images found in the batch.")g
+            print("No images found in the batch.")
     # shutil.rmtree(os.path.join(".", "data", "raw", "Bullinger", "extracted_folder"))
     # train_en_loader, val_en_loader, test_en_loader = get_data_loader(512, 0.2)
     # # Iterate through the DataLoader

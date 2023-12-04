@@ -1,8 +1,0 @@
-# Training Parameters
-training:
-  resize_height: 120
-  resize_width: 2270
-  batch_size: 512
-  test_size: 0.2
-  learning_rate: 
-  epochs: 
