@@ -33,3 +33,4 @@ Pipfile
 # Others
 *.DS_Store
 .pytest_cache
+config/__pycache__/
