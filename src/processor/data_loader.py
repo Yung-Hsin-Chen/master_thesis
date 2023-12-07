@@ -143,7 +143,7 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
     """
     folds = []
     # Get indices for GW
-    def get_indices_GW():
+    def get_indices_gw():
         base_path = os.path.join(DATA_RAW, "GW", "cv")
         # Open the file in read mode
         for cv_dir in ["cv1", "cv2", "cv3", "cv4"]:
@@ -156,14 +156,16 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
             folds.append(one_fold)
         return folds
     # Get indices for IAM
-    def get_indices_IAM():
-        indices_list = list(image.keys())
-        # Split the indices into training, validation and testing sets for each fold
-        num_folds = 1
-        for fold in range(num_folds):
-            train_indices, test_indices = train_test_split(indices_list, test_size=0.25, random_state=42)
-            train_indices, val_indices = train_test_split(train_indices, test_size=1/3, random_state=42)
-            folds.append((train_indices, val_indices, test_indices))
+    def get_indices_iam():
+        fold = tuple()
+        base_path = os.path.join(DATA_RAW, "IAM", "split")
+        # Open the file in read mode
+        for filename in ["trainset.txt", "validationset1.txt", "testset.txt"]:
+            with open(os.path.join(base_path, filename), "r") as file:
+                lines = file.readlines()
+            lines = [i.rstrip("\n") for i in lines]
+            fold = fold + (lines,)
+        folds = [fold]
         return folds
     # Get indices for Bullinger
     def get_indices_bullinger():
@@ -182,7 +184,7 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
         folds = [(train_indices, val_indices, test_indices)]
         return folds
     # A dictionary to map data_name to the corresponding function
-    functions = {"GW": get_indices_GW, "IAM": get_indices_IAM, "Bullinger": get_indices_bullinger, "ICFHR": get_indices_icfhr}
+    functions = {"GW": get_indices_gw, "IAM": get_indices_iam, "Bullinger": get_indices_bullinger, "ICFHR": get_indices_icfhr}
     return functions.get(data_name, lambda: "Invalid data_name")()
 
 def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, transform=None, data_name=None) -> dict:
@@ -258,15 +260,15 @@ def get_data_loader(batch_size: int) -> tuple:
         transforms.ToTensor()
     ])
     # Load the data loaders for all datasets
-    GW_data_loaders = process_data_loader(data["GW_image"], data["GW_gt"], GW_folds, batch_size, transform)
-    IAM_data_loaders = process_data_loader(data["IAM_image"], data["IAM_gt"], IAM_folds, batch_size, transform)
+    gw_data_loaders = process_data_loader(data["GW_image"], data["GW_gt"], GW_folds, batch_size, transform)
+    iam_data_loaders = process_data_loader(data["IAM_image"], data["IAM_gt"], IAM_folds, batch_size, transform)
     bullinger_data_loaders = process_data_loader(data["bullinger_image"], data["bullinger_gt"], bullinger_folds, batch_size, transform, "Bullinger")
     icfhr_data_loaders = process_data_loader(data["icfhr_image"], data["icfhr_gt"], icfhr_folds, batch_size, transform)
-    return GW_data_loaders, IAM_data_loaders, bullinger_data_loaders, icfhr_data_loaders
+    return gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders
 
 if __name__=="__main__":
-    GW_data_loaders, IAM_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(512)
-    test_loader = icfhr_data_loaders["cv1"][0]
+    gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(512)
+    test_loader = iam_data_loaders["cv1"][0]
     for batch in test_loader:
         # Extract the image tensor from the batch (adjust based on your actual data structure)
         images = batch[0]

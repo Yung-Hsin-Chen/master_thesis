@@ -23,6 +23,7 @@ data/raw/IAM/ground_truth/
 data/raw/IAM/line_image/
 data/raw/ICFHR_2016/
 data/raw/Bullinger/
+data/raw/IAM/split/
 
 # Ignore Pipenv and Poetry lock files
 Pipfile.lock
