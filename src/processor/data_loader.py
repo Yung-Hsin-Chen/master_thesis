@@ -10,6 +10,7 @@ import json
 from zipfile import ZipFile
 import shutil
 from src.utils.helpers import get_config_const, load_data
+from config.config_paths import DATA_RAW
 
 # Define a custom dataset class 
 class CustomDataset(Dataset):
@@ -77,7 +78,7 @@ class CustomDataset(Dataset):
         sample_path = self.data[index]
         # print(sample_path)
         if self.data_name:
-            root_path = os.path.join(".", "data", "raw", "Bullinger")
+            root_path = os.path.join(DATA_RAW, "Bullinger")
             extract_folder = os.path.join(root_path, "extracted_folder")
             # Open the ZIP file
             mode = index.split("_")[0]
@@ -143,7 +144,7 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
     folds = []
     # Get indices for GW
     def get_indices_GW():
-        base_path = os.path.join(".", "data", "raw", "GW", "cv")
+        base_path = os.path.join(DATA_RAW, "GW", "cv")
         # Open the file in read mode
         for cv_dir in ["cv1", "cv2", "cv3", "cv4"]:
             one_fold = tuple()

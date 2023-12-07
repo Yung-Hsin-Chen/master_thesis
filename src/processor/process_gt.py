@@ -5,6 +5,7 @@ import json
 import os
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+from config.config_paths import CONFIG_JSON, DATA_RAW, DATA_PROCESSED
 
 # Configure logging
 configure_logging()
@@ -16,13 +17,13 @@ def load_GW_gt() -> None:
     Load, process GW dataset ground truth, and then store the data in data/processed.
     """
     # Load the punctuation abbreviation dictionary
-    config_path = os.path.join(".", "config", "config.json")
+    config_path = CONFIG_JSON
     with open(config_path, "r") as json_file:
         config = json.load(json_file)
     punctuation_abbrev = config["punctuation_abbrev"]
     symbol_replacement = config["GW_symbol_replacement"]
     # Load the GW ground truth raw data
-    gt_path = os.path.join(".", "data", "raw", "GW", "ground_truth", "transcription.txt")
+    gt_path = os.path.join(DATA_RAW, "GW", "ground_truth", "transcription.txt")
     with open(gt_path, "r") as file:
         GW_gt = file.readlines()
     GW_gt = {i[:6]: i[7:] for i in GW_gt}
@@ -33,7 +34,7 @@ def load_GW_gt() -> None:
         for k,v in symbol_replacement.items():
             line = line.replace(k, v)
         GW_gt[page] = line.strip()
-    destination_folder = os.path.join(".", "data", "processed", "GW", "ground_truth")
+    destination_folder = os.path.join(DATA_PROCESSED, "GW", "ground_truth")
     store_processed_data("GW_gt", GW_gt, destination_folder)
     return
 
@@ -44,7 +45,7 @@ def load_IAM_gt() -> None:
     """
     IAM_gt = dict()
     # Parse the XML file
-    gt_root_path = os.path.join(".", "data", "raw", "IAM", "ground_truth")
+    gt_root_path = os.path.join(DATA_RAW, "IAM", "ground_truth")
     for filename in os.listdir(gt_root_path):
         file_path = os.path.join(gt_root_path, filename)
         tree = ET.parse(file_path)
@@ -56,7 +57,7 @@ def load_IAM_gt() -> None:
                 line_text = line_element.get("text")
                 line_id = line_element.get("id")
                 IAM_gt[line_id] = line_text
-    destination_folder = os.path.join(".", "data", "processed", "IAM", "ground_truth")
+    destination_folder = os.path.join(DATA_PROCESSED, "IAM", "ground_truth")
     store_processed_data("IAM_gt", IAM_gt, destination_folder)
     return
 
@@ -65,7 +66,7 @@ def load_bullinger_gt() -> None:
     Load, process Bullinger dataset ground truth, and then store the data in data/processed.
     """
     bullinger_gt = dict()
-    root_path = os.path.join(".", "data", "raw", "Bullinger")
+    root_path = os.path.join(DATA_RAW, "Bullinger")
     # Open the ZIP file
     for mode in ["train", "val", "test"]:
         for zip_filename in os.listdir(os.path.join(root_path, mode)):
@@ -78,7 +79,7 @@ def load_bullinger_gt() -> None:
                         with zip_file.open(filename) as gt:
                             key = mode+"_"+os.path.splitext(filename)[0]
                             bullinger_gt[key] = gt.read().decode("utf-8")
-    destination_folder = os.path.join(".", "data", "processed", "Bullinger", "ground_truth")
+    destination_folder = os.path.join(DATA_PROCESSED, "Bullinger", "ground_truth")
     store_processed_data("bullinger_gt", bullinger_gt, destination_folder)
     return
 
@@ -99,7 +100,7 @@ def load_icfhr_gt() -> None:
     - The values in the dictionary are Unicode text corresponding to the extracted text from the XML files.
     """
     icfhr_gt = dict()
-    root_path = os.path.join(".", "data", "raw", "ICFHR_2016", "ground_truth")
+    root_path = os.path.join(DATA_RAW, "ICFHR_2016", "ground_truth")
     for mode in ["train", "val", "test"]:
         files = os.listdir(os.path.join(root_path, mode))
         files = [file for file in files if file != ".DS_Store"]
@@ -115,7 +116,7 @@ def load_icfhr_gt() -> None:
                 unicode_value = textline.find(".//{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}TextEquiv/{http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15}Unicode").text
                 key = mode+"__"+textline_id+"__"+file.replace(".xml", "")
                 icfhr_gt[key] = unicode_value
-    destination_folder = os.path.join(".", "data", "processed", "ICFHR_2016", "ground_truth")
+    destination_folder = os.path.join(DATA_PROCESSED, "ICFHR_2016", "ground_truth")
     store_processed_data("icfhr_gt", icfhr_gt, destination_folder)
     return
 
@@ -136,5 +137,5 @@ def process_gt() -> None:
     logger.info("All ground truth data processed and is stored in data/processed/.")
     return
 
-if __name__=="__main__":
-    process_gt()
+# if __name__=="__main__":
+#     process_gt()

@@ -3,6 +3,7 @@ from config.config import configure_logging
 import logging
 import os
 import xml.etree.ElementTree as ET
+from config.config_paths import DATA_RAW
 
 # Configure logging
 configure_logging()
@@ -96,7 +97,7 @@ def crop_image(input_path, mode):
 
 
 # if __name__=="__main__":
-#     logger.info("Start cropping ICFHR 2016 images to line images...")
-#     input_path = os.path.join(".", "data", "raw", "ICFHR_2016", "page_image", "train", "Seite0001.JPG")
-#     # coordinates = "1828,422 1617,420 285,415 285,635 1617,640 1828,642"
+#     logger.info("Start cropping ICFHR 2016 images to line images.")
+#     input_path = os.path.join(DATA_RAW, "ICFHR_2016", "page_image", "train", "Seite0001.JPG")
 #     crop_image(input_path, "train")
+#     logger.info("Cropping finished.")
