@@ -2,6 +2,7 @@ import os
 import json
 import configparser
 from typing import List, Tuple
+from config.config_paths import DATA_PROCESSED, CONFIG_CONST
 
 # Store processed data dictionary into HDF5
 def store_processed_data(data_name: str, data: dict, path: str) -> None:
@@ -33,7 +34,7 @@ def store_processed_data(data_name: str, data: dict, path: str) -> None:
 def get_config_const(*config_keys: Tuple[str, str, type]) -> List:  
     # Get batch size and other values based on the provided keys
     config_parser = configparser.ConfigParser()
-    config_parser.read(os.path.join(".", "config", "config_const.ini"))
+    config_parser.read(CONFIG_CONST)
 
     values = []
     for key in config_keys:
@@ -63,32 +64,55 @@ def load_data() -> dict:
         The data dictionaries have their file names as keys and data contents as values.
     """
     # Load ground truth data
-    file_path = os.path.join(".", "data", "processed", "GW", "ground_truth", "GW_gt.json")
+    file_path = os.path.join(DATA_PROCESSED, "GW", "ground_truth", "GW_gt.json")
     with open(file_path, "r") as json_file:
         GW_gt = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "IAM", "ground_truth", "IAM_gt.json")
+    file_path = os.path.join(DATA_PROCESSED, "IAM", "ground_truth", "IAM_gt.json")
     with open(file_path, "r") as json_file:
         IAM_gt = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "Bullinger", "ground_truth", "bullinger_gt.json")
+    file_path = os.path.join(DATA_PROCESSED, "Bullinger", "ground_truth", "bullinger_gt.json")
     with open(file_path, "r") as json_file:
         bullinger_gt = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "ICFHR_2016", "ground_truth", "icfhr_gt.json")
+    file_path = os.path.join(DATA_PROCESSED, "ICFHR_2016", "ground_truth", "icfhr_gt.json")
     with open(file_path, "r") as json_file:
         icfhr_gt = json.load(json_file)
     # Load image data
-    file_path = os.path.join(".", "data", "processed", "GW", "line_image", "GW_image.json")
+    file_path = os.path.join(DATA_PROCESSED, "GW", "line_image", "GW_image.json")
     with open(file_path, "r") as json_file:
         GW_image = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "IAM", "line_image", "IAM_image.json")
+    file_path = os.path.join(DATA_PROCESSED, "IAM", "line_image", "IAM_image.json")
     with open(file_path, "r") as json_file:
         IAM_image = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "Bullinger", "line_image", "bullinger_image.json")
+    file_path = os.path.join(DATA_PROCESSED, "Bullinger", "line_image", "bullinger_image.json")
     with open(file_path, "r") as json_file:
         bullinger_image = json.load(json_file)
-    file_path = os.path.join(".", "data", "processed", "ICFHR_2016", "line_image", "icfhr_image.json")
+    file_path = os.path.join(DATA_PROCESSED, "ICFHR_2016", "line_image", "icfhr_image.json")
     with open(file_path, "r") as json_file:
         icfhr_image = json.load(json_file)
     return {"GW_image": GW_image, "GW_gt": GW_gt,
             "IAM_image": IAM_image, "IAM_gt": IAM_gt,
             "bullinger_image": bullinger_image, "bullinger_gt": bullinger_gt,
             "icfhr_image": icfhr_image, "icfhr_gt": icfhr_gt}
+
+# def index_mapping():
+#     data = load_data()
+#     gw_indices = list(data["GW_image"].keys())
+#     gw_numbers = range(len(gw_indices))
+#     gw_idx_to_num = dict(zip(gw_indices, gw_numbers))
+#     gw_num_to_idx = dict(zip(gw_numbers, gw_indices))
+#     iam_indices = list(data["IAM_image"].keys())
+#     iam_numbers = range(len(iam_indices))
+#     iam_idx_to_num = dict(zip(iam_indices, iam_numbers))
+#     iam_num_to_idx = dict(zip(iam_numbers, iam_indices))
+#     bullinger_indices = list(data["bullinger_image"].keys())
+#     bullinger_numbers = range(len(bullinger_indices))
+#     bullinger_idx_to_num = dict(zip(bullinger_indices, bullinger_numbers))
+#     bullinger_num_to_idx = dict(zip(bullinger_numbers, bullinger_indices))
+#     icfhr_indices = list(data["icfhr_image"].keys())
+#     icfhr_numbers = range(len(icfhr_indices))
+#     icfhr_idx_to_num = dict(zip(icfhr_indices, icfhr_numbers))
+#     icfhr_num_to_idx = dict(zip(icfhr_numbers, icfhr_indices))
+#     return {"gw": {"idx_to_num": gw_idx_to_num, "num_to_idx": gw_num_to_idx}, 
+#             "iam": {"idx_to_num": iam_idx_to_num, "num_to_idx": iam_num_to_idx}, 
+#             "bullinger": {"idx_to_num": bullinger_idx_to_num, "num_to_idx": bullinger_num_to_idx}, 
+#             "icfhr": {"idx_to_num": icfhr_idx_to_num, "num_to_idx": icfhr_num_to_idx}}
