@@ -236,8 +236,8 @@ def check_text_lines(image_dict, gt_dict, data_name, data_loader):
     # bullinger_folds = get_split_indices("Bullinger", data["bullinger_image"], data["bullinger_gt"])
     # icfhr_folds = get_split_indices("ICFHR", data["icfhr_image"], data["icfhr_gt"])
     
-    # train_sample = get_num_samples(train_loader)
-    # shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
+    train_sample = get_num_samples(train_loader)
+    shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
     val_sample = get_num_samples(val_loader)
     shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
     test_sample = get_num_samples(test_loader)

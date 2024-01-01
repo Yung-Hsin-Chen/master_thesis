@@ -5,7 +5,7 @@ import json
 import os
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
-from config.config_paths import CONFIG_JSON, DATA_RAW, DATA_PROCESSED
+from config.config_paths import PUNCTUATION_LIST, DATA_RAW, DATA_PROCESSED
 
 # Configure logging
 configure_logging()
@@ -17,7 +17,7 @@ def load_GW_gt() -> None:
     Load, process GW dataset ground truth, and then store the data in data/processed.
     """
     # Load the punctuation abbreviation dictionary
-    config_path = CONFIG_JSON
+    config_path = PUNCTUATION_LIST
     with open(config_path, "r") as json_file:
         config = json.load(json_file)
     punctuation_abbrev = config["punctuation_abbrev"]

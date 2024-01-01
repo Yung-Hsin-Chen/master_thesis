@@ -3,6 +3,8 @@ import json
 import configparser
 from typing import List, Tuple
 from config.config_paths import DATA_PROCESSED, CONFIG_CONST
+import torch
+import torch.nn as nn
 
 # Store processed data dictionary into HDF5
 def store_processed_data(data_name: str, data: dict, path: str) -> None:
@@ -30,28 +32,6 @@ def store_processed_data(data_name: str, data: dict, path: str) -> None:
     with open(file_name, "w") as json_file:
         json.dump(data, json_file)
     return
-
-def get_config_const(*config_keys: Tuple[str, str, type]) -> List:  
-    # Get batch size and other values based on the provided keys
-    config_parser = configparser.ConfigParser()
-    config_parser.read(CONFIG_CONST)
-
-    values = []
-    for key in config_keys:
-        section, option, data_type = key
-        try:
-            # Attempt to get the value from the config file
-            value_str = config_parser.get(section, option)
-            
-            # Convert the string value to the specified data type
-            converted_value = data_type(value_str)
-            values.append(converted_value)
-        except (configparser.NoSectionError, configparser.NoOptionError, ValueError) as e:
-            # Handle errors, e.g., section or option not found, or conversion error
-            print(f"Error reading config: {e}")
-            values.append(None)  # or some default value
-
-    return values if len(values) > 1 else values[0]
 
 def load_data() -> dict:
     """
@@ -94,25 +74,24 @@ def load_data() -> dict:
             "bullinger_image": bullinger_image, "bullinger_gt": bullinger_gt,
             "icfhr_image": icfhr_image, "icfhr_gt": icfhr_gt}
 
-# def index_mapping():
-#     data = load_data()
-#     gw_indices = list(data["GW_image"].keys())
-#     gw_numbers = range(len(gw_indices))
-#     gw_idx_to_num = dict(zip(gw_indices, gw_numbers))
-#     gw_num_to_idx = dict(zip(gw_numbers, gw_indices))
-#     iam_indices = list(data["IAM_image"].keys())
-#     iam_numbers = range(len(iam_indices))
-#     iam_idx_to_num = dict(zip(iam_indices, iam_numbers))
-#     iam_num_to_idx = dict(zip(iam_numbers, iam_indices))
-#     bullinger_indices = list(data["bullinger_image"].keys())
-#     bullinger_numbers = range(len(bullinger_indices))
-#     bullinger_idx_to_num = dict(zip(bullinger_indices, bullinger_numbers))
-#     bullinger_num_to_idx = dict(zip(bullinger_numbers, bullinger_indices))
-#     icfhr_indices = list(data["icfhr_image"].keys())
-#     icfhr_numbers = range(len(icfhr_indices))
-#     icfhr_idx_to_num = dict(zip(icfhr_indices, icfhr_numbers))
-#     icfhr_num_to_idx = dict(zip(icfhr_numbers, icfhr_indices))
-#     return {"gw": {"idx_to_num": gw_idx_to_num, "num_to_idx": gw_num_to_idx}, 
-#             "iam": {"idx_to_num": iam_idx_to_num, "num_to_idx": iam_num_to_idx}, 
-#             "bullinger": {"idx_to_num": bullinger_idx_to_num, "num_to_idx": bullinger_num_to_idx}, 
-#             "icfhr": {"idx_to_num": icfhr_idx_to_num, "num_to_idx": icfhr_num_to_idx}}
+class DummyLayer(nn.Module):
+    def forward(self, *args, **kwargs):
+        raise NotImplementedError("This is a dummy layer. It should not be called.")
+    
+def write_predictions_to_file(pred_str, label_str, file_path):
+    with open(file_path, "a") as f:
+        for pred, label in zip(pred_str, label_str):
+            f.write("output: " + pred + "\n")
+            f.write("label:  " + label + "\n\n")
+    return
+
+def shutdown_logger(logger):
+    """
+    Shuts down the specified logger.
+
+    Args:
+        logger (logging.Logger): The logger to shut down.
+    """
+    for handler in logger.handlers[:]:
+        handler.close()
+        logger.removeHandler(handler)

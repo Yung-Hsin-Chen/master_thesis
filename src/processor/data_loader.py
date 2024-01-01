@@ -1,16 +1,24 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-from torchvision import datasets, transforms
 from sklearn.model_selection import train_test_split
 import yaml
 from PIL import Image
 from typing import List, Tuple
 import os
-import json
 from zipfile import ZipFile
 import shutil
-from src.utils.helpers import get_config_const, load_data
+from src.utils.helpers import load_data
 from config.config_paths import DATA_RAW
+from transformers import VisionEncoderDecoderModel
+import config.model_config as cfg
+
+# Extracting the embedding layer from the model
+# Load the processor and model from the specified TrOCR model
+# processor = TrOCRProcessor.from_pretrained(model_name)
+model = VisionEncoderDecoderModel.from_pretrained(cfg.model_config["trocr_config"])
+
+# Extracting the embedding layer from the model
+embedding_layer = model.decoder.model.decoder.embed_tokens
 
 # Define a custom dataset class 
 class CustomDataset(Dataset):
@@ -44,11 +52,36 @@ class CustomDataset(Dataset):
     ------
     Ensure that the PIL library is installed (`pip install Pillow`) for working with images.
     """
-    def __init__(self, data: dict, labels: dict, transform=None, data_name=None):
+    def __init__(self, data: dict, labels: dict, processor, max_target_length, embedding_layer=embedding_layer, transform=None, data_name=None):
         self.data = data
         self.labels = labels
+        self.processor = processor
+        self.max_target_length = max_target_length
         self.transform = transform
         self.data_name = data_name
+        self.trocr_embedding = embedding_layer
+
+    def shift_tokens_right(self, input_ids, pad_token_id):
+        """Shift input ids one token to the right, and wrap the last non pad token."""
+        # Convert input_ids list to a tensor
+        input_ids = torch.tensor(input_ids)
+        # Ensure input_ids is 2D: [1, sequence_length]
+        if input_ids.ndim == 1:
+            input_ids = input_ids.unsqueeze(0)
+        # Clone the input_ids to create prev_output_tokens tensor
+        prev_output_tokens = input_ids.clone()
+        # Calculate the index of the end of sequence (EOS) token for each sequence in the batch
+        index_of_eos = (input_ids.ne(pad_token_id).sum(dim=1) - 1).unsqueeze(-1)
+        # Shift the tokens to the right
+        prev_output_tokens[:, 0] = input_ids.gather(1, index_of_eos).squeeze()
+        prev_output_tokens[:, 1:] = input_ids[:, :-1]
+        
+        return prev_output_tokens
+
+    def create_attention_mask(self, input_ids, pad_token_id):
+        # Create a mask of the same shape as input_ids, where each element is 1 if the corresponding input_id is not
+        # the pad_token_id, and 0 if it is the pad_token_id.
+        return (input_ids != pad_token_id).long().squeeze()
 
     def __len__(self):
         """
@@ -76,7 +109,6 @@ class CustomDataset(Dataset):
             A tuple containing the data sample and its corresponding label.
         """
         sample_path = self.data[index]
-        # print(sample_path)
         if self.data_name:
             root_path = os.path.join(DATA_RAW, "Bullinger")
             extract_folder = os.path.join(root_path, "extracted_folder")
@@ -89,29 +121,37 @@ class CustomDataset(Dataset):
                             zip_file.extractall(extract_folder)
             sample_path = os.path.join(extract_folder, sample_path)
 
-        # else:
         with open(sample_path, "rb") as file:
-            sample = Image.open(file)
-            if self.transform:
-                sample = self.transform(sample)
-            
+            sample = Image.open(file).convert("RGB")
+            pixel_values = self.processor(sample, return_tensors="pt").pixel_values
 
-        label = self.labels[index]
+            # if self.transform:
+            #     sample = self.transform(sample)
+        decoder_input_ids = self.processor.tokenizer(self.labels[index], 
+                                        padding="max_length", 
+                                        max_length=self.max_target_length).input_ids
+        
 
-        return sample, label
+        decoder_input_ids = self.shift_tokens_right(decoder_input_ids, self.processor.tokenizer.pad_token_id)
+        # Get attention mask
+        attention_mask = self.create_attention_mask(decoder_input_ids, self.processor.tokenizer.pad_token_id)
 
-def resize_data() -> tuple:
-    """
-    Get the resize height and the resize weight from config_const.yaml.
+        # print("decoder input ids type: ", decoder_input_ids.dtype)
+        # print("decoder input ids: ", decoder_input_ids.size())
 
-    Returns
-    --------
-    resize_data["resize_height"], resize_data["resize_width"]: tuple
-    """
-    # Load resize dimensions from the config file
-    resize_height, resize_width = get_config_const(("training", "resize_height", int),
-                                                ("training", "resize_width", int))
-    return resize_height, resize_width
+        # Get embeddings
+        labels = self.trocr_embedding(decoder_input_ids)
+        # print("labels ###: ", labels.size())
+        if labels.shape[0] == 1:
+            labels = labels.squeeze(0)
+        # labels = labels.squeeze(1)
+        # label = self.labels[index]
+        # labels = [label if label != self.processor.tokenizer.pad_token_id else -100 for label in labels]
+        return {"pixel_values": pixel_values.squeeze(), 
+                "label_emb": labels, 
+                "label_str": self.labels[index], 
+                "labels": decoder_input_ids, 
+                "attention_mask": attention_mask}
 
 def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List, List, List]]:
     """
@@ -187,7 +227,7 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
     functions = {"GW": get_indices_gw, "IAM": get_indices_iam, "Bullinger": get_indices_bullinger, "ICFHR": get_indices_icfhr}
     return functions.get(data_name, lambda: "Invalid data_name")()
 
-def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, transform=None, data_name=None) -> dict:
+def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, processor, max_target_length, transform=None, data_name=None) -> dict:
     """
     Process and create data loaders with/without a cross-validation setup.
 
@@ -213,17 +253,17 @@ def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, tra
         The values are tuples of DataLoader objects for training, validation, and test sets.
     """
     data_loaders = dict()
-    custom_dataset = CustomDataset(data=image, labels=gt, transform=transform, data_name=data_name)
+    custom_dataset = CustomDataset(data=image, labels=gt, processor=processor, max_target_length=max_target_length, transform=transform, data_name=data_name)
     # Create instances of my custom dataset for training, validation and testing purposes
     for index, fold in enumerate(folds):
         # Create DataLoader for training, validation, and test sets
-        train_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[0]))
-        val_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[1]))
-        test_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[2]))
-        data_loaders["cv"+str(index+1)] = (train_loader, val_loader, test_loader)
+        train_loader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True, sampler=torch.utils.data.SubsetRandomSampler(fold[0]))
+        val_loader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True, sampler=torch.utils.data.SubsetRandomSampler(fold[1]))
+        test_loader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True, sampler=torch.utils.data.SubsetRandomSampler(fold[2]))
+        data_loaders["cv"+str(index+1)] = {"train": train_loader, "val": val_loader, "test": test_loader}
     return data_loaders
 
-def get_data_loader(batch_size: int) -> tuple:
+def get_data_loader(batch_size: int, processor, max_target_length) -> tuple:
     """
     Loads and prepares data for training, validation, and testing, and returns corresponding DataLoaders.
 
@@ -249,26 +289,17 @@ def get_data_loader(batch_size: int) -> tuple:
     IAM_folds = get_split_indices("IAM", data["IAM_image"], data["IAM_gt"])
     bullinger_folds = get_split_indices("Bullinger", data["bullinger_image"], data["bullinger_gt"])
     icfhr_folds = get_split_indices("ICFHR", data["icfhr_image"], data["icfhr_gt"])
-    # Define data transformations
-    resize_height, resize_width = resize_data()
-    # Assert data types 
-    assert isinstance(resize_height, int)
-    assert isinstance(resize_width, int)
-    # Define transformation
-    transform = transforms.Compose([
-        transforms.Resize((resize_height, resize_width)),
-        transforms.ToTensor()
-    ])
+
     # Load the data loaders for all datasets
-    gw_data_loaders = process_data_loader(data["GW_image"], data["GW_gt"], GW_folds, batch_size, transform)
-    iam_data_loaders = process_data_loader(data["IAM_image"], data["IAM_gt"], IAM_folds, batch_size, transform)
-    bullinger_data_loaders = process_data_loader(data["bullinger_image"], data["bullinger_gt"], bullinger_folds, batch_size, transform, "Bullinger")
-    icfhr_data_loaders = process_data_loader(data["icfhr_image"], data["icfhr_gt"], icfhr_folds, batch_size, transform)
+    gw_data_loaders = process_data_loader(data["GW_image"], data["GW_gt"], GW_folds, batch_size, processor, max_target_length)
+    iam_data_loaders = process_data_loader(data["IAM_image"], data["IAM_gt"], IAM_folds, batch_size, processor, max_target_length)
+    bullinger_data_loaders = process_data_loader(data["bullinger_image"], data["bullinger_gt"], bullinger_folds, batch_size, processor, max_target_length, "Bullinger")
+    icfhr_data_loaders = process_data_loader(data["icfhr_image"], data["icfhr_gt"], icfhr_folds, batch_size, processor, max_target_length)
     return gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders
 
 if __name__=="__main__":
     gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(512)
-    test_loader = iam_data_loaders["cv1"][0]
+    test_loader = iam_data_loaders["cv1"]["train"]
     for batch in test_loader:
         # Extract the image tensor from the batch (adjust based on your actual data structure)
         images = batch[0]

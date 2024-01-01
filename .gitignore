@@ -14,6 +14,8 @@
 *.ind
 *.fdb_latexmk
 *.synctex.gz
+*.egg-info/
+*.pth
 
 # Data
 data/raw/GW/ground_truth/
@@ -35,3 +37,4 @@ Pipfile
 .pytest_cache
 config/__pycache__/
 __pycache__/
+.vscode
