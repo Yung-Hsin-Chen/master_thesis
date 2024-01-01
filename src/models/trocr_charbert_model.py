@@ -259,13 +259,6 @@ def initialise_trocr_charbert_model(experiment_version=None):
     for name, param in model.named_parameters():
         # Set the print options to increase threshold
         torch.set_printoptions(threshold=10_000)  # Set a high threshold value
-
-        if name=="encoder.pooler.dense.bias":
-            print(trocr_state_dict.get(name, None))
-            print(param)
-        if name=="encoder.pooler.dense.weight":
-            print(trocr_state_dict.get(name, None))
-            print(param)
         # If the parameter is not part of "ffnn" and does not match the state dict, raise an error
         if name[:4] != "ffnn" and not torch.equal(trocr_state_dict.get(name, None), param):
             message = f"Parameter {name} does not match."

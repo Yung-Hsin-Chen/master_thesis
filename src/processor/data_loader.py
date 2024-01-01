@@ -257,9 +257,9 @@ def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, pro
     # Create instances of my custom dataset for training, validation and testing purposes
     for index, fold in enumerate(folds):
         # Create DataLoader for training, validation, and test sets
-        train_loader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True, sampler=torch.utils.data.SubsetRandomSampler(fold[0]))
-        val_loader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True, sampler=torch.utils.data.SubsetRandomSampler(fold[1]))
-        test_loader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True, sampler=torch.utils.data.SubsetRandomSampler(fold[2]))
+        train_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[0]))
+        val_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[1]))
+        test_loader = DataLoader(custom_dataset, batch_size=batch_size, sampler=torch.utils.data.SubsetRandomSampler(fold[2]))
         data_loaders["cv"+str(index+1)] = {"train": train_loader, "val": val_loader, "test": test_loader}
     return data_loaders
 

@@ -11,7 +11,7 @@ import config.model_config as cfg
 from src.processor.data_loader import get_data_loader
 import numpy as np
 
-def main(experiment_version, fine_tuned):
+def main(experiment_version, fine_tuned=None):
     data_loader_keys = cfg.trocr_charbert[experiment_version]["data_loader_keys"]
     gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(**data_loader_keys)
     wer_list, cer_list = [], []
