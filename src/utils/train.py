@@ -152,4 +152,4 @@ def train(model, **kwargs):
     # Print the elapsed time
     my_logger.info("Elapsed time: {:.2f} seconds".format(elapsed_time))
     shutdown_logger(my_logger)
-    return
+    return val_wer_score, val_cer_score

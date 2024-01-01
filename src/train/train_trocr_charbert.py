@@ -16,7 +16,7 @@ max_epochs = cfg.general["max_epochs"]
 max_target_length = cfg.model["max_target_length"]
 
 # Training
-def train_charbert_trocr(experiment_version: str, fine_tuned=None):
+def train_charbert_trocr(experiment_version: str, train_loader, val_loader, fine_tuned=None):
     # Define model
     if fine_tuned:
         fine_tuned = experiment_version
@@ -28,16 +28,18 @@ def train_charbert_trocr(experiment_version: str, fine_tuned=None):
     model.freeze_except(layers_to_not_freeze)
     model.charbert.freeze_except(layers_to_not_freeze)
     # Get data loaders
-    data_loader_keys = cfg.trocr_charbert[experiment_version]["data_loader_keys"]
-    gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(**data_loader_keys)
+    # data_loader_keys = cfg.trocr_charbert[experiment_version]["data_loader_keys"]
+    # gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(**data_loader_keys)
     # Train
     training_keys = cfg.trocr_charbert[experiment_version]["training_keys"]
     # Add 'optimizer' to the training_keys dictionary
     optimizer_keys = cfg.trocr_charbert[experiment_version]["optimizer_keys"]
     training_keys["optimizer"] = optim.Adam(model.parameters(), **optimizer_keys)
     # Add 'train_loader' and 'val_loader' to the training_keys dictionary
-    training_keys["train_loader"] = gw_data_loaders["cv1"]["train"]
-    training_keys["val_loader"] = gw_data_loaders["cv1"]["val"]
+    # training_keys["train_loader"] = gw_data_loaders["cv1"]["train"]
+    training_keys["train_loader"] = train_loader
+    # training_keys["val_loader"] = gw_data_loaders["cv1"]["val"]
+    training_keys["val_loader"] = val_loader
 
-    train(model, **training_keys)
-    return
+    val_wer_score, val_cer_score = train(model, **training_keys)
+    return val_wer_score, val_cer_score
