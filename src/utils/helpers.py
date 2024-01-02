@@ -5,6 +5,7 @@ from typing import List, Tuple
 from config.config_paths import DATA_PROCESSED, CONFIG_CONST
 import torch
 import tensorflow as tf
+import torch.nn as nn
 
 # Store processed data dictionary into HDF5
 def store_processed_data(data_name: str, data: dict, path: str) -> None:
