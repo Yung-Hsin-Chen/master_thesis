@@ -8,6 +8,7 @@ from config.config import configure_logging
 import config.model_config as cfg
 import torch.nn.init as init
 from config.config_paths import MODELS
+import os
 
 CHARBERT_CONFIG = cfg.model_config["charbert_config"]
 TROCR_CONFIG = cfg.model_config["trocr_config"]
@@ -216,7 +217,9 @@ def get_pretrain_param():
         if (name in state_dict) and (name not in bypass_param):
             state_dict[name].copy_(param)
         elif name not in bypass_param:
-            logging.debug(f"Parameter {name} not found in the model.")
+            message = f"Parameter {name} not found in the model."
+            logging.error(message)
+            raise ValueError(message)
 
     return model, state_dict, trocr_state_dict
 
@@ -258,11 +261,11 @@ def initialise_trocr_charbert_model(experiment_version=None):
     # Check if the parameters are loaded correctly
     for name, param in model.named_parameters():
         # Set the print options to increase threshold
-        torch.set_printoptions(threshold=10_000)  # Set a high threshold value
+        # torch.set_printoptions(threshold=10_000)  # Set a high threshold value
         # If the parameter is not part of "ffnn" and does not match the state dict, raise an error
         if name[:4] != "ffnn" and not torch.equal(trocr_state_dict.get(name, None), param):
             message = f"Parameter {name} does not match."
-            logging.debug(message)
+            logging.error(message)
             raise ValueError(message)
     logging.info("All pretrained parameters matched.")
     

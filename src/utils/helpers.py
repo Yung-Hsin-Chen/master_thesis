@@ -4,7 +4,7 @@ import configparser
 from typing import List, Tuple
 from config.config_paths import DATA_PROCESSED, CONFIG_CONST
 import torch
-import torch.nn as nn
+import tensorflow as tf
 
 # Store processed data dictionary into HDF5
 def store_processed_data(data_name: str, data: dict, path: str) -> None:
@@ -95,3 +95,30 @@ def shutdown_logger(logger):
     for handler in logger.handlers[:]:
         handler.close()
         logger.removeHandler(handler)
+
+def set_device():
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+        print(f"Using GPU: {torch.cuda.get_device_name(0)}")
+    else:
+        device = torch.device("cpu")
+        print("Using CPU")
+    return device
+
+def set_gpu(gpu: str):
+    # Specify which GPUs to use
+    os.environ['CUDA_VISIBLE_DEVICES'] = gpu  # for example, GPU 1 and 2
+
+    # List all visible GPUs after setting the environment variable
+    physical_devices = tf.config.list_physical_devices("GPU")
+
+    # Enable memory growth for each visible GPU
+    for gpu in physical_devices:
+        try:
+            # Set memory growth to True
+            tf.config.experimental.set_memory_growth(gpu, True)
+            print(f"Memory growth set for {gpu}")
+        except RuntimeError as e:
+            # Print any RuntimeErrors and continue
+            print(e)
+    return

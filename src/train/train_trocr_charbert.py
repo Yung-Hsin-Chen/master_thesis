@@ -16,7 +16,7 @@ max_epochs = cfg.general["max_epochs"]
 max_target_length = cfg.model["max_target_length"]
 
 # Training
-def train_charbert_trocr(experiment_version: str, train_loader, val_loader, fine_tuned=None):
+def train_charbert_trocr(experiment_version: str, train_loader, val_loader, device, fine_tuned=None):
     # Define model
     if fine_tuned:
         fine_tuned = experiment_version
@@ -40,6 +40,7 @@ def train_charbert_trocr(experiment_version: str, train_loader, val_loader, fine
     training_keys["train_loader"] = train_loader
     # training_keys["val_loader"] = gw_data_loaders["cv1"]["val"]
     training_keys["val_loader"] = val_loader
+    training_keys["device"] = device
 
     val_wer_score, val_cer_score = train(model, **training_keys)
     return val_wer_score, val_cer_score

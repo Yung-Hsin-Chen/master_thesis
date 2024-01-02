@@ -1,24 +1,3 @@
-# import logging
-# import os
-
-# def configure_logging(log_file_path=None):
-#     # Clear any existing handlers
-#     for handler in logging.root.handlers[:]:
-#         logging.root.removeHandler(handler)
-#     handlers = [logging.StreamHandler()]  # Always print logs to the console
-
-#     if log_file_path:
-#         # Ensure the directory exists
-#         os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
-#         handlers.append(logging.FileHandler(log_file_path, mode="w"))
-
-#     logging.basicConfig(
-#         level=logging.DEBUG,
-#         format="[\"INFO\" - %(asctime)s]  %(message)s",
-#         datefmt="%d-%m-%Y %H:%M",
-#         handlers=handlers
-#     )
-
 import logging
 import os
 
@@ -34,7 +13,8 @@ def get_my_logger(name, log_file_path=None):
     logger.setLevel(logging.INFO)  # or DEBUG, depending on your need
 
     # Create formatters
-    log_format = '[\"INFO\" - %(asctime)s]  %(message)s'
+    log_format = '[\"%(levelname)s\" - %(asctime)s]  %(message)s'
+    # log_format = '[\"INFO\" - %(asctime)s]  %(message)s'
     date_format = "%d-%m-%Y %H:%M"
 
     # Create and add the console handler
