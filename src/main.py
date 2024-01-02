@@ -31,3 +31,6 @@ def main(experiment_version, fine_tuned=None):
     print("WER: ", wer)
     print("CER: ", cer)
     return
+
+if __name__=="__main__":
+    main("experiment1")
