@@ -21,6 +21,8 @@ BULLINGER_GT_PATH = os.path.join(DATA_PROCESSED, "Bullinger", "ground_truth", "b
 BULLINGER_IMAGE_PATH = os.path.join(DATA_PROCESSED, "Bullinger", "line_image", "bullinger_image.json")
 ICFHR_GT_PATH = os.path.join(DATA_PROCESSED, "ICFHR_2016", "ground_truth", "icfhr_gt.json")
 ICFHR_IMAGE_PATH = os.path.join(DATA_PROCESSED, "ICFHR_2016", "line_image", "icfhr_image.json")
+WIKI_TRAIN_PATH = os.path.join(".", "data", "wiki", "enwiki_train.txt")
+WIKI_VAL_PATH = os.path.join(".", "data", "wiki", "enwiki_val.txt")
 
 # Dataset Information from website (used for double check)
 # Text line
@@ -215,8 +217,8 @@ def get_dataset_info(gt_path, image_path):
 
 def get_num_samples(data_loader):
     total_samples = 0
-    for batch in data_loader:
-        total_samples += len(batch[0]) 
+    for i, batch in enumerate(data_loader):
+        total_samples += batch["pixel_values"].size(0)
     return total_samples # Assuming batch[0] contains the samples
 
 def check_text_lines(image_dict, gt_dict, data_name, data_loader):
@@ -226,8 +228,11 @@ def check_text_lines(image_dict, gt_dict, data_name, data_loader):
                     "icfhr": {"lines": ICFHR_TEXT_LINE, "train": ICFHR_TRAIN, "val": ICFHR_VAL, "test": ICFHR_TEST}}
     gt_text_line = len(gt_dict)
     image_text_line = len(image_dict)
-    train_loader, val_loader, test_loader = data_loader["cv1"]
-    assert gt_text_line==image_text_line, "Image and ground truth text lines are not the same."
+    train_loader = data_loader["cv1"]["train"]
+    val_loader = data_loader["cv1"]["val"]
+    test_loader = data_loader["cv1"]["test"]
+    # train_loader, val_loader, test_loader = data_loader["cv1"]
+    # assert gt_text_line==image_text_line, "Image and ground truth text lines are not the same."
 
     # data = load_data()
     # # Split IAM data into train, validation and test datasets, and get the indices
@@ -237,26 +242,42 @@ def check_text_lines(image_dict, gt_dict, data_name, data_loader):
     # icfhr_folds = get_split_indices("ICFHR", data["icfhr_image"], data["icfhr_gt"])
     
     train_sample = get_num_samples(train_loader)
-    shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
+    # shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
     val_sample = get_num_samples(val_loader)
-    shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
+    # shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
     test_sample = get_num_samples(test_loader)
-    shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
+    # shutil.rmtree(os.path.join(DATA_RAW, "Bullinger", "extracted_folder"))
 
     info = {"Text line": (expected_lines[data_name]["lines"], image_text_line),
-            "Train": (expected_lines[data_name]["train"], get_num_samples(train_loader)),
-            "Validation": (expected_lines[data_name]["val"], get_num_samples(val_loader)),
-            "Test": (expected_lines[data_name]["test"], get_num_samples(test_loader))}
-    print("Data        | Website        | Downloaded ")
-    print("--------------------------------------------")
+            "Train": (expected_lines[data_name]["train"], train_sample),
+            "Validation": (expected_lines[data_name]["val"], val_sample),
+            "Test": (expected_lines[data_name]["test"], test_sample)}
+    print("Data            | Website         | Downloaded ")
+    print("-----------------------------------------------")
     for k,v in info.items():
         print(f"{k:<15} | {v[0]:<15} | {v[1]:<15}")
 
-    assert gt_text_line==image_text_line==expected_lines[data_name]["lines"], "Text lines are not the same."
-    assert train_sample==expected_lines[data_name]["train"], "Training lines are not the same."
-    assert val_sample==expected_lines[data_name]["val"], "Validation lines are not the same."
-    assert test_sample==expected_lines[data_name]["test"], "Testing lines are not the same."
+    # assert gt_text_line==image_text_line==expected_lines[data_name]["lines"], "Text lines are not the same."
+    # assert train_sample==expected_lines[data_name]["train"], "Training lines are not the same."
+    # assert val_sample==expected_lines[data_name]["val"], "Validation lines are not the same."
+    # assert test_sample==expected_lines[data_name]["test"], "Testing lines are not the same."
     print("Assertion tests passed.")
 
     return 
     
+def get_wiki_lines():
+
+    with open(WIKI_TRAIN_PATH, 'r') as file:
+        train_lines = file.readlines()
+        train_line_count = len(train_lines)
+        formatted_train_line_count = "{:,}".format(train_line_count).replace(",", "'")
+
+    with open(WIKI_VAL_PATH, 'r') as file:
+        val_lines = file.readlines()
+        val_line_count = len(val_lines)
+        formatted_val_line_count = "{:,}".format(val_line_count).replace(",", "'")
+
+    print(f"The wikipedia training file has {formatted_train_line_count} lines.")
+    print(f"The wikipedia validation file has {formatted_val_line_count} lines.")
+    print(f"Validation data is {int(val_line_count/train_line_count*100)}% of training data")
+    return

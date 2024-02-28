@@ -180,3 +180,22 @@
 
 \usepackage{graphicx}
 \graphicspath{ {./images/} }
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{relsize}
+\usepackage{mathtools}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings,theorems}
+\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
+
+% TODO
+\usepackage{lipsum}                     % Dummytext
+\usepackage{xargs}                      % Use more than one optional parameter in a new commands
+\usepackage[pdftex,dvipsnames]{xcolor}  % Coloured text etc.
+% 
+\usepackage[colorinlistoftodos,prependcaption,textsize=footnotesize]{todonotes}
+\newcommandx{\TODO}[2][1=]{\todo[linecolor=RedOrange,backgroundcolor=YellowOrange!25,bordercolor=RedOrange,#1]{#2}}
+\newcommandx{\CHECK}[2][1=]{\todo[linecolor=RoyalPurple,backgroundcolor=Periwinkle!25,bordercolor=RoyalPurple,#1]{#2}}
+\newcommandx{\FIG}[2][1=]{\todo[linecolor=ForestGreen,backgroundcolor=LimeGreen!25,bordercolor=ForestGreen,#1]{#2}}

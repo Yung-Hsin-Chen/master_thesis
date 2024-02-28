@@ -1,40 +1,26 @@
-from src.models.trocr import load_model
 import os
 import time
 import logging
-from PIL import Image
-from src.utils.helpers import load_data
 from config.config import configure_logging
+# from src.models.charbert_trocr_model import CharBERTrOCRModel
+from src.processor.data_loader import get_data_loader
+from src.utils.train import train
+from src.utils.eval import eval
+import torch.optim as optim
+from argparse import Namespace
+from src.models.trocr_model import initialise_trocr_model
+import config.model_config as cfg
+import torch.nn as nn
+import torch
 
-def eval_trocr(log_file_path, text_output=False):
-    if text_output:
-        text_list = []
-    configure_logging(log_file_path)
-    start_time = time.time()
-    logging.info("Evaluation process started.")
-    processor, model = load_model()
-    data = load_data()
-    for image, label in zip(data["GW_image"], data["GW_gt"]):
-        image = Image.open(image).convert("RGB")
-        pixel_values = processor(images=image, return_tensors="pt").pixel_values
-        # Generate text from the model
-        generated_ids = model.generate(pixel_values)
-        generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        print(generated_text)
-        text_list.append((generated_text, label))
-    # Open the txt file in append mode
-    with open(log_file_path.replace("logs.txt", "output.txt"), "a") as file:
-        for text in range(5):
-            data_to_write = f"{text[0]}, {text[1]}\n"
-            file.write(data_to_write)
-    logging.info("Evaluation process completed. The logging file is stored in %s.", log_file_path)
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    # Print the elapsed time
-    logging.info("Elapsed time: {:.2f} seconds".format(elapsed_time))
-    logging.shutdown()
-    return
+max_target_length = cfg.model["max_target_length"]
 
-if __name__ == "__main__":
-    log_file_path = os.path.join(".", "results", "trocr_exp01", "logs.txt")
-    eval_trocr(log_file_path, text_output=True)
+def eval_trocr(experiment_version: str, test_loader, device, data, model, fine_tuned=None):
+    model = initialise_trocr_model(experiment_version=fine_tuned)
+    testing_keys = cfg.trocr[experiment_version]["testing_keys"]
+    testing_keys["language"] = "GW" if data=="gw" else "IAM"
+    testing_keys["test_loader"] = test_loader
+    testing_keys["device"] = device
+    testing_keys["model_name"] = model
+    wer, cer = eval(model, **testing_keys)
+    return wer, cer

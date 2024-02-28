@@ -13,7 +13,7 @@ def get_my_logger(name, log_file_path=None):
     logger.setLevel(logging.INFO)  # or DEBUG, depending on your need
 
     # Create formatters
-    log_format = '[\"%(levelname)s\" - %(asctime)s]  %(message)s'
+    log_format = '[%(levelname)s - %(asctime)s]  %(message)s'
     # log_format = '[\"INFO\" - %(asctime)s]  %(message)s'
     date_format = "%d-%m-%Y %H:%M"
 
@@ -26,7 +26,7 @@ def get_my_logger(name, log_file_path=None):
     if log_file_path:
         # Ensure the directory exists
         os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
-        file_handler = logging.FileHandler(log_file_path, mode='w')
+        file_handler = logging.FileHandler(log_file_path, mode="w")
         file_handler.setFormatter(logging.Formatter(log_format, date_format))
         logger.addHandler(file_handler)
 

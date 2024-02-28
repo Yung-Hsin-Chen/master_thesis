@@ -15,6 +15,7 @@ DATA_RAW = os.path.join(DATA, "raw")
 
 # results
 RESULTS = os.path.join(ROOT, "results")
+PIJ = os.path.join(RESULTS, "p_ij")
 
 # models
 MODELS = os.path.join(ROOT, "models")

@@ -16,10 +16,13 @@ def get_wer_cer_per_batch(targets, labels):
     # targets = [convert_string(s) for s in targets]
     # labels = [convert_string(s) for s in labels]
     for t,l in zip(targets, labels):
-        if t.strip()=="":
-            wer_score += 1
-            cer_score += 1
-        else:
-            wer_score += jiwer.wer(t, l)
-            cer_score += jiwer.cer(t, l)
+        wer_score += jiwer.wer(t, l)
+        cer_score += jiwer.cer(t, l)
+    # for t,l in zip(targets, labels):
+    #     if t.strip()=="":
+    #         wer_score += 1
+    #         cer_score += 1
+    #     else:
+    #         wer_score += jiwer.wer(t, l)
+    #         cer_score += jiwer.cer(t, l)
     return wer_score, cer_score

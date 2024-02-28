@@ -26,6 +26,7 @@ data/raw/IAM/line_image/
 data/raw/ICFHR_2016/
 data/raw/Bullinger/
 data/raw/IAM/split/
+data/wiki/
 
 # Ignore Pipenv and Poetry lock files
 Pipfile.lock
@@ -38,3 +39,7 @@ Pipfile
 config/__pycache__/
 __pycache__/
 .vscode
+results/gpt4/
+results/charbert_small/
+results/p_ij
+models/charbert/

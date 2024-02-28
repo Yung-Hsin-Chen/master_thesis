@@ -25,3 +25,11 @@ Dockerfiles are included. Thus, please ensure that Docker is installed.
     ```
     pdflatex master_thesis_YH.tex
     ```
+5. Compile the bibliography.
+    ```
+    bibtex master_thesis_YH
+    ```
+6. Compile the ```.tex``` file to get the report pdf.
+    ```
+    pdflatex master_thesis_YH.tex
+    ```
