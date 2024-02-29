@@ -42,7 +42,7 @@ class TensorTransform(nn.Module):
         self.batch_norm1 = nn.BatchNorm1d(hid_channels_dim1)
         self.batch_norm2 = nn.BatchNorm1d(hid_channels_dim2)
 
-        self.dropout = nn.Dropout(0.2)
+        # self.dropout = nn.Dropout(0.2)
 
         # Initialize weights and biases
         self.init_weights()
@@ -50,25 +50,25 @@ class TensorTransform(nn.Module):
     def forward(self, x):
         # Apply first convolution layer
         x = self.relu(self.conv1(x))
-        x = self.dropout(x)
+        # x = self.dropout(x)
         # Apply second convolution layer
         x = self.batch_norm1(x)
         x = self.relu(self.conv2(x))
-        x = self.dropout(x)
+        # x = self.dropout(x)
         # Apply third convolution layer
         x = self.batch_norm2(x)
         x = self.relu(self.conv3(x))
-        x = self.dropout(x)
+        # x = self.dropout(x)
         # Apply first FFNN layer
         x = self.relu(self.ffnn1(x))
-        x = self.dropout(x)
+        # x = self.dropout(x)
         # Apply second FFNN layer
         x = self.relu(self.ffnn2(x))
-        x = self.dropout(x)
+        # x = self.dropout(x)
         # Apply third FFNN layer
         # x = self.ffnn3(x)
         x = self.relu(self.ffnn3(x))
-        x = self.dropout(x)
+        # x = self.dropout(x)
         return x
 
     def init_weights(self):
@@ -212,7 +212,7 @@ class TrOCRCharBERTModel(VisionEncoderDecoderModel):
                                                     hid_channels_dim1=1024, hid_channels_dim2=512,
                                                     in_features_dim=768, out_features_dim=1024,
                                                     hid_features_dim1=2048, hid_features_dim2=1024) 
-        self.embedding_combiner = EmbeddingCombiner()    
+        # self.embedding_combiner = EmbeddingCombiner()    
 
         self.decoder.model.decoder.embed_tokens = DummyLayer()
         self.max_target_length = max_target_length
@@ -308,14 +308,14 @@ class TrOCRCharBERTModel(VisionEncoderDecoderModel):
         mean = transformed_char_repr.mean(dim=2, keepdim=True)
         std = transformed_char_repr.std(dim=2, keepdim=True)
         transformed_char_repr = (transformed_char_repr - mean) / std
-        decoder_input = self.embedding_combiner([transformed_token_repr, decoder_inputs_embeds, transformed_char_repr])
+        # decoder_input = self.embedding_combiner([transformed_token_repr, decoder_inputs_embeds, transformed_char_repr])
 
         outputs = super().forward(
             pixel_values=pixel_values,
             decoder_input_ids=decoder_input_ids,
             decoder_attention_mask=decoder_attention_mask,
-            decoder_inputs_embeds=decoder_input,
-            # decoder_inputs_embeds=decoder_inputs_embeds+transformed_token_repr+transformed_char_repr,
+            # decoder_inputs_embeds=decoder_input,
+            decoder_inputs_embeds=decoder_inputs_embeds+transformed_token_repr+transformed_char_repr,
             encoder_outputs=encoder_outputs,
             labels=labels,
             **kwargs

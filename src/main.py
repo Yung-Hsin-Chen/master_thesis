@@ -98,6 +98,6 @@ if __name__=="__main__":
         "freeze_mode": "freeze", # freeze/not_freeze
         "layers": ["encoder", "decoder"],
         "model": "trocr_charbert", # trocr/trocr_charbert
-        "data": "gw" # gw/iam
+        "data": "iam" # gw/iam
     }
     main(**keys)
