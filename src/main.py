@@ -7,6 +7,7 @@
 # logger = logging.getLogger(__name__)
 
 from src.train.train_trocr_charbert import train_trocr_charbert
+from src.train.train_trocr_charbert_small import train_trocr_charbert_small
 from src.train.train_trocr import train_trocr
 # from src.eval.eval_trocr_charbert import eval_trocr_charbert
 from src.eval.eval_trocr import eval_trocr
@@ -18,7 +19,7 @@ import os
 from src.utils.helpers import set_gpu, set_device
 import torch
 
-model_dict = {"train": {"trocr": train_trocr, "trocr_charbert": train_trocr_charbert},
+model_dict = {"train": {"trocr": train_trocr, "trocr_charbert": train_trocr_charbert, "trocr_charbert_small": train_trocr_charbert_small},
             "eval": {"trocr": eval_trocr, "seq_models": eval_seq_models}}
 
 def main(**kwargs):
@@ -96,8 +97,9 @@ if __name__=="__main__":
         "fine_tuned": None,
         "mode": "train", # eval/train
         "freeze_mode": "freeze", # freeze/not_freeze
+        # "layers": ["encoder.pooler", "encoder.layernorm", "encoder.encoder.layer.23"],
         "layers": ["encoder", "decoder"],
-        "model": "trocr_charbert", # trocr/trocr_charbert
+        "model": "trocr_charbert", # trocr/trocr_charbert/trocr_charbert_small
         "data": "iam" # gw/iam
     }
     main(**keys)

@@ -37,7 +37,7 @@ def get_fine_tuned_param(experiment_version):
     fine_tuned_weights = torch.load(model_path)
     fine_tuned_weights = {prefix + k: v for k, v in fine_tuned_weights.items()}
     # print("STATE DICT: \n", list(fine_tuned_weights.keys()), "\n\n")
-    # model.load_state_dict(fine_tuned_weights)
+    model.load_state_dict(fine_tuned_weights)
     # for name, param in model.named_parameters():
     #     if name not in list(fine_tuned_weights.keys()):
     #         print("Parameter", name, " not in model.")

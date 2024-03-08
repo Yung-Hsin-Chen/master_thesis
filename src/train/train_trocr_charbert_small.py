@@ -7,7 +7,6 @@ from src.processor.data_loader import get_data_loader
 from src.utils.train import train
 import torch.optim as optim
 from argparse import Namespace
-from src.models.trocr_charbert_model import initialise_trocr_charbert_model
 from src.models.trocr_charbert_small_model import initialise_trocr_charbert_small_model
 import config.model_config as cfg
 import torch.nn as nn
@@ -18,12 +17,12 @@ max_epochs = cfg.general["max_epochs"]
 max_target_length = cfg.model["max_target_length"]
 
 # Training
-def train_trocr_charbert(experiment_version: str, train_loader, val_loader, test_loader, device, freeze_mode, layers, data, model_name, fine_tuned=None):
+def train_trocr_charbert_small(experiment_version: str, train_loader, val_loader, test_loader, device, freeze_mode, layers, data, model_name, fine_tuned=None):
     # Define model
     if fine_tuned:
         fine_tuned = experiment_version
     # model = initialise_trocr_charbert_model(experiment_version=fine_tuned)
-    model = initialise_trocr_charbert_model()
+    model = initialise_trocr_charbert_small_model()
     # Specify the layers you do not want to freeze (by name or type)
 
     # Freeze all other layers in both the TrOCR and CharBERT parts of the model

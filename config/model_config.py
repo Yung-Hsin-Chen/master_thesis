@@ -62,8 +62,8 @@ model = {
 trocr = {
     "experiment1": {
         "optimizer_keys": {
-            "lr": 1e-7, # leaning rate
-            "weight_decay": 1e-7  # leaning rate
+            "lr": 1e-6, # leaning rate
+            "weight_decay": 1e-6  # leaning rate
         },
         "data_loader_keys": {
             "batch_size": general["batch_size"],
@@ -93,8 +93,8 @@ trocr = {
 trocr_charbert = {
     "experiment1": {
         "optimizer_keys": {
-            "lr": 1e-5, # leaning rate
-            "weight_decay": 1e-5
+            "lr": 1e-6, # leaning rate
+            "weight_decay": 1e-6
         },
         "data_loader_keys": {
             "batch_size": general["batch_size"],

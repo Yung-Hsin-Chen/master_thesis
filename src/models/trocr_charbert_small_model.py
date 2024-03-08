@@ -11,6 +11,7 @@ from config.config_paths import MODELS
 import os
 from src.models.adapted_charbert import AdaptedRobertaModel
 import torch.nn.functional as F
+from src.models.charbert_small_model import initialise_charbert_small_model
 
 CHARBERT_CONFIG = cfg.model_config["charbert_config"]
 TROCR_CONFIG = cfg.model_config["trocr_config"]
@@ -42,7 +43,7 @@ class TensorTransform(nn.Module):
         self.batch_norm1 = nn.BatchNorm1d(hid_channels_dim1)
         self.batch_norm2 = nn.BatchNorm1d(hid_channels_dim2)
 
-        # self.dropout = nn.Dropout(0.2)
+        self.dropout = nn.Dropout(0.1)
 
         # Initialize weights and biases
         self.init_weights()
@@ -50,25 +51,24 @@ class TensorTransform(nn.Module):
     def forward(self, x):
         # Apply first convolution layer
         x = self.relu(self.conv1(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply second convolution layer
         x = self.batch_norm1(x)
         x = self.relu(self.conv2(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply third convolution layer
         x = self.batch_norm2(x)
         x = self.relu(self.conv3(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply first FFNN layer
         x = self.relu(self.ffnn1(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply second FFNN layer
         x = self.relu(self.ffnn2(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply third FFNN layer
-        # x = self.ffnn3(x)
         x = self.relu(self.ffnn3(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         return x
 
     def init_weights(self):
@@ -190,10 +190,11 @@ class TrOCRCharBERTModel(VisionEncoderDecoderModel):
 
         self.used_layers = []
         # """
-        self.charbert = AdaptedRobertaModel.from_pretrained(args.model_name_or_path,
-                                        from_tf=False,
-                                        config=charbert_config,
-                                        cache_dir=None)
+        self.charbert = initialise_charbert_small_model("experiment")
+        # self.charbert = AdaptedRobertaModel.from_pretrained(args.model_name_or_path,
+        #                                 from_tf=False,
+        #                                 config=charbert_config,
+        #                                 cache_dir=None)
 
         # Three layer FFNNs to generate CharBERT's arguments
         self.transform_char_embeds = TensorTransform(in_channels_dim=512, out_channels_dim=3060,
@@ -384,10 +385,16 @@ def get_pretrain_param():
     trocr_model = VisionEncoderDecoderModel.from_pretrained(TROCR_CONFIG)
     trocr_state_dict = trocr_model.state_dict()
     # Standalone CharBERT model and state dict(adjusted according to the prefix)
-    charbert_model = AdaptedRobertaModel.from_pretrained(charbert_args.model_name_or_path,
-                                        from_tf=False,
-                                        config=cfg.charbert_config,
-                                        cache_dir=None)
+    charbert_model = initialise_charbert_small_model("experiment")
+    # charbert_model = AdaptedRobertaModel.from_pretrained(charbert_args.model_name_or_path,
+    #                                     from_tf=False,
+    #                                     config=cfg.charbert_config,
+    #                                     cache_dir=None)
+    # print("\nPRETRAINED MODEL PARAM")
+    # print(fine_tuned_weights.keys())
+    # print("\nMODEL PARAM")
+    # for name, param in charbert_model.named_parameters():
+    #     print(name)
     charbert_state_dict = charbert_model.state_dict()
     charbert_state_dict = {prefix + k: v for k, v in charbert_state_dict.items()}
     # Composite model and state dict
@@ -419,7 +426,7 @@ def get_fine_tuned_param(experiment_version):
     model.load_state_dict(fine_tuned_weights)
     return model
 
-def initialise_trocr_charbert_model(experiment_version=None):
+def initialise_trocr_charbert_small_model(experiment_version=None):
     """
     Initializes and verifies a composite model with pre-trained parameters from TrOCR and CharBERT models.
 

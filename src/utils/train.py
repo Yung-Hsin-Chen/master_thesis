@@ -113,9 +113,12 @@ def train(model, freeze_mode, layers, **kwargs):
     #     model = nn.DataParallel(model)
     # model.cuda()
     # model = nn.DataParallel(model)
-    charbert_model = initialise_charbert_model(experiment_version="experiment1")
-    charbert_model = charbert_model.to(device)
+    # charbert_model = initialise_charbert_model(experiment_version="experiment1")
+    # charbert_model = charbert_model.to(device)
     model = model.to(device)
+    # for name,param in model.named_parameters():
+    #     print(name)
+    #     print(param)
     message = {"freeze": "Frozen parameters: ", "not_freeze": "Trainable parameters: "}
     if layers==[]:
         layers = [message[freeze_mode]] + [" "*27+"None"]

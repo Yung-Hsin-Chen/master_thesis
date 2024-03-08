@@ -15,12 +15,12 @@ import torch
 
 max_target_length = cfg.model["max_target_length"]
 
-def eval_trocr(experiment_version: str, test_loader, device, data, model, fine_tuned=None):
+def eval_trocr(experiment_version: str, test_loader, device, data, model_name, fine_tuned=None):
     model = initialise_trocr_model(experiment_version=fine_tuned)
     testing_keys = cfg.trocr[experiment_version]["testing_keys"]
     testing_keys["language"] = "GW" if data=="gw" else "IAM"
     testing_keys["test_loader"] = test_loader
     testing_keys["device"] = device
-    testing_keys["model_name"] = model
+    testing_keys["model_name"] = model_name
     wer, cer = eval(model, **testing_keys)
     return wer, cer

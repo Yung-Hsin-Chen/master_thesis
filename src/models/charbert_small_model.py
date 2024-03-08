@@ -6,20 +6,32 @@ import torch
 charbert_args = cfg.charbert_dataset_args
 import os
 from config.config_paths import MODELS
+from src.models.adapted_charbert import AdaptedRobertaModel
 
 def load_model():
     charbert_config = cfg.charbert_config
     model = RobertaForMaskedLM(config=charbert_config)
+    # model = AdaptedRobertaModel.from_pretrained(charbert_args.model_name_or_path,
+    #                                     from_tf=False,
+    #                                     config=cfg.charbert_config,
+    #                                     cache_dir=None)
     return model
 
 def get_fine_tuned_param(experiment_version):
     prefix = "roberta."
     model = load_model()
-    model_path = os.path.join(MODELS, "charbert", "pytorch_model.bin")
+    model_path = os.path.join(MODELS, "charbert_small", "pytorch_model.bin")
     fine_tuned_weights = torch.load(model_path)
-    fine_tuned_weights = {prefix + k: v for k, v in fine_tuned_weights.items()}
+    # print("\nPRETRAINED MODEL PARAM")
+    # print(fine_tuned_weights.keys())
+    # print("\nMODEL PARAM")
+    # for name, param in model.named_parameters():
+    #     print(name)
+    fine_tuned_weights = {(k[8:] if k.startswith("roberta.") else k): v for k, v in fine_tuned_weights.items()}
+    # print("\nPRETRAINED MODEL PARAM")
+    # print(fine_tuned_weights.keys())
     # print("STATE DICT: \n", list(fine_tuned_weights.keys()), "\n\n")
-    # model.load_state_dict(fine_tuned_weights)
+    model.load_state_dict(fine_tuned_weights, strict=False)
     # for name, param in model.named_parameters():
     #     if name not in list(fine_tuned_weights.keys()):
     #         print("Parameter", name, " not in model.")
