@@ -1,5 +1,6 @@
 \newchap{Experiment}
 \label{chap:4_experiment}
+This chapter presents a detailed examination of the experimental setup and evaluation criteria in our study. Beginning with the data collection and processing section, we outline the sources and types of data utilised to benchmark the performance of our composite model and the training of CharBERT${_\text{SMALL}}$. This is followed by a discussion on the baseline model, where we compare both the pre-trained and fine-tuned versions of the TrOCR model to establish performance benchmarks. The subsequent sections delve into the training and evaluation criteria for the composite model and CharBERT${_\text{SMALL}}$. They highlights the strategic choices made in terms of optimizers, loss functions, and hyperparameters. In addition, we address common training challenges and our solutions. Finally, the analysis section explores the impact of specific model components and features on overall performance. This comprehensive approach not only enables a deeper understanding of the models' capabilities and limitations but also guides the refinement of OCR technologies for enhanced performance and efficiency.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                              Data Collection and processing                                %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -101,11 +102,17 @@ The training and evaluation of CharBERT$_{\text{SMALL}}$ adhere closely to the m
 
 \TODO{Finish this}The results is evaluated
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                                       Ablation Study                                       %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Ablation Study}
-\label{sec:4_ablation_study}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                          Analysis                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Analysis}
+\label{sec:4_analysis}
+To understand the contribution of specific components or features of a model to its overall performance, we conducted a comprehensive analysis. This analysis encompassed strategies such as 1) freezing specific layers; 2) integrating dropout mechanisms; 3) comparing combined tensor modules; 4) benchmarking against GPT-4. Each of these approaches was carefully implemented to isolate and understand the impact of various model elements on its efficiency.
+
+\subsection{Freezing Specific Layers}
+\label{subsec:4_freezing_specific_layers}
+\subsection{Integrating Dropout Mechanisms}
+\label{subsec:4_integrating_dropout_mechanisms}
+\subsection{Comparing Combined Tensor Modules}
+\label{subsec:4_comparing_combined_tensor_modules}
+\subsection{Benchmarking Against GPT-4}
+\label{subsec:4_benchmarking_against_gpt-4}
