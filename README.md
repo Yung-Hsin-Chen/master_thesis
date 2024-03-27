@@ -6,6 +6,7 @@
   - [Data](#data)
   - [Get Report](#get-report)
   - [Run Source Codes](#run-source-codes)
+  - [Folder Structure](#folder-structure)
 
 ## Data
 Data used in the project can be downloaded online.
@@ -45,13 +46,42 @@ Dockerfiles are included. Thus, please ensure that Docker is installed.
     ```
     docker build -t master_thesis/ocr_correction:v.1.0 . -f Dockerfile
     ```
-2. Run the container in an interactive mode.
-   
-   1. Run ```processor.py``` to prepare the data loaders.
-        ```
-        python ./src/processor/precessor.py
-        ```
-    2. Start training or evaluation by modifying the ```main.py```.
-        ```
-        python ./src/main.py
-        ```
+2. Run the container in an interactive mode. Start training or evaluation by modifying the ```main.py```.
+    ```
+    python ./src/main.py
+    ```
+
+## Folder Structure
+```
+master_thesis
+│--- README.md        <- Contains an overview of the project, setup 
+│                        instructions, and any additional information 
+│                        relevant to the project.
+│--- Dockerfile 
+│--- run_script.sh    <- A shell script for executing common tasks, 
+│                        such as setting up the environment, starting 
+│                        a training run, or evaluating models.  
+│--- setup.py
+│--- requirements.txt
+│--- config           <- Directory containing configuration files for
+│                        models, training processes, or application 
+│                        settings.
+│--- data             <- Datasets used in the thesis.
+│--- models           <- Contains saved models.
+│--- notebook         <- Jupyter notebooks for exploratory data analysis.
+│--- report           <- Stores the final report.
+│--- results          <- Contains output from model evaluations, 
+│                        including metrics.
+└─── src              <- Source code for the project.
+    │--- processor    <- Code related to data preprocessing and  
+    │                    preparing raw data for training or evaluation.
+    │--- models       <- Definitions of the machine learning models used
+    │                    in the thesis
+    │--- train        <- Scripts and modules for training models.
+    │--- eval         <- Scripts and modules for evaluating models.
+    │--- utils        <- Utility functions and classes that support 
+    │                    various tasks across the project, such as data 
+    │                    loading, metric calculation, and visualization 
+    │                    tools.
+    └─── tests        <- Automated tests for the codebase
+```
