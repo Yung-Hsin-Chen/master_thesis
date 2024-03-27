@@ -1,12 +1,18 @@
-# TrOCR meets CharBERT
+# TrOCR meets CharBERT - On-Going
+
+## Table of Contents
+- [TrOCR meets CharBERT - On-Going](#trocr-meets-charbert---on-going)
+  - [Table of Contents](#table-of-contents)
+  - [Data](#data)
+  - [Get Report](#get-report)
+  - [Run Source Codes](#run-source-codes)
 
 ## Data
 Data used in the project can be downloaded online.
-1. [IAM](https://fki.tic.heia-fr.ch/databases/iam-handwriting-database)
-2. [GW](https://fki.tic.heia-fr.ch/databases/washington-database)
-3. 
+1. [IAM Handwritten Dataset](https://fki.tic.heia-fr.ch/databases/iam-handwriting-database)
+2. [GW Handwritten Dataset](https://fki.tic.heia-fr.ch/databases/washington-database)
 
-## Installation
+## Get Report
 Dockerfiles are included. Thus, please ensure that Docker is installed.
 
 1. Compile the report by navigating to the ```master_thesis``` folder, and then build the Docker.
@@ -33,3 +39,19 @@ Dockerfiles are included. Thus, please ensure that Docker is installed.
     ```
     pdflatex master_thesis_YH.tex
     ```
+
+## Run Source Codes
+1. Navigate to ```master_thesis``` folder, put data in ```data/raw/data```, and build the docker image.
+    ```
+    docker build -t master_thesis/ocr_correction:v.1.0 . -f Dockerfile
+    ```
+2. Run the container in an interactive mode.
+   
+   1. Run ```processor.py``` to prepare the data loaders.
+        ```
+        python ./src/processor/precessor.py
+        ```
+    2. Start training or evaluation by modifying the ```main.py```.
+        ```
+        python ./src/main.py
+        ```
