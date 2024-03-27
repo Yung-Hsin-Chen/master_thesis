@@ -9,13 +9,18 @@ import jiwer
 #     wer_score = wer.compute(predictions=pred_ids, references=label_ids)
 #     return cer_score, wer_score
 
+
 def get_wer_cer_per_batch(targets, labels):
     wer_score, cer_score = 0, 0
+    # print("TARGET: ", targets)
+    # print("LABEL:", labels)
     # targets = get_word(ocr_output)
     # labels = get_word(label)
     # targets = [convert_string(s) for s in targets]
     # labels = [convert_string(s) for s in labels]
     for t,l in zip(targets, labels):
+        # print("OUTPUT: ", t)
+        # print("LABEL: ", l)
         wer_score += jiwer.wer(t, l)
         cer_score += jiwer.cer(t, l)
     # for t,l in zip(targets, labels):

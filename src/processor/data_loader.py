@@ -446,18 +446,21 @@ class CharBertDataset(Dataset):
         return self.examples
     
 class CombinedDataset(Dataset):
-    def __init__(self, dataset1, dataset2):
+    def __init__(self, data, dataset1, dataset2):
         """
         Initialize the CombinedDataset with two datasets.
         :param dataset1: First dataset
         :param dataset2: Second dataset
         """
+        self.data = data
         self.dataset1 = dataset1
         self.dataset2 = dataset2
 
         # Ensure both datasets have the same length
         if len(dataset1) != len(dataset2):
             raise ValueError("Datasets must have the same length")
+        self.file_paths = [k for k,v in data.items()]
+        self.index_to_filename = {i: fname for i, fname in enumerate(self.file_paths)}
 
     def __len__(self):
         """
@@ -470,6 +473,8 @@ class CombinedDataset(Dataset):
         Return a combined item from both datasets.
         :param idx: Index of the item to fetch
         """
+        # print("\n\n", idx)
+        # idx = self.index_to_filename[idx]
         item1 = self.dataset1[idx]
         item2 = self.dataset2[idx]
 
@@ -579,7 +584,7 @@ def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, pro
     data_loaders = dict()
     custom_dataset = CustomDataset(data=image, labels=gt, processor=processor, max_target_length=max_target_length, transform=transform, data_name=data_name)
     charbert_dataset = CharBertDataset(charbert_dataset_args, data=image, labels=gt)
-    combined_dataset = CombinedDataset(custom_dataset, charbert_dataset)
+    combined_dataset = CombinedDataset(gt, custom_dataset, charbert_dataset)
     # Create instances of my custom dataset for training, validation and testing purposes
     for index, fold in enumerate(folds):
         # Create DataLoader for training, validation, and test sets

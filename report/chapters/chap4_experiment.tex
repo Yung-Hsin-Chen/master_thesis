@@ -34,9 +34,16 @@ In the original study, the authors trained CharBERT using a 12GB dataset from Wi
 In this study, we consider both the pre-trained and fine-tuned versions of the TrOCR model as baseline models for comparison. The rationale behind using the fine-tuned TrOCR model alongside its pre-trained counterpart is to ascertain the performance benchmark. If the fine-tuned TrOCR model outperform the composite model, it would suggest that further fine-tuning of the TrOCR model is a more efficient approach than employing the larger, more complex composite model. This comparison allows us to evaluate the efficiency of the fine-tuning process relative to the integration of additional model components.
 \paragraph*{Pre-trained TrOCR}
 \label{par:4_pre-trained_trocr}
-We use the pre-trained \href{https://huggingface.co/microsoft/trocr-large-handwritten}{handwritten large TrOCR} as the baseline model. The model is trained on 
+We use the pre-trained \href{https://huggingface.co/microsoft/trocr-large-handwritten}{handwritten large TrOCR} as the baseline model. The model is trained on synthetic data and IAM handwritten dataset, and evaluated on IAM handwritten dataset. To make fair comparisons across different models or approaches in their paper, the output text predicted by TrOCR is filtered to include only characters from the 36-character set, which consists of 26 lowercase letters (a-z) and 10 digits (0-9). 
 \paragraph*{Fine-tuned TrOCR}
 \label{par:4_fine_tuned_trocr}
+Another stronger baseline of ours is the fine-tuned TrOCR on GW and IAM handwritten datasets. We further include this baseline model for the following reasons: 
+
+First of all, fine-tuning TrOCR on a specific dataset can enhance its performance significantly. Camparing the composite model with both the original and fine-tuned TrOCR allows us to assess the added value of integrating CharBERT. In other words, demonstrating that the composite model outperforms not just the original but also a fine-tuned version of TrOCR helps justify this added complexity. 
+
+In addition, including both the original and fine-tuned versions of TrOCR as baselines provides a more comprehensive view of how the composite model performs across different stages of model optimization. This comparison is crucial for understanding whether the improvements come from fine-tuning, integrating CharBERT, or both. 
+
+Lastly, fine-tuning allows the model to adapt to the specific characteristics and distribution of your data, which might be significantly different from the data TrOCR was originally trained on. By evaluating against a fine-tuned baseline, we ensure that comparisons take into account the model's ability to handle data-specific challenges.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                           Model Training and Evaluation Criteria                           %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,9 +117,13 @@ To understand the contribution of specific components or features of a model to 
 
 \subsection{Freezing Specific Layers}
 \label{subsec:4_freezing_specific_layers}
+When a layer is frozen, its weights remain unchanged during the training updates. This is often done to understand the contribution of specific layers to the model's learning and performance. By freezing specific layers and training the remaining layers, we can assess how changes in certain parts of the model affect its overall performance. This helps identify which layers are critical for learning the task at hand and which might be redundant or less influential.
 \subsection{Integrating Dropout Mechanisms}
-\label{subsec:4_integrating_dropout_mechanisms}
+\label{subsec:4_integrating_dropout_mechanisms} 
+Dropout is a regularization technique used to prevent overfitting in neural networks. By integrating dropout mechanisms into different parts of the model, we can analyze its effect on reducing overfitting and improving generalization. This helps to understand the importance of each component in achieving a balance between model complexity and its ability to perform well on unseen data.
 \subsection{Comparing Combined Tensor Modules}
 \label{subsec:4_comparing_combined_tensor_modules}
+This involves experimenting with different tensor combination modules within the model. By comparing how different combinations of these modules affect performance, we can understand how the architecture and data flow within the model contribute to its success or limitations.
 \subsection{Benchmarking Against GPT-4}
 \label{subsec:4_benchmarking_against_gpt-4}
+Benchmarking against a model like GPT-4 provides a high standard for performance and innovation. It allows us to gauge how far your model has come in terms of understanding and generating text compared to leading models in the field. This comparison can highlight the strengths and weaknesses of our approach, offering insights into what components or features are contributing most to its performance. 

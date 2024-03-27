@@ -27,6 +27,7 @@ def freeze(model, mode, layers):
                 "not_freeze": {"none": False, "layers": True, "not_layers": False}}
     if layers==[]:
         for name, param in model.named_parameters():
+            # param.requires_grad = False
             param.requires_grad = mode_dict[mode]["none"]
     else:
         for name, param in model.named_parameters():
@@ -43,10 +44,16 @@ def train_trocr(experiment_version: str, train_loader, val_loader, test_loader, 
     if fine_tuned:
         fine_tuned = experiment_version
     model = initialise_trocr_model(experiment_version=fine_tuned)
+    # for name,param in model.named_parameters():
+    #     print(param)
+    #     break
     # Specify the layers you do not want to freeze (by name or type)
 
     # Freeze all other layers in both the TrOCR and CharBERT parts of the model
     model = freeze(model, freeze_mode, layers)
+    # for name,param in model.named_parameters():
+    #     print(param)
+    #     break
     # print(model.ffnn_embeddings.fc1.weight.requires_grad)
     # model.charbert.freeze_except(layers_to_not_freeze)
     # Get data loaders

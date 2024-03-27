@@ -46,7 +46,7 @@ general = {
 
 model_config = {
     "roberta_config": "imvladikon/charbert-roberta-wiki",
-    "trocr_config": "microsoft/trocr-large-handwritten",
+    "trocr_config": "microsoft/trocr-base-handwritten",
     "charbert_config": RobertaConfig.from_dict(config_dict),
     "prefix": "charbert."
 }
@@ -62,8 +62,8 @@ model = {
 trocr = {
     "experiment1": {
         "optimizer_keys": {
-            "lr": 1e-6, # leaning rate
-            "weight_decay": 1e-6  # leaning rate
+            "lr": 1e-7, # leaning rate
+            "weight_decay": 1e-7  # leaning rate
         },
         "data_loader_keys": {
             "batch_size": general["batch_size"],
@@ -93,8 +93,8 @@ trocr = {
 trocr_charbert = {
     "experiment1": {
         "optimizer_keys": {
-            "lr": 1e-6, # leaning rate
-            "weight_decay": 1e-6
+            "lr": 1e-5, # leaning rate
+            "weight_decay": 1e-5
         },
         "data_loader_keys": {
             "batch_size": general["batch_size"],

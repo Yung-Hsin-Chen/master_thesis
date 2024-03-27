@@ -6,6 +6,7 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 pattern = r'\|--\|'
 
@@ -54,7 +55,7 @@ def record_character_mismatches(matches):
         align_score = aligner.score(a1, a2)
         score = align_score/(len(a1)+len(a2))*2
         if score>0.8:
-            print("SCORE: ", score)
+            # print("SCORE: ", score)
             alignment = next(aligner.align(a1, a2))
 
             # Convert alignment to string and split into lines for analysis
@@ -71,9 +72,9 @@ def record_character_mismatches(matches):
             match_line = match_line[:match_line.rfind(" ")]
             query = query[6:].strip()[2:]
             query = query[:query.rfind(" ")]
-            print(target)
-            print(match_line)
-            print(query)
+            # print(target)
+            # print(match_line)
+            # print(query)
             mismatch_char = re.finditer(pattern, match_line)
 
             # Print all matches found
@@ -120,6 +121,12 @@ def heatmap(mismatches, threshold):
     plt.show()
     return
 
+def get_prob(mismatch_dict: dict):
+    mismatch_dict = {k:np.log1p(v) for k,v in mismatch_dict.items()}
+    max_val = max(mismatch_dict.values())
+    mismatch_dict = {k:v/max_val for k,v in mismatch_dict.items()}
+    return mismatch_dict
+
 
 def get_pij(threshold=14, plot=False):
     ocr_outputs_all = []
@@ -133,14 +140,23 @@ def get_pij(threshold=14, plot=False):
     matches = word_matching(ocr_outputs_all, correct_labels_all)
     # print(matches)
     mismatches = record_character_mismatches(matches)
+    """
     # Sort the dictionary by its values, resulting in a list of tuples
     sorted_misread_list = sorted(mismatches.items(), key=lambda item: item[1])
-
     # Convert the sorted list of tuples back to a dictionary if needed
     sorted_misread_dict = dict(sorted_misread_list)
-    print(sorted_misread_dict) 
+    # print(sorted_misread_dict) 
+    """
     if plot:
         heatmap(mismatches, threshold)
+    mismatch_prob = get_prob(mismatches)
+    # sorted_misread_list = sorted(mismatch_prob.items(), key=lambda item: item[1])
+    # sorted_misread_dict = dict(sorted_misread_list)
+    # print(sorted_misread_dict)
+    # print(mismatch_prob)
+    mismatch_prob = {k[0]:(k[1], v) for k,v in mismatch_prob.items()}
+    # print(mismatch_prob)
+    return mismatch_prob
 
 if __name__=="__main__":
-    get_pij(plot=True)
+    get_pij(plot=False)

@@ -77,6 +77,9 @@ def _is_whitespace(c):
         return True
     return False
 
+from src.get_pij import get_pij
+pij = get_pij()
+
 class TextDataset(Dataset):
     def __init__(self, tokenizer, args, file_path='train', block_size=512):
         assert os.path.isfile(file_path)
@@ -261,7 +264,7 @@ class TextDataset(Dataset):
             masked_lm_labels[p.index] = tokenizer.convert_tokens_to_ids(p.label)
 
         return output_tokens, masked_lm_labels
-
+    
     def create_adv_word(self, orig_token, rng):
         
         token = list(copy.deepcopy(orig_token))
@@ -285,6 +288,51 @@ class TextDataset(Dataset):
                     print(f"Swap the char:{token[idx:idx+2]} orig_token: {orig_token} new_token: {token}")
         token = ''.join(token)
         return token
+
+    # def create_adv_word(self, orig_token, rng):
+        
+    #     token = list(copy.deepcopy(orig_token))
+    #     if len(orig_token) < 4:
+    #         rand_idx = rng.randint(0, 80)
+    #         rand_char = list(self.char2ids_dict.keys())[rand_idx]
+    #         insert_idx = rng.randint(0, len(orig_token)-1)
+    #         token = token[:insert_idx] + [rand_char] + token[insert_idx:]
+    #         if self.args.output_debug and False:
+    #             print(f"Insert the char:{rand_char} orig_token: {orig_token} new_token: {token}")
+    #     else:
+    #         if rng.random() < 0.5:
+    #             rand_idx = rng.randint(0, len(orig_token)-1)
+    #             del token[rand_idx]
+    #             if self.args.output_debug and False:
+    #                 print(f"Delete the char:{orig_token[rand_idx]} orig_token: {orig_token} new_token: {token}")
+    #         else:
+    #             cnt = 0
+    #             before_token = token
+    #             while True and cnt<10:
+    #                 cnt += 1
+    #                 rand_idx = rng.randint(0, len(token)-1)
+    #                 # print("rand_idx: ", rand_idx)
+    #                 target_char = token[rand_idx]
+    #                 if target_char in pij and rng.random() < pij[target_char][1]:
+    #                     # print("Inside if")
+    #                     char = pij[target_char][0]
+    #                     # print("target_char: ", target_char)
+    #                     # print(pij[target_char])
+    #                     # print("char: ", char)
+    #                     token = token[:rand_idx] + [char] + token[rand_idx+1:]
+    #                     # print("token_list: ", token)
+    #                     # print(f"OCR common error: {target_char} --> {char}; orig_token: {''.join(before_token)}; new_token: {''.join(token)}")
+    #                     break
+    #     # if self.args.output_debug and False:
+    #         # print(f"OCR common error:orig_token: {orig_token} new_token: {token}")
+    #         # else:
+    #             # idx = random.randint(1, len(orig_token)-2)
+    #             # token[idx], token[idx+1] = token[idx+1], token[idx]
+    #             # if self.args.output_debug and False:
+    #             #     print(f"Swap the char:{token[idx:idx+2]} orig_token: {orig_token} new_token: {token}")
+    #     token = ''.join(token)
+    #     # print("Final token: ", token)
+    #     return token
 
     def build_char_inputs(self, input_ids, sub_index_to_ori_tok, start, rng, labels):
         all_seq_tokens = self.tokenizer.convert_ids_to_tokens(input_ids)
@@ -559,8 +607,8 @@ def train(args, train_dataset, model, tokenizer):
                 if args.local_rank in [-1, 0] and args.save_steps > 0 and global_step % args.save_steps == 0:
                     checkpoint_prefix = 'checkpoint'
                     # Save model checkpoint
-                    global_step = 6500
-                    output_dir = os.path.join(args.output_dir, '{}-{}'.format(checkpoint_prefix, global_step))
+                    global_step_fake = 7500
+                    output_dir = os.path.join(args.output_dir, '{}-{}'.format(checkpoint_prefix, global_step_fake))
                     # output_dir = os.path.join(args.output_dir, '{}-{}'.format(checkpoint_prefix))
                     if not os.path.exists(output_dir):
                         os.makedirs(output_dir)

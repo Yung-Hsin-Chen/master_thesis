@@ -42,7 +42,7 @@ class TensorTransform(nn.Module):
         self.batch_norm1 = nn.BatchNorm1d(hid_channels_dim1)
         self.batch_norm2 = nn.BatchNorm1d(hid_channels_dim2)
 
-        # self.dropout = nn.Dropout(0.2)
+        self.dropout = nn.Dropout(0.1)
 
         # Initialize weights and biases
         self.init_weights()
@@ -50,25 +50,24 @@ class TensorTransform(nn.Module):
     def forward(self, x):
         # Apply first convolution layer
         x = self.relu(self.conv1(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply second convolution layer
         x = self.batch_norm1(x)
         x = self.relu(self.conv2(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply third convolution layer
         x = self.batch_norm2(x)
         x = self.relu(self.conv3(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply first FFNN layer
         x = self.relu(self.ffnn1(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply second FFNN layer
         x = self.relu(self.ffnn2(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         # Apply third FFNN layer
-        # x = self.ffnn3(x)
         x = self.relu(self.ffnn3(x))
-        # x = self.dropout(x)
+        x = self.dropout(x)
         return x
 
     def init_weights(self):

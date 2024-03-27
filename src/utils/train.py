@@ -26,6 +26,15 @@ def get_str(processor, logits):
     pred_str = processor.batch_decode(pred_ids, skip_special_tokens=True)
     return pred_str
 
+def filter_string(input_string):
+    # Define the allowed characters: 26 lowercase letters, 10 digits, and space
+    allowed_chars = set('abcdefghijklmnopqrstuvwxyz0123456789 ')
+    
+    # Filter the string to include only characters in the allowed set
+    filtered_string = ''.join(char for char in input_string.lower() if char in allowed_chars)
+    
+    return filtered_string
+
 def train(model, freeze_mode, layers, **kwargs):
 # def train(model, language: str, log_file_path: str, model_path: str, max_epochs: int, train_loader, val_loader, optimizer, device, processor, config_name, text_output=False):
     """
@@ -116,6 +125,19 @@ def train(model, freeze_mode, layers, **kwargs):
     # charbert_model = initialise_charbert_model(experiment_version="experiment1")
     # charbert_model = charbert_model.to(device)
     model = model.to(device)
+    # set special tokens used for creating the decoder_input_ids from the labels
+    model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
+    model.config.pad_token_id = processor.tokenizer.pad_token_id
+    # make sure vocab size is set correctly
+    model.config.vocab_size = model.config.decoder.vocab_size
+
+    # set beam search parameters
+    model.config.eos_token_id = processor.tokenizer.sep_token_id
+    model.config.max_length = 512
+    model.config.early_stopping = True
+    model.config.no_repeat_ngram_size = 3
+    model.config.length_penalty = 2.0
+    model.config.num_beams = 4
     # for name,param in model.named_parameters():
     #     print(name)
     #     print(param)
@@ -133,6 +155,7 @@ def train(model, freeze_mode, layers, **kwargs):
         epoch += 1
         # train_loss, train_wer_sum, train_cer_sum = 0, 0, 0
         train_loss = 0
+        train_loss, train_wer_sum, train_cer_sum = 0, 0, 0
         val_loss, val_wer_sum, val_cer_sum = 0, 0, 0
         test_loss, test_wer_sum, test_cer_sum = 0, 0, 0
         train_samples, val_samples, test_samples = 0, 0, 0
@@ -172,16 +195,24 @@ def train(model, freeze_mode, layers, **kwargs):
             # outputs = model(pixel_values=batch["pixel_values"], 
             #                 decoder_inputs_embeds=batch["label_emb"], 
             #                 decoder_attention_mask=batch["attention_mask"], labels=batch["labels"])
+                loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
             elif model_name=="trocr":
-                outputs = model(pixel_values=batch["pixel_values"], 
-                                decoder_input_ids=batch["test_decoder_input_ids"], labels=batch["labels"])
+                # outputs = model(pixel_values=batch["pixel_values"], 
+                #                 decoder_input_ids=batch["test_decoder_input_ids"], labels=batch["labels"])
+                outputs = model(pixel_values=batch["pixel_values"], labels=batch["labels"])
+                loss = outputs.loss
+            # pred_str = get_str(processor, outputs.logits)
+            # wer, cer = get_wer_cer_per_batch(pred_str, batch["label_str"])
+            # train_wer_sum += wer
+            # train_cer_sum += cer
             # print("train output: ", outputs.logits.size())
                 # print("train output type: ", outputs.logits.dtype)
                 # print(outputs.logits)
                 # print(batch["labels"])
             # print(outputs.logits.view(-1, outputs.logits.size(-1)).size())
             # print(batch["labels"].view(-1).size())
-            loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
+            # loss = outputs.loss
+            # loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
             # loss_2 = 1 - F.cosine_similarity(charbert_token_repr, charbert_token_label).mean()
             # loss_3 = 1 - F.cosine_similarity(charbert_char_repr, charbert_char_label).mean()
             # print(loss_1)
@@ -222,6 +253,8 @@ def train(model, freeze_mode, layers, **kwargs):
             pred_str = get_str(processor, outputs.logits)
             # if text_output:
             #     write_predictions_to_file(pred_str, batch["label_str"], text_output_path)
+        train_wer_score = train_wer_sum/train_samples
+        train_cer_score = train_cer_sum/train_samples
         # print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
         # Validation
         with torch.no_grad():
@@ -244,10 +277,24 @@ def train(model, freeze_mode, layers, **kwargs):
                 # outputs = model(pixel_values=batch["pixel_values"], 
                 #             decoder_inputs_embeds=batch["label_emb"], 
                 #             decoder_attention_mask=batch["attention_mask"], labels=batch["labels"])
+                    # generated_ids = model.generate(pixel_values=batch["pixel_values"])
+                    # generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)
+                    # print(generated_text)
+                    pred_str = get_str(processor, outputs.logits)
+                    pred_str = [filter_string(i) for i in pred_str]
+                    label_str = [filter_string(i) for i in batch["label_str"]]
+                    wer, cer = get_wer_cer_per_batch(pred_str, label_str)
+                    loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
                 elif model_name=="trocr":
                     outputs = model(pixel_values=batch["pixel_values"], 
                                 decoder_input_ids=batch["test_decoder_input_ids"], labels=batch["labels"])
-                loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
+                    generated_ids = model.generate(batch["pixel_values"])
+                    generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)
+                    # print("GENERATE TEXT: ", generated_text)
+                    loss = outputs.loss
+                    wer, cer = get_wer_cer_per_batch(generated_text, batch["label_str"])
+                # loss = outputs.loss
+                # loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
                 # loss_2 = 1 - F.cosine_similarity(charbert_token_repr, charbert_token_label).mean()
                 # loss_3 = 1 - F.cosine_similarity(charbert_char_repr, charbert_char_label).mean()
                 # print(loss_1)
@@ -256,8 +303,8 @@ def train(model, freeze_mode, layers, **kwargs):
                 # loss = loss_1/4 + loss_2 + loss_3
                 # print("val loss: ", loss)
                 val_loss += loss.detach()
-                pred_str = get_str(processor, outputs.logits)
-                wer, cer = get_wer_cer_per_batch(pred_str, batch["label_str"])
+                # pred_str = get_str(processor, outputs.logits)
+                # wer, cer = get_wer_cer_per_batch(generated_text, batch["label_str"])
                 # if text_output:
                 #     write_predictions_to_file(pred_str, batch["label_str"], text_output_path)
                 val_wer_sum += wer
@@ -299,13 +346,22 @@ def train(model, freeze_mode, layers, **kwargs):
                     outputs, charbert_token_repr, charbert_char_repr = model(pixel_values=batch["pixel_values"], decoder_inputs_embeds=batch["label_emb"], 
                                 decoder_attention_mask=batch["attention_mask"], labels=batch["labels"],
                                 start_ids=batch["start_ids"], end_ids=batch["end_ids"])
+                    loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
+                    pred_str = get_str(processor, outputs.logits)
+                    pred_str = [filter_string(i) for i in pred_str]
+                    label_str = [filter_string(i) for i in batch["label_str"]]
+                    wer, cer = get_wer_cer_per_batch(pred_str, label_str)
+                    # wer, cer = get_wer_cer_per_batch(pred_str, batch["label_str"])
                 # outputs = model(pixel_values=batch["pixel_values"], 
                 #             decoder_inputs_embeds=batch["label_emb"], 
                 #             decoder_attention_mask=batch["attention_mask"], labels=batch["labels"])
                 elif model_name=="trocr":
                     outputs = model(pixel_values=batch["pixel_values"], 
                                 decoder_input_ids=batch["test_decoder_input_ids"], labels=batch["labels"])
-                loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
+                    generated_ids = model.generate(batch["pixel_values"])
+                    generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)
+                    loss = outputs.loss
+                    wer, cer = get_wer_cer_per_batch(generated_text, batch["label_str"])
                 # loss_2 = 1 - F.cosine_similarity(charbert_token_repr, charbert_token_label).mean()
                 # loss_3 = 1 - F.cosine_similarity(charbert_char_repr, charbert_char_label).mean()
                 # print(loss_1)
@@ -314,8 +370,7 @@ def train(model, freeze_mode, layers, **kwargs):
                 # loss = loss_1/4 + loss_2 + loss_3
                 # print("val loss: ", loss)
                 test_loss += loss.detach()
-                pred_str = get_str(processor, outputs.logits)
-                wer, cer = get_wer_cer_per_batch(pred_str, batch["label_str"])
+                # pred_str = get_str(processor, outputs.logits)
                 if text_output:
                     write_predictions_to_file(pred_str, batch["label_str"], text_output_path)
                 test_wer_sum += wer

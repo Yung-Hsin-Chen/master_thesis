@@ -22,6 +22,15 @@ def get_str(processor, logits):
     pred_str = processor.batch_decode(pred_ids, skip_special_tokens=True)
     return pred_str
 
+def filter_string(input_string):
+    # Define the allowed characters: 26 lowercase letters, 10 digits, and space
+    allowed_chars = set('abcdefghijklmnopqrstuvwxyz0123456789 ')
+    
+    # Filter the string to include only characters in the allowed set
+    filtered_string = ''.join(char for char in input_string.lower() if char in allowed_chars)
+    
+    return filtered_string
+
 def eval(model, **kwargs):
     language = kwargs.get("language", "English")
     log_file_path = kwargs["log_file_path"]
@@ -61,8 +70,7 @@ def eval(model, **kwargs):
             # print(batch["input_ids"])
             if model_name=="trocr":
                 generated_ids = model.generate(pixel_values=batch["pixel_values"])
-                generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-                # print(generated_text)
+                generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)
             if model_name=="seq_models":
                 print("label: ", batch["label_str"])
                 # print("input_ids", batch["input_ids"])
@@ -73,12 +81,15 @@ def eval(model, **kwargs):
                 # print(predictions)
                 # print("label: \n", batch["label_str"])
                 generated_text = charbert_args.tokenizer.decode(predictions)
-                print("generated text: \n", generated_text)
             # print(generated_text)
-            wer, cer = get_wer_cer_per_batch([generated_text], batch["label_str"])
+            generate_text = [filter_string(i) for i in generated_text]
+            label_text = [filter_string(i) for i in batch["label_str"]]
+            # print("\nGenerated_Text: ", generated_text)
+            # print("Label_Text: ", label_text)
+            wer, cer = get_wer_cer_per_batch(generate_text, label_text)
             # print(cer)
             if text_output:
-                write_predictions_to_file([generated_text], batch["label_str"], text_output_path)
+                write_predictions_to_file(generate_text, label_text, text_output_path)
             test_wer_sum += wer
             test_cer_sum += cer
         # print("test: ", test_samples)
