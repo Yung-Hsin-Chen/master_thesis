@@ -1,12 +1,9 @@
-# TrOCR meets CharBERT - On-Going
-
-## Table of Contents
+## TrOCR meets CharBERT - On-Going
 - [TrOCR meets CharBERT - On-Going](#trocr-meets-charbert---on-going)
-  - [Table of Contents](#table-of-contents)
-  - [Data](#data)
-  - [Get Report](#get-report)
-  - [Run Source Codes](#run-source-codes)
-  - [Folder Structure](#folder-structure)
+- [Data](#data)
+- [Get Report](#get-report)
+- [Run Source Codes](#run-source-codes)
+- [Folder Structure](#folder-structure)
 
 ## Data
 Data used in the project can be downloaded online.
