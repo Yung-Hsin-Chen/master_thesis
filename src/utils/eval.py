@@ -10,6 +10,7 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import os
 from config.config_paths import RESULTS
+from torch.cuda.amp import autocast
 
 import config.model_config as cfg
 charbert_args = cfg.charbert_dataset_args
@@ -69,7 +70,9 @@ def eval(model, **kwargs):
             # print(batch["char_input_ids"][:, :5])
             # print(batch["input_ids"])
             if model_name=="trocr":
-                generated_ids = model.generate(pixel_values=batch["pixel_values"])
+                with autocast():
+                    generated_ids = model.generate(batch["pixel_values"], num_beams=10, early_stopping=True)
+                # generated_ids = model.generate(pixel_values=batch["pixel_values"])
                 generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)
             if model_name=="seq_models":
                 print("label: ", batch["label_str"])
@@ -82,11 +85,11 @@ def eval(model, **kwargs):
                 # print("label: \n", batch["label_str"])
                 generated_text = charbert_args.tokenizer.decode(predictions)
             # print(generated_text)
-            generate_text = [filter_string(i) for i in generated_text]
-            label_text = [filter_string(i) for i in batch["label_str"]]
+            generate_text = [i for i in generated_text]
+            label_text = [i for i in batch["label_str"]]
             # print("\nGenerated_Text: ", generated_text)
             # print("Label_Text: ", label_text)
-            wer, cer = get_wer_cer_per_batch(generate_text, label_text)
+            wer, cer = get_wer_cer_per_batch(generate_text, batch["label_str"])
             # print(cer)
             if text_output:
                 write_predictions_to_file(generate_text, label_text, text_output_path)

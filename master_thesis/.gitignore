@@ -1,0 +1,46 @@
+# Report
+*.aux
+*.bbl
+*.blg
+*.glo
+*.idx
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.fls
+*.ilg
+*.ind
+*.fdb_latexmk
+*.synctex.gz
+*.egg-info/
+*.pth
+
+# Data
+data/raw/GW/ground_truth/
+data/raw/GW/line_image/
+data/raw/GW/cv/
+data/raw/IAM/ground_truth/
+data/raw/IAM/line_image/
+data/raw/ICFHR_2016/
+data/raw/Bullinger/
+data/raw/IAM/split/
+data/wiki/
+
+# Ignore Pipenv and Poetry lock files
+Pipfile.lock
+poetry.lock
+Pipfile
+
+# Others
+*.DS_Store
+.pytest_cache
+config/__pycache__/
+__pycache__/
+.vscode
+results/gpt4/
+results/charbert_small/
+results/p_ij
+models/charbert/
+models/charbert_small

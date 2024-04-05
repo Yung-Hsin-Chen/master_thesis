@@ -82,7 +82,7 @@ def main(**kwargs):
                             "fine_tuned": fine_tuned}
             val_wer_score, val_cer_score = model_dict[mode][model](**arguments)
         if mode=="eval":
-            test_loader = data_loaders["cv1"]["val"]
+            test_loader = data_loaders["cv1"]["test"]
             arguments = {"experiment_version": experiment_version, "test_loader": test_loader, 
                             "device": device, "data": data, "model_name": model, "fine_tuned": fine_tuned}
             val_wer_score, val_cer_score = model_dict[mode][model](**arguments)
@@ -98,9 +98,9 @@ if __name__=="__main__":
         "mode": "eval", # eval/train
         "freeze_mode": "freeze", # freeze/not_freeze
         # "layers": ["encoder.pooler", "encoder.layernorm", "encoder.encoder.layer.23"],
-        "layers": [],
+        "layers": ["encoder", "decoder"],
         # "layers": [],
         "model": "trocr", # trocr/trocr_charbert/trocr_charbert_small
-        "data": "gw" # gw/iam
+        "data": "iam" # gw/iam
     }
     main(**keys)

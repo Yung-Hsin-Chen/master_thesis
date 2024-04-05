@@ -48,31 +48,31 @@ Lastly, fine-tuning allows the model to adapt to the specific characteristics an
 %%                           Model Training and Evaluation Criteria                           %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Composite Model Training and Evaluation Criteria}
-\label{sec:3_model_training_and_evaluation_criteria}
+\label{sec:4_model_training_and_evaluation_criteria}
 In this section, we will be exploring the training and evaluation process of the composite model. Details including optimiser, loss function, hyperparameters, and the challenges encountered training deep models and how to mitigate it will also be discussed.
 
 In this section, we delve into the training and evaluation process for the composite model. The section will cover key aspects such as the choice of optimizer, the loss function employed, and the hyperparameters set for the training. Additionally, the challenges commonly faced when training deep learning models, and insights into strategies and solutions to mitigate these issues will also be discussed.
 \subsection{Training Details}
-\label{subsec:3_training_details}
+\label{subsec:4_training_details}
 % optimiser, loss function, hyperparameters, utilisation of GPU resources
 When training deep learning models, the selection of optimisation, loss computation techniques, and the hyperparameters settings play a crucial role in the effeiciency and effectiveness of the training process. In this study, we use Adam as the optimiser and cross-entropy for loss computation.
 
 \paragraph*{Optimiser}
-\label{par:3_Optimiser}
+\label{par:4_Optimiser}
 Utilising Adam as the optimiser provides a sophisticated approach by adopting an adaptive learning rate, which is particularly adept at managing sparse gradients tasks such as NLP problems. Besides, due to its efficient computation of adaptive learning rates, Adam often leads to faster convergence on training data. This can significantly reduce the time and computational resources needed to train deep models, making the process more efficient.
 
 For the training of the composite model, the learning rate has been meticulously set to $1\mathrm{e}{-5}$. This settingn ensures a controlled and gradual adaptation of the model parameters, facilitating a smooth convergence towards the local minima. Additionally, a weight decay parameter of $1\mathrm{e}{-5}$ is employed to enhance the model's ability to navigate the optimization landscape efficiently. This careful calibration prevents the optimizer from overshooting the local minima, thereby promoting stability in the training process and improving the model's overall performance.
 
 \paragraph*{Loss Function}
-\label{par:3_loss_function}
+\label{par:4_loss_function}
 OCR tasks involves predicting the probability distribution of possible characters for a given input image. It is a multi-class classification problem, with each character representing a unique class. Cross-entropy loss is naturally suited for multi-class settings. This makes it directly applicable to the task of classifying images into characters. In addition, unlike other loss functions that might focus solely on the accuracy of the classification, cross-entropy loss encourages the model not just to predict the correct class but to do so with high confidence. High-confidence wrong predictions are penalised more, encouraging the model to be cautious about making predictions when unsure, which is often the case with less frequent characters.
 \subsection{Training Challenges and Solutions}
-\label{subsec:3_training_challenges_and_solutions}
+\label{subsec:4_training_challenges_and_solutions}
 % overfitting (dropout), underfitting, learning rate, gradient vanishing/exploding, converge faster (norm), transfer learning
 Training deep learning models involves navigating a series of common challenges that can significantly impact their performance and effectiveness. Common challenges include overfitting, vanishing/exploding gradients, high computational costs, and data quantity. The following discussion will delve into these challenges and the strategies used in this study to mitigate them.
 
 \paragraph*{Overfitting}
-\label{par:3_overfitting}
+\label{par:4_overfitting}
 Overfitting occurs when a model learns the training data too well, capturing noisein the training set instead of learning the underlying patterns, which results in poor generalisation to new, unseen data. Deep learning models, by their very nature, have a large number of parameters, allowing them to model intricate patterns and relationships in the data. However, it also means they have the capacity to memorise irrelevant details in the training data, leading to overfitting. Lack of regularisation techniques, or poorly chosen learning rate and batch size can easily lead to overfitting. 
 
 To mitigate overfitting, we implemented dropout layers between both linear and convolutional layers within the composite model architecture. Dropout serves as a form of regularization that, by temporarily dropping out units from the network, prevents the model from becoming overly dependent on any single element of the training data, thereby enhancing its generalization capabilities.
@@ -80,7 +80,7 @@ To mitigate overfitting, we implemented dropout layers between both linear and c
 Additionally, we explored the impact of batch size on model training. Smaller batch sizes result in more noise during the gradient updates, which can have a regularizing effect. However, very small batch sizes can lead to extremely noisy gradient estimates, which might make training unstable or lead to convergence on suboptimal solutions. Through iterative testing, we determined that a batch size of 8 strikes an optimal balance, offering sufficient regularization to mitigate overfitting while maintaining stable and effective training dynamics.
 
 \paragraph*{Vanishing/Exploding Gradients}
-\label{par:3_vanishing_exploding_gradients}
+\label{par:4_vanishing_exploding_gradients}
 Training deep models often encounters exploding or vanishing gradient problems due to their complex architectures and the long chains of computations involved. If the gradients are large (greater than 1), they can exponentially increase as they propagate back through the layers, leading to exploding gradients. Conversely, if the gradients are small (less than 1), they can exponentially decrease, leading to vanishing gradients. 
 
 Certain activation functions, like the sigmoid or tanh, squish a large input space into a small output range in a non-linear fashion. For inputs with large magnitudes, the gradients can be extremely small, leading to vanishing gradients. In addition, improper initialization of weights can exacerbate the exploding or vanishing gradient problems. For instance, large initial weights can lead to exploding gradients, while small initial weights can contribute to vanishing gradients.
@@ -88,15 +88,15 @@ Certain activation functions, like the sigmoid or tanh, squish a large input spa
 To mitigate the vanishing/exploding gradients, we deploy strategies such as Xavier initialisation, Leaky ReLU activation function, gradient clipping, residual connection and batch normalisation in the composite model architecture. The details of residual connection and batch normalisation\CHECK{Make sure they are mentioned} is discussed in \hyperref[subsec:3_composite_model]{Composite Model}.
 
 \paragraph*{High Computational Costs}
-\label{par:3_high_computational_costs}
+\label{par:4_high_computational_costs}
 Deep models, especially those with many layers and parameters, require significant computational resources and time to train. Hardware accelerators like GPUs can reduce training times. In this study, a single A100 GPU, equipped with 80GB of RAM, was utilized to accelerate the training process. When applied to the GW dataset and the IAM dataset, the training durations were approximately 2 minutes per epoch and 30 minutes per epoch, respectively.
 
 \paragraph*{Data Quantity}
-\label{par:3_data_quantity}
+\label{par:4_data_quantity}
 Deep models typically require large datasets to effectively learn and generalize due to their complex architectures and the vast number of parameters they contain. Training these models from scratch on limited data often leads to overfitting. To mitigate this issue, we employ transfer learning. In this study, we take pre-trained CharBERT and TrOCR model, which are developed on large and comprehensive datasets, and adapt it to our specific task. 
 
 \subsection{Evaluation}
-\label{subsec:3_evaluation}
+\label{subsec:4_evaluation}
 The validation set serves the purpose of hyperparameter tuning and model selection. Meanwhile, the testing set is reserved for the final evaluation. For the GW dataset, we employ a 4-fold cross-validation approach. This method divides the dataset into four equally sized segments, using each in turn for testing while the remaining three serve as the training set. The final results for the GW dataset represent the average performance across these four folds.
 
 In this study, we focus on word error rate (WER) and character error rate (CER) as our primary evaluation metrics. These metrics are critical for assessing the model's accuracy in recognizing and reproducing text, providing the model's performance in terms of both word-level and character-level precision.
@@ -104,7 +104,7 @@ In this study, we focus on word error rate (WER) and character error rate (CER) 
 %%                          CharBERT Training and Evaluation Criteria                         %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{CharBERT$_{\text{SMALL}}$ Training and Evaluation Criteria}
-\label{sec:3_charbert_training_and_evaluation_criteria}
+\label{sec:4_charbert_training_and_evaluation_criteria}
 The training and evaluation of CharBERT$_{\text{SMALL}}$ adhere closely to the methodology outlined by the original authors. The model is trained using the pre-training objectives, i.e., MLM and NLM, over the large text corpus. The training involves backpropagation and optimisation of weights to minimize the prediction error for both MLM and NLM tasks. While adhering to the \href{https://github.com/mawentao277/CharBERT/blob/main/shell/mlm.sh}{hyperparameters recommended by the original authors}, we have adjusted the batch size to 16, up from the suggested size of 4, to accelerate the computation process. The training was executed on five A100 GPUs, each equipped with 80GB of RAM, and was completed over the course of six days, encompassing five training epochs. 
 
 \TODO{Finish this}The results is evaluated
@@ -124,6 +124,9 @@ Dropout is a regularization technique used to prevent overfitting in neural netw
 \subsection{Comparing Combined Tensor Modules}
 \label{subsec:4_comparing_combined_tensor_modules}
 This involves experimenting with different tensor combination modules within the model. By comparing how different combinations of these modules affect performance, we can understand how the architecture and data flow within the model contribute to its success or limitations.
+\subsection{Comparing Loss Functions}
+\label{subsec:4_comparing_loss_functions}
+Given the involvement of two models in our study, we explored various combinations of loss functions derived from the outputs of both models. This method not only allow us to assess the individual contributions of each model's output to the overall task, but also identify the most effective loss functions for the two models to work together.
 \subsection{Benchmarking Against GPT-4}
 \label{subsec:4_benchmarking_against_gpt-4}
 Benchmarking against a model like GPT-4 provides a high standard for performance and innovation. It allows us to gauge how far your model has come in terms of understanding and generating text compared to leading models in the field. This comparison can highlight the strengths and weaknesses of our approach, offering insights into what components or features are contributing most to its performance. 

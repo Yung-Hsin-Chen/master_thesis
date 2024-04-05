@@ -19,6 +19,10 @@ def get_wer_cer_per_batch(targets, labels):
     # targets = [convert_string(s) for s in targets]
     # labels = [convert_string(s) for s in labels]
     for t,l in zip(targets, labels):
+        if not t:
+            wer_score += 1
+            cer_score += 1
+            return wer_score, cer_score
         # print("OUTPUT: ", t)
         # print("LABEL: ", l)
         wer_score += jiwer.wer(t, l)

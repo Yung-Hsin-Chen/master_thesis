@@ -7,11 +7,48 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Metric}
 \label{sec:5_metric}
+The metrices used in this study are character error rate (CER) and word error rate (WER). They are two metrics commonly used to evaluate the performance of systems in tasks related to OCR. Both metrics measure how accurately the system transcribes or recognises text compared to the ground truth transcription. While WER operates on the character level, WER evaluates the accuracy at the word level.
+
+The main difference between CER and WER is their granularity. CER is more fine-grained, making it more useful for evaluating tasks where character-level accuracy is crucial, such as OCR. On the other hand, WER is more suitable when inaccuracies at the word level significantly influence the interpretability of the transcribed text, such as speech recognition tasks.
+
+The other difference between CER and WER is the sensitivity to errors. CER can be more sensitive to minor errors. In situations where altering a single character can drastically change a word's meaning, this sensitivity is crucial for assessing the system's performance accurately. For instance, changing "hat" to "hot" by substituting "a" with "o" changes the meaning completely. CER is good at capturing these subtle but critical errors, making it indispensable for tasks requiring high character-level precision. On the other hand, WER is more about capturing the errors affecting the listener's or reader's ability to understand the intended message at the word level. An illustratice example of this is the digitisation of a restaurant menu where the original text, "Chicken with Lemon Sauce" was misinterpreted by the OCR system as "Chicken with Lemon Source". This resulted in a WER of 20\%. Although this single-word error does not significantly diminish the readability of the item, it introduces a notable semantic error. The term "Sauce" referring to a culinary liquid, while the term "Source" implies origin. This can easily mislead the readers and potentially affecting their understanding of the menu item. Thus, WER highlights how even minor word-level errors can have impacts on the content's semantic integrity.
+
+Despite the differences, both CER and WER are critical for benchmarking the improving models in OCR, speech recognition and similar domains. They help developers identify shortcomings, compare different model architectures and track progress over time.
+
+\subsection{Character Error Rate (CER)}
+\label{subsec:5_cer}
+CER is often expressed as a precentage, representing the proportion of characters that are incorrectly predicted by the system. It is calculated based on the number of character level operations required to transform the system output into the ground truth text. These operations include insertions, deletions and substitutions of characters.
+
+\begin{equation}
+    \text{CER} = \frac{I+D+S}{N}
+\end{equation}
+
+where $I$, $D$ and $S$ are number of insertions, deletions and substitutions needed to match the ground truth respectively.
+
+\subsection{Word Error Rate (CER)}
+\label{subsec:5_wer}
+WER is calculated similarly to CER but at the word level. It also measures the number of insertions, deletions and substititions at the word-level required to change the system's output into the ground truth.
+
+\begin{equation}
+    \text{WER} = \frac{I+D+S}{N}
+\end{equation}
+
+where $I$, $D$ and $S$ are number of insertions, deletions and substitutions needed to match the ground truth respectively.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                           Results                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 \label{sec:5_results}
+\subsection{Freezing Specific Layers}
+\label{subsec:5_freezing_specific_layers}
+\subsection{Integrating Dropout Mechanisms}
+\label{subsec:5_integrating_dropout_mechanisms}
+\subsection{Comparing Combined Tensor Modules}
+\label{subsec:5_comparing_combined_tensor_modules}
+\subsection{Comparing Loss Functions}
+\label{subsec:5_comparing_loss_functions}
+\subsection{Benchmarking Against GPT-4}
+\label{subsec:5_benchmarking_against_gpt-4}
 
 \section{Graphics}
 

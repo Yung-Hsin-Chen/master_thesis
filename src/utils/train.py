@@ -104,7 +104,7 @@ def train(model, freeze_mode, layers, **kwargs):
     my_logger = configure_logging(script_name="MyScript", log_file_path=log_file_path)
     my_logger.info("Training process started.")
     # Load processor and model
-    my_logger.info("Loading %s on %s data.", config_name, language)
+    my_logger.info("Loading %s on %s data.", str(model_name).replace("_", " "), language)
     device_name = "CPU" if device==torch.device("cpu") else "GPU"
     my_logger.info("Training on %s.", device_name)
     # formatted_lr = f"{lr:.15f}".rstrip("0").rstrip(".")
@@ -187,7 +187,8 @@ def train(model, freeze_mode, layers, **kwargs):
             # charbert_output = charbert_model(char_input_ids=batch["char_input_ids"], start_ids=batch["start_ids"], end_ids=batch["end_ids"], input_ids=batch["input_ids"])
             # charbert_token_label = charbert_output[0]
             # charbert_char_label = charbert_output[2]
-            if model_name=="trocr_charbert":
+            # print("\nMODEL NAME: ", model_name)
+            if model_name.startswith("trocr_charbert"):
                 outputs, charbert_token_repr, charbert_char_repr = model(pixel_values=batch["pixel_values"], 
                                 decoder_inputs_embeds=batch["label_emb"], 
                                 decoder_attention_mask=batch["attention_mask"], labels=batch["labels"],
@@ -270,7 +271,7 @@ def train(model, freeze_mode, layers, **kwargs):
                 # charbert_output = charbert_model(char_input_ids=batch["char_input_ids"], start_ids=batch["start_ids"], end_ids=batch["end_ids"], input_ids=batch["input_ids"])
                 # charbert_token_label = charbert_output[0]
                 # charbert_char_label = charbert_output[2]
-                if model_name=="trocr_charbert":
+                if model_name.startswith("trocr_charbert"):
                     outputs, charbert_token_repr, charbert_char_repr = model(pixel_values=batch["pixel_values"], decoder_inputs_embeds=batch["label_emb"], 
                                 decoder_attention_mask=batch["attention_mask"], labels=batch["labels"],
                                 start_ids=batch["start_ids"], end_ids=batch["end_ids"])
@@ -281,9 +282,9 @@ def train(model, freeze_mode, layers, **kwargs):
                     # generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)
                     # print(generated_text)
                     pred_str = get_str(processor, outputs.logits)
-                    pred_str = [filter_string(i) for i in pred_str]
-                    label_str = [filter_string(i) for i in batch["label_str"]]
-                    wer, cer = get_wer_cer_per_batch(pred_str, label_str)
+                    # pred_str = [filter_string(i) for i in pred_str]
+                    # label_str = [filter_string(i) for i in batch["label_str"]]
+                    wer, cer = get_wer_cer_per_batch(pred_str, batch["label_str"])
                     loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
                 elif model_name=="trocr":
                     outputs = model(pixel_values=batch["pixel_values"], 
@@ -342,15 +343,15 @@ def train(model, freeze_mode, layers, **kwargs):
                 # charbert_output = charbert_model(char_input_ids=batch["char_input_ids"], start_ids=batch["start_ids"], end_ids=batch["end_ids"], input_ids=batch["input_ids"])
                 # charbert_token_label = charbert_output[0]
                 # charbert_char_label = charbert_output[2]
-                if model_name=="trocr_charbert":
+                if model_name.startswith("trocr_charbert"):
                     outputs, charbert_token_repr, charbert_char_repr = model(pixel_values=batch["pixel_values"], decoder_inputs_embeds=batch["label_emb"], 
                                 decoder_attention_mask=batch["attention_mask"], labels=batch["labels"],
                                 start_ids=batch["start_ids"], end_ids=batch["end_ids"])
                     loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
                     pred_str = get_str(processor, outputs.logits)
-                    pred_str = [filter_string(i) for i in pred_str]
-                    label_str = [filter_string(i) for i in batch["label_str"]]
-                    wer, cer = get_wer_cer_per_batch(pred_str, label_str)
+                    # pred_str = [filter_string(i) for i in pred_str]
+                    # label_str = [filter_string(i) for i in batch["label_str"]]
+                    wer, cer = get_wer_cer_per_batch(pred_str, batch["label_str"])
                     # wer, cer = get_wer_cer_per_batch(pred_str, batch["label_str"])
                 # outputs = model(pixel_values=batch["pixel_values"], 
                 #             decoder_inputs_embeds=batch["label_emb"], 
