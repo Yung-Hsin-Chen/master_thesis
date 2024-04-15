@@ -2,31 +2,6 @@
 \label{chap:4_experiment}
 This chapter presents a detailed examination of the experimental setup and evaluation criteria in our study. Beginning with the data collection and processing section, we outline the sources and types of data utilised to benchmark the performance of our composite model and the training of CharBERT${_\text{SMALL}}$. This is followed by a discussion on the baseline model, where we compare both the pre-trained and fine-tuned versions of the TrOCR model to establish performance benchmarks. The subsequent sections delve into the training and evaluation criteria for the composite model and CharBERT${_\text{SMALL}}$. They highlights the strategic choices made in terms of optimizers, loss functions, and hyperparameters. In addition, we address common training challenges and our solutions. Finally, the analysis section explores the impact of specific model components and features on overall performance. This comprehensive approach not only enables a deeper understanding of the models' capabilities and limitations but also guides the refinement of OCR technologies for enhanced performance and efficiency.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%                              Data Collection and processing                                %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Data Collection and Processing}
-\label{sec:3_data_collection_and_processing}
-This section is dedicated to detailing the data collection process for OCR task training and CharBERT$_{\text{SMALL}}$ training. We will outline the types and sources of data harnessed for this study, emphasizing the diversity and volume of the datasets to ensure comprehensive learning. Following the data collection overview, we will delve into the processing techniques applied to the collected data.
-\subsection{Data for OCR} 
-\label{subsec:3_data_for_ocr}
-We focus on the performances of handwritten datasets on the composite model. The data used in this study is George Washington (GW) handwritten dataset and IAM handwritten dataset. They serve as a valuable benchmark for developing and evaluating handwriting recognition systems. Note that to ensure comparability with existing studies, this research adheres to the established train-validation-test splits of the GW and IAM datasets. 
-\TODO{Add data downloading link}
-
-The GW dataset is a collection of historical letters and dairies handwritten by George Washington and this secretaries in 1755. The dataset is often used in research focused on recognising historical handwriting, which poses unique challenges due to the use of archaic words and phrases, and the degradation of materials over time.
-
-The IAM dataset is a more comtemporary collection of English handwriting samples. It contains forms written by hundreds of writers, and is thus renowned for its diversity in handwriting styles, the variability of written content. 
-
-While the George Washington Handwritten Dataset provides a niche focus on historical documents, making it ideal for projects related to historical document analysis and preservation, the IAM Handwriting Database offers a broad spectrum of modern handwriting samples, making it suitable for a wide range of handwriting recognition applications. Both datasets have played crucial roles in advancing the field of handwriting recognition. 
-\FIG{Add data sample here}
-\paragraph*{Transcription Ground Truth Processing}
-\label{par:3_transcription_gound_truth_processing}
-The transcription ground truths of the IAM dataset are stored in XML files, where parsing these files is sufficient to retrieve the transcription texts. On the other hand, the transcription ground truths of the GW dataset follow a more complex format. In this dataset, individual characters within words are separated by hyphens ("-"), and words themselves are separated by vertical bars ("\textbar"). Additionally, punctuation marks are represented by special characters, with a specific table detailing the replacements for each punctuation mark. The table for the punctuation replacement can be found in this \href{https://github.com/Yung-Hsin-Chen/master_thesis/blob/src/model/config/punctuation_list.json}{link}. 
-\TODO{Add text example}
-For data processing purposes, we modify the transcription texts from the GW dataset by removing the hyphens, replacing vertical bars and special characters representing punctuations with spaces and their respective punctuation marks. This process ensures that the transcription texts are standardized and easily readable. 
-\subsection{Data for Training CharBERT$_{\text{SMALL}}$}
-\label{subsec:3_data_for_training_charbert}
-In the original study, the authors trained CharBERT using a 12GB dataset from Wikipedia. This training process spanned 5 days, utilizing the computational power of two NVIDIA Tesla V100 GPUs. Given constraints in time and computational resources, our approach involves testing a scaled-down version of CharBERT, which we have designated as CharBERT$_{\text{SMALL}}$. This variant was trained on a significantly smaller dataset, specifically 1.13GB of English Wikipedia data, from which sentences were randomly sampled. This adaptation allows us to evaluate the performance of CharBERT under more restricted conditions, ensuring our experiments are feasible within our available resources.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                       Baseline Model                                       %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Baseline Model}

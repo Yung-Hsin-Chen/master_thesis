@@ -39,17 +39,82 @@ where $I$, $D$ and $S$ are number of insertions, deletions and substitutions nee
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 \label{sec:5_results}
+As outlined in the Analysis section in Chapter Experiment (referenced as \hyperref[sec:4_analysis]{Analysis}), several analytical experiments were conducted. These include comparing the effects of freezing specific layers, integrating dropout mechanisms, evaluating different tensor module combinations, assessing various loss functions, and benchmarking against GPT-4.
+\subsection{Baseline Models}
+\label{subsec:5_baseline_models}
 \subsection{Freezing Specific Layers}
 \label{subsec:5_freezing_specific_layers}
+\begin{tabular}{l|l||r|r}
+    Dataset	& Freeze	& WER	& CER		\\
+    \hline
+    \hline
+    GW		& None		& 16.51	& 9.88	\\
+    GW		& TrOCR encoder		& 23.62	& 12.95	\\
+    GW	& TrOCR decoder	& 16.12	& 8.78	\\
+    GW	& TrOCR encoder, decoder	& 12.37	& 5.36	\\
+    GW	& TrOCR decoder output projection layers	&  &  	\\
+    \hline
+    IAM		& None		& 	& 	\\
+    IAM		& TrOCR encoder		& 	& \\
+    IAM	& TrOCR decoder	& & 	\\
+    IAM	& TrOCR encoder, decoder	& 12.17	& 5.42	\\
+    IAM	& TrOCR decoder output projection layers	&  &  	\\
+    \hline
+    \end{tabular}
 \subsection{Integrating Dropout Mechanisms}
 \label{subsec:5_integrating_dropout_mechanisms}
+\begin{tabular}{l|l||r|r}
+    Dataset	& Dropout Rate	& WER	& CER		\\
+    \hline
+    \hline
+    GW		& -		& 13.27	& 5.90	\\
+    GW		& 0.1		& 12.40 & 5.86	\\
+    GW		& 0.2	& - & -	\\
+    \hline
+    IAM		& -		& 9.81	& 5.79	\\
+    IAM		& 0.1		& 	& 5.42	\\
+    IAM		& 0.2	& - & -	\\
+    \end{tabular}
 \subsection{Comparing Combined Tensor Modules}
 \label{subsec:5_comparing_combined_tensor_modules}
+\begin{tabular}{l|l||r|r}
+    Dataset	& Combined Tensor Modules	& WER	& CER		\\
+    \hline
+    \hline
+    GW		& 1	& 	& 	\\
+    GW		& 2		&  & 	\\
+    GW		& 3	&  & 	\\
+    GW		& 4	&  & 	\\
+    \hline
+    IAM		& 1	& 	& 	\\
+    IAM		& 2		&  & 	\\
+    IAM		& 3	&  & 	\\
+    IAM		& 4	&  & 	\\
+    \end{tabular}
 \subsection{Comparing Loss Functions}
 \label{subsec:5_comparing_loss_functions}
+\begin{tabular}{l|l||r|r}
+    Dataset	& Loss Function	& WER	& CER		\\
+    \hline
+    \hline
+    GW		& 1	& 	& 	\\
+    GW		& 2		&  & 	\\
+    GW		& 3	&  & 	\\
+    \hline
+    IAM		& 1	& 	& 	\\
+    IAM		& 2		&  & 	\\
+    IAM		& 3	&  & 	\\
+    \end{tabular}
 \subsection{Benchmarking Against GPT-4}
 \label{subsec:5_benchmarking_against_gpt-4}
-
+\begin{tabular}{l||r|r}
+    Model	& WER	& CER		\\
+    \hline
+    \hline
+    TrOCR-CharBERT		& 	& 	\\
+    GPT-4 Post Correction	&  & 	\\
+    GPT-4 Image Recognition		&  & 	\\
+    \end{tabular}
 \section{Graphics}
 
 To include a graphic that appears in the list of figures, use the predefined fig command:\\
