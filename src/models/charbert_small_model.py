@@ -10,18 +10,18 @@ from src.models.adapted_charbert import AdaptedRobertaModel
 
 def load_model():
     charbert_config = cfg.charbert_config
-    # model = RobertaForMaskedLM(config=charbert_config)
+    model = RobertaForMaskedLM(config=charbert_config)
     # model = AdaptedRobertaModel.from_pretrained(charbert_args.model_name_or_path,
     #                                     from_tf=False,
     #                                     config=cfg.charbert_config,
     #                                     cache_dir=None)
-    model = AdaptedRobertaModel(charbert_config)
+    # model = AdaptedRobertaModel(charbert_config)
     return model
 
 def get_fine_tuned_param(experiment_version):
     prefix = "roberta."
     model = load_model()
-    model_path = os.path.join(MODELS, "charbert_small", "checkpoint-8500", "pytorch_model.bin")
+    model_path = os.path.join(MODELS, "charbert_small", "checkpoint-9500", "pytorch_model.bin")
     fine_tuned_weights = torch.load(model_path)
     # print("\nPRETRAINED MODEL PARAM")
     # print(fine_tuned_weights.keys())

@@ -31,6 +31,7 @@ def main(**kwargs):
     layers = kwargs["layers"]
     model = kwargs["model"]
     data = kwargs["data"]
+    text_file = kwargs["text_file"]
 
     if gpu:
         # gpu = "1,2"
@@ -57,13 +58,13 @@ def main(**kwargs):
                 test_loader = data_loaders[cv]["test"]
                 arguments = {"experiment_version": experiment_version, "train_loader": train_loader, 
                             "val_loader": val_loader, "test_loader": test_loader, "device": device, 
-                            "freeze_mode": freeze_mode, "layers": layers, "data": data, "model_name": model,
-                            "fine_tuned": fine_tuned}
+                            "freeze_mode": freeze_mode, "layers": layers, "data": data, "model_name": model
+                            , "text_file": text_file, "fine_tuned": fine_tuned}
                 val_wer_score, val_cer_score = model_dict[mode][model](**arguments)
             if mode=="eval":
                 test_loader = data_loaders[cv]["test"]
                 arguments = {"experiment_version": experiment_version, "test_loader": test_loader, 
-                            "device": device, "data": data, "model_name": model, "fine_tuned": fine_tuned}
+                            "device": device, "data": data, "model_name": model, "text_file": text_file, "fine_tuned": fine_tuned}
                 val_wer_score, val_cer_score = model_dict[mode][model](**arguments)
             wer_list.append(val_wer_score)
             cer_list.append(val_cer_score)
@@ -95,12 +96,13 @@ if __name__=="__main__":
         "experiment_version": "experiment1",
         "gpu": "0",
         "fine_tuned": None,
-        "mode": "eval", # eval/train
+        "mode": "train", # eval/train
         "freeze_mode": "freeze", # freeze/not_freeze
         # "layers": ["encoder.pooler", "encoder.layernorm", "encoder.encoder.layer.23"],
         "layers": ["encoder", "decoder"],
         # "layers": [],
-        "model": "trocr", # trocr/trocr_charbert/trocr_charbert_small
-        "data": "iam" # gw/iam
+        "model": "trocr_charbert", # trocr/trocr_charbert/trocr_charbert_small
+        "data": "gw", # gw/iam
+        "text_file": "gw_encoder_decoder"
     }
     main(**keys)

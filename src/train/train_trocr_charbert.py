@@ -18,7 +18,7 @@ max_epochs = cfg.general["max_epochs"]
 max_target_length = cfg.model["max_target_length"]
 
 # Training
-def train_trocr_charbert(experiment_version: str, train_loader, val_loader, test_loader, device, freeze_mode, layers, data, model_name, fine_tuned=None):
+def train_trocr_charbert(experiment_version: str, train_loader, val_loader, test_loader, device, freeze_mode, layers, data, model_name, text_file, fine_tuned=None):
     # Define model
     if fine_tuned:
         fine_tuned = experiment_version
@@ -50,6 +50,7 @@ def train_trocr_charbert(experiment_version: str, train_loader, val_loader, test
     training_keys["lr"] = cfg.trocr_charbert[experiment_version]["optimizer_keys"]["lr"]
     training_keys["weight_decay"] = cfg.trocr_charbert[experiment_version]["optimizer_keys"]["weight_decay"]
     training_keys["model_name"] = model_name
+    training_keys["text_file"] = text_file
     # with torch.autograd.detect_anomaly():
     val_wer_score, val_cer_score = train(model, freeze_mode, layers, **training_keys)
     return val_wer_score, val_cer_score

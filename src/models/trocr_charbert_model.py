@@ -39,35 +39,50 @@ class TensorTransform(nn.Module):
         self.ffnn3 = nn.Linear(in_features=hid_features_dim2, out_features=out_features_dim)
 
         # Batch Normalization layers for stability
-        self.batch_norm1 = nn.BatchNorm1d(hid_channels_dim1)
-        self.batch_norm2 = nn.BatchNorm1d(hid_channels_dim2)
+        self.batch_norm_cnn1 = nn.BatchNorm1d(hid_channels_dim1)
+        self.batch_norm_cnn2 = nn.BatchNorm1d(hid_channels_dim2)
+        self.batch_norm_cnn3 = nn.BatchNorm1d(out_channels_dim)
+        self.batch_norm_ffnn1 = nn.BatchNorm1d(hid_features_dim1)
+        self.batch_norm_ffnn2 = nn.BatchNorm1d(hid_features_dim2)
 
         self.dropout = nn.Dropout(0.1)
 
         # Initialize weights and biases
         self.init_weights()
 
+        self.out_channels_dim = out_channels_dim
+        self.out_features_dim = out_features_dim
+        self.in_features_dim = in_features_dim
+
     def forward(self, x):
         # Apply first convolution layer
-        x = self.relu(self.conv1(x))
-        x = self.dropout(x)
+        x = self.conv1(x)
+        x = self.batch_norm_cnn1(x)
+        x = self.relu(x)
         # Apply second convolution layer
-        x = self.batch_norm1(x)
-        x = self.relu(self.conv2(x))
-        x = self.dropout(x)
+        x = self.conv2(x)
+        x = self.batch_norm_cnn2(x)
+        x = self.relu(x)
         # Apply third convolution layer
-        x = self.batch_norm2(x)
-        x = self.relu(self.conv3(x))
-        x = self.dropout(x)
+        x = self.conv3(x)
+        x = self.batch_norm_cnn3(x)
+        x = self.relu(x)
+        # Flatten
         # Apply first FFNN layer
-        x = self.relu(self.ffnn1(x))
-        x = self.dropout(x)
+        x = self.ffnn1(x)
+        x = x.transpose(1, 2) 
+        x = self.batch_norm_ffnn1(x)
+        x = self.relu(x)
+        x = x.transpose(1, 2) 
         # Apply second FFNN layer
-        x = self.relu(self.ffnn2(x))
+        x = self.ffnn2(x)
+        x = x.transpose(1, 2) 
+        x = self.batch_norm_ffnn2(x)
+        x = self.relu(x)
+        x = x.transpose(1, 2) 
         x = self.dropout(x)
         # Apply third FFNN layer
         x = self.relu(self.ffnn3(x))
-        x = self.dropout(x)
         return x
 
     def init_weights(self):

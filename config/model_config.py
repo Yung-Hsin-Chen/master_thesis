@@ -46,7 +46,7 @@ general = {
 
 model_config = {
     "roberta_config": "imvladikon/charbert-roberta-wiki",
-    "trocr_config": "microsoft/trocr-small-handwritten",
+    "trocr_config": "microsoft/trocr-large-handwritten",
     "charbert_config": RobertaConfig.from_dict(config_dict),
     "prefix": "charbert."
 }

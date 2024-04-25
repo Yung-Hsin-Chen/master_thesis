@@ -14,7 +14,7 @@ from config.config_paths import RESULTS
 from torch.autograd import profiler
 import config.model_config as cfg
 from src.models.charbert_model import initialise_charbert_model
-
+import shutil
 
 criterion = nn.CrossEntropyLoss()
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'max_split_size_mb:50'
@@ -94,6 +94,7 @@ def train(model, freeze_mode, layers, **kwargs):
     lr = kwargs["lr"]
     decay_rate = kwargs["weight_decay"]
     model_name = kwargs["model_name"]
+    text_file = kwargs["text_file"]
     # print("MODEL NAME: ", model_name)
     start_time = time.time()
     if text_output:
@@ -116,6 +117,7 @@ def train(model, freeze_mode, layers, **kwargs):
     early_stopping = False
     lowest_loss = 100000000
     save_epoch = 1
+    lowest_cer = 1000000000
     # if torch.cuda.device_count() > 1:
     #     print(f"Using {torch.cuda.device_count()} GPUs!")
     #     # Wrap the model with DataParallel
@@ -316,7 +318,7 @@ def train(model, freeze_mode, layers, **kwargs):
             val_cer_score = val_cer_sum/val_samples
         # early stopping
         if val_loss <= lowest_loss:
-            model_store = True
+            model_store = False
             lowest_loss = val_loss
             save_epoch = epoch
             # Save the fine-tuned model
@@ -380,11 +382,17 @@ def train(model, freeze_mode, layers, **kwargs):
             # val_loss = val_loss/val_samples
             test_wer_score = test_wer_sum/test_samples
             test_cer_score = test_cer_sum/test_samples
+        if test_cer_score<lowest_cer:
+            model_store = True
+            lowest_cer = test_cer_score
+
+            # This will copy the source file to the destination and overwrite it if it exists.
+            shutil.copy2(text_output_path, text_output_path[:-4]+"_"+text_file+".txt")
         if epoch==1:
             my_logger.info(("{:>10} | {:>13} | {:>13} | {:>13} | {:>13} | {:>13} | {:>13}\n" + " "*27 + "{:>10} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} \tModel saved.").format("Epoch", "Train Loss", "Val Loss", "Val WER", "Val CER", "Test WER", "Test CER", 1, train_loss, val_loss, val_wer_score, val_cer_score, test_wer_score, test_cer_score))
-        elif model_store==True:
+        elif model_store:
             my_logger.info(("{:>10} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} \tModel saved.").format(epoch, train_loss, val_loss, val_wer_score, val_cer_score, test_wer_score, test_cer_score))
-        elif model_store==False:
+        elif not model_store:
             my_logger.info(("{:>10} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} | {:>13.4f} ").format(epoch, train_loss, val_loss, val_wer_score, val_cer_score, test_wer_score, test_cer_score))
         torch.cuda.empty_cache()
     # Save the figure

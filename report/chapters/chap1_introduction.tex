@@ -4,16 +4,44 @@
 %%                                         Motivation                                         %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Motivation}
+\label{sec:1_motivation}
+Optical Character Recognition (OCR) has become a key tool for digitizing printed documents. While OCR tasks for modern printed materials are typically straightforward, digitizing ancient texts or handwritten documents introduces complex challenges. Inadequate OCR can significantly affect downstream tasks such as text classification, NER, information retrieval, etc, leading to poor data utility. 
+
+\citep{kettunen2022ocr} explores the significant impact of Optical Character Recognition (OCR) \TODO{OCR only}quality on the effectiveness of information retrieval tasks, particularly focusing on historical newspaper collections. Through an experimental setup involving 32 users who evaluated search results from historical newspapers, it was found that improved OCR quality significantly enhances the perceived usefulness of historical newspaper articles. The main findings includes 1) Higher OCR quality led to more favorable relevance assessments, with the average evaluation score for improved OCR results being 7.94\% higher than those obtained with older, lower-quality OCR; 2) Users were more likely to find documents relevant when the underlying text was optically recognized with higher accuracy; 3) As OCR quality improves, it supports more reliable and effective searches, which is crucial for historians, researchers, and the general public engaging with historical databases; 4) Investments in better OCR methods could substantially increase the accessibility and utility of historical text archives.
+
+\citep{nguyen2021survey} also highlights how OCR errors can significantly affect downstream applications such as information retrieval (IR) and various natural language processing (NLP) tasks. OCR inaccuracies can disrupt a wide range of NLP applications including named entity recognition (NER), part-of-speech (POS) tagging, text summarization, and sentiment analysis. For instance, as the word error rate (WER) increases, the performance of NER tools drops significantly, illustrating a rapid decline from high accuracy to substantially lower levels as errors increase. 
+
+
+\citep{ehrmann2023named} outlines several challenges faced by Named Entity Recognition (NER) systems when applied to historical handwritten documents including 1) Noisy Input; 2) Dynamics of Language; 3) Lack of Resources. 
+
+\paragraph*{Noisy Input}
+\label{par:1_noisy_input}
+Texts derived from historical documents often suffer from quality issues due to the condition of the source material and the process of digitization. Optical Character Recognition (OCR) and Handwritten Text Recognition (HTR) systems may introduce errors such as misrecognized characters and tokenization problems, severely impacting the accuracy of downstream tasks. The challenge is compounded by the diverse nature of noise in historical texts, ranging from ink bleeds and paper deterioration to varying typographic conventions over time.
+
+\paragraph*{Dynamics of Language}
+\label{par:1_dynamics_of_language}
+The language used in historical documents can significantly differ from modern language due to evolutionary changes in spelling, grammar, and syntax. NER systems must cope with historical spelling variations, outdated naming conventions, and the historical context of terms, which may vary significantly from their modern counterparts. Such linguistic dynamics pose a substantial challenge to maintaining high accuracy in entity recognition and classification.
+
+\paragraph*{Lack of Resources}
+\label{par:1_lack_of_resources}
+A significant scarcity of annotated corpora, language models, and other NLP resources specifically designed for historical document processing substantially hinders the development and training of models tailored to these texts. Moreover, the resources that do exist often lack standardization, adding further complexity to the development, training, and evaluation of effective models.
+
+Consequently, post-OCR correction has emerged as a crucial approach to overcome these limitations and enhance the accuracy of digitized data. To mitigate these effects, \cite{nguyen2021survey} explore advanced post-OCR correction techniques in their survey, which includes the integration of sophisticated language models and the application of both statistical and neural machine learning models. These methods, which range from manual to semi-automatic and fully automatic approaches, significantly enhance the quality of text. This improvement in text quality is crucial for the reliability of subsequent information retrieval (IR) and natural language processing (NLP) tasks, underscoring the ongoing need for enhancements in post-processing technologies to effectively manage OCR errors.
+
+Several post-OCR correction methods have been applied and shown significant improvements. Most of these methods function sequentially, not in an end-to-end manner. However, \cite{kang2021candidate} suggest that allowing backpropagation to influence both the recognizer and language model concurrently can yield better results than training them separately. 
+
+Therefore, this study aims to evaluate the effectiveness of integrating a recognizer with a language model to not only enhance performance but also enable models trained on modern texts to adjust to ancient English texts.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                     Research Questions                                     %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Research Questions}
+\label{sec:1_research_questions}
 In this study, we aim to investigate and address the following key research questions. 
 \begin{enumerate}
-    \item In the Candidate Fusion paper, they claimed that fusing the recogniser and LM can make the LM adjust to the domain-specific data. Can fusing TrOCR and CharBERT achieve the same conclusion? In other words, can CharBERT adjust to historical texts even it was trained on modern texts?
-    \item In the CharBERT paper, they claimed that, by using the character level information in addition to the subword level information, the problems of incomplete modelling and fragile 
+    \item \textbf{Domain Adaptation Through Model Fusion: }In the Candidate Fusion paper, they claimed that fusing the recogniser and LM can make the LM adjust to the domain-specific data. Can fusing TrOCR and CharBERT achieve the same conclusion? In other words, can CharBERT adjust to historical texts even it was trained on modern texts?
+    \item \textbf{Character-Level Information Enhancement: }In the CharBERT paper, they claimed that, by using the character level information in addition to the subword level information, the problems of incomplete modelling and fragile 
     representation can be solved. However, the results shown in the paper did not show significant performance improvement over RoBERTa (a strong baseline LM model). Is this statement valid? Can TrOCR combined with CharBERT achieve the claim?
-    \item 
-    \item Does TrOCR decoder change its output with the presence of the language model?
+    \item \textbf{Influence of Language Model on Decoder Output: }Does TrOCR decoder change its output with the presence of the language model?
+    \item \textbf{Impact of Training on Common Errors:} After integrating common errors made by TrOCR into the training process of CharBERT, do the results show improvements? 
 \end{enumerate}
 

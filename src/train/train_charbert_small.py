@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class MainArgs:
     def __init__(self):
         # (str) The input training data file (a text file).
-        self.train_data_file = "./data/wiki/fake_train.txt"
+        self.train_data_file = "./data/eme/combined.txt"
         # (str) The output directory where the model predictions and checkpoints will be written.
         self.output_dir = "./results/charbert_small/"
         # (str) An optional input evaluation data file to evaluate the perplexity on (a text file).
@@ -117,8 +117,8 @@ my_args = MainArgs()
 def train_charbert_small():
     parser = argparse.ArgumentParser()
 
-    ## Required parameters
-    parser.add_argument("--train_data_file", default="./data/wiki/fake_train.txt", type=str,
+    ## Required parameterst
+    parser.add_argument("--train_data_file", default="./data/eme/combined.txt", type=str,
                         help="The input training data file (a text file).")
     parser.add_argument("--output_dir", default="./results/charbert_small/", type=str,
                         help="The output directory where the model predictions and checkpoints will be written.")
@@ -154,8 +154,8 @@ def train_charbert_small():
                         help="Optional directory to store the pre-trained models downloaded from s3 (instread of the default one)")
     parser.add_argument("--block_size", default=-1, type=int,
                         help="Optional input sequence length after tokenization."
-                             "The training dataset will be truncated in block of this size for training."
-                             "Default to the model max input length for single sentence inputs (take into account special tokens).")
+                            "The training dataset will be truncated in block of this size for training."
+                            "Default to the model max input length for single sentence inputs (take into account special tokens).")
     parser.add_argument("--do_train", action='store_true',
                         help="Whether to run training.")
     parser.add_argument("--do_eval", action='store_true',

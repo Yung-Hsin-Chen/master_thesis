@@ -16,6 +16,8 @@ import collections
 import copy
 import random
 import nltk
+from torchvision import transforms
+from torchvision.transforms import InterpolationMode
 nltk.download('punkt')
 
 # Extracting the embedding layer from the model
@@ -143,8 +145,18 @@ class CustomDataset(Dataset):
             sample_path = os.path.join(extract_folder, sample_path)
 
         with open(sample_path, "rb") as file:
+            input_size = (384, 384)
+            norm_tfm = transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+            resize_tfm = transforms.Resize(input_size, interpolation=InterpolationMode.BICUBIC)
+
+            # Compose the transforms
+            transform = transforms.Compose([
+                resize_tfm, 
+                transforms.ToTensor(),
+                norm_tfm
+            ])
             sample = Image.open(file).convert("RGB")
-            pixel_values = self.processor(sample, return_tensors="pt").pixel_values
+            pixel_values = transform(sample)
             # not_ones = pixel_values[pixel_values != 1]
 
             # if self.transform:
@@ -152,7 +164,7 @@ class CustomDataset(Dataset):
         # decoder_input_ids = self.processor.tokenizer(self.labels[index], 
         #                                 padding="max_length", 
         #                                 max_length=self.max_target_length).input_ids
-        decoder_input_ids = self.processor.tokenizer(self.labels[index], padding="max_length").input_ids
+        decoder_input_ids = self.processor.tokenizer(self.labels[index], padding="max_length", max_length=512).input_ids
 
         label_tensor = self.get_label_tensor(decoder_input_ids, self.processor.tokenizer.pad_token_id)
         decoder_input_ids = torch.tensor(decoder_input_ids)
