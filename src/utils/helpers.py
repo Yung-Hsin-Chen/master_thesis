@@ -53,7 +53,7 @@ def load_data() -> dict:
     file_path = os.path.join(DATA_PROCESSED, "GW", "ground_truth", "GW_gt.json")
     with open(file_path, "r") as json_file:
         GW_gt = json.load(json_file)
-    file_path = os.path.join(DATA_PROCESSED, "IAM", "ground_truth", "IAM_gt.json")
+    file_path = os.path.join(DATA_PROCESSED, "jh", "ground_truth", "jh_gt.json")
     with open(file_path, "r") as json_file:
         IAM_gt = json.load(json_file)
     file_path = os.path.join(DATA_PROCESSED, "Bullinger", "ground_truth", "bullinger_gt.json")
@@ -66,7 +66,7 @@ def load_data() -> dict:
     file_path = os.path.join(DATA_PROCESSED, "GW", "line_image", "GW_image.json")
     with open(file_path, "r") as json_file:
         GW_image = json.load(json_file)
-    file_path = os.path.join(DATA_PROCESSED, "IAM", "line_image", "IAM_image.json")
+    file_path = os.path.join(DATA_PROCESSED, "jh", "line_image", "jh_image.json")
     with open(file_path, "r") as json_file:
         IAM_image = json.load(json_file)
     file_path = os.path.join(DATA_PROCESSED, "Bullinger", "line_image", "bullinger_image.json")

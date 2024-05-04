@@ -80,12 +80,12 @@ def main(**kwargs):
             arguments = {"experiment_version": experiment_version, "train_loader": train_loader, 
                             "val_loader": val_loader, "test_loader": test_loader, "device": device, 
                             "freeze_mode": freeze_mode, "layers": layers, "data": data, "model_name": model,
-                            "fine_tuned": fine_tuned}
+                            "text_file": text_file, "fine_tuned": fine_tuned}
             val_wer_score, val_cer_score = model_dict[mode][model](**arguments)
         if mode=="eval":
             test_loader = data_loaders["cv1"]["test"]
             arguments = {"experiment_version": experiment_version, "test_loader": test_loader, 
-                            "device": device, "data": data, "model_name": model, "fine_tuned": fine_tuned}
+                            "device": device, "data": data, "model_name": model, "text_file": text_file, "fine_tuned": fine_tuned}
             val_wer_score, val_cer_score = model_dict[mode][model](**arguments)
         print("WER: ", val_wer_score)
         print("CER: ", val_cer_score)
@@ -99,10 +99,10 @@ if __name__=="__main__":
         "mode": "train", # eval/train
         "freeze_mode": "freeze", # freeze/not_freeze
         # "layers": ["encoder.pooler", "encoder.layernorm", "encoder.encoder.layer.23"],
-        "layers": ["encoder", "decoder"],
+        "layers": [],
         # "layers": [],
-        "model": "trocr_charbert", # trocr/trocr_charbert/trocr_charbert_small
+        "model": "trocr", # trocr/trocr_charbert/trocr_charbert_small
         "data": "gw", # gw/iam
-        "text_file": "gw_encoder_decoder"
+        "text_file": "gw_ft"
     }
     main(**keys)

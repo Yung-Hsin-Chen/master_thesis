@@ -38,6 +38,22 @@ def load_GW_gt() -> None:
     store_processed_data("GW_gt", GW_gt, destination_folder)
     return
 
+def load_jh_gt() -> None:
+    """
+    Load, process JH dataset ground truth, and then store the data in data/processed.
+    """
+    data = dict()
+
+    # Reading data with a custom format
+    with open(os.path.join(DATA_RAW, "jh", "transcription.txt"), 'r') as text_file:
+        for line in text_file:
+            key, value = line.strip().split(': ', 1)
+            data[key] = value
+
+    destination_folder = os.path.join(DATA_PROCESSED, "jh", "ground_truth")
+    store_processed_data("jh_gt", data, destination_folder)
+    return
+
 # Load and process IAM data ground truth
 def load_IAM_gt() -> None:
     """
@@ -128,6 +144,8 @@ def process_gt() -> None:
     """
     logger.info("Start processing GW raw ground truth data...")
     load_GW_gt()
+    logger.info("Start processing JH raw ground truth data...")
+    load_jh_gt()
     logger.info("Start processing IAM raw ground truth data...")
     load_IAM_gt()
     logger.info("Start processing Bullinger raw ground truth data...")
@@ -137,5 +155,6 @@ def process_gt() -> None:
     logger.info("All ground truth data processed and is stored in data/processed/.")
     return
 
-# if __name__=="__main__":
-#     process_gt()
+if __name__=="__main__":
+    # process_gt()
+    load_jh_gt()

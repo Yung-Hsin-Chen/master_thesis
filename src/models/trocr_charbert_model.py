@@ -59,28 +59,32 @@ class TensorTransform(nn.Module):
         x = self.conv1(x)
         x = self.batch_norm_cnn1(x)
         x = self.relu(x)
+        x = self.dropout(x)
         # Apply second convolution layer
         x = self.conv2(x)
         x = self.batch_norm_cnn2(x)
         x = self.relu(x)
+        x = self.dropout(x)
         # Apply third convolution layer
         x = self.conv3(x)
         x = self.batch_norm_cnn3(x)
         x = self.relu(x)
+        x = self.dropout(x)
         # Flatten
         # Apply first FFNN layer
         x = self.ffnn1(x)
         x = x.transpose(1, 2) 
         x = self.batch_norm_ffnn1(x)
         x = self.relu(x)
+        x = self.dropout(x)
         x = x.transpose(1, 2) 
         # Apply second FFNN layer
         x = self.ffnn2(x)
         x = x.transpose(1, 2) 
         x = self.batch_norm_ffnn2(x)
         x = self.relu(x)
-        x = x.transpose(1, 2) 
         x = self.dropout(x)
+        x = x.transpose(1, 2) 
         # Apply third FFNN layer
         x = self.relu(self.ffnn3(x))
         return x
@@ -94,56 +98,56 @@ class TensorTransform(nn.Module):
             elif isinstance(m, nn.BatchNorm1d):
                 init.ones_(m.weight)
                 init.zeros_(m.bias)
-"""
-class EmbeddingCombiner(nn.Module):
-    def __init__(self, input_channels=1024, intermediate_channels_1=512, intermediate_channels_2=256, output_channels=1, num_models=3, seq_len=512):
-        super(EmbeddingCombiner, self).__init__()
-        self.num_models = num_models
-        # Apply a Conv1d to reduce embedding dimension from 1024 to 1
-        # The convolution is applied independently for each model's output
-        # self.conv1d = nn.Conv1d(in_channels=input_channels,
-        #                         out_channels=output_channels,
-        #                         kernel_size=3, stride=1, padding=1)
-        self.conv1d_1 = nn.Conv1d(in_channels=input_channels,
-                                out_channels=intermediate_channels_1,
-                                kernel_size=3, stride=1, padding=1)
-        self.conv1d_2 = nn.Conv1d(in_channels=intermediate_channels_1,
-                                out_channels=intermediate_channels_2,
-                                kernel_size=3, stride=1, padding=1)
-        self.conv1d_3 = nn.Conv1d(in_channels=intermediate_channels_2,
-                                out_channels=output_channels,
-                                kernel_size=3, stride=1, padding=1)
-        self.seq_len = seq_len
-        self.relu = nn.LeakyReLU(0.1)
+
+# class EmbeddingCombiner4(nn.Module):
+#     def __init__(self, input_channels=1024, intermediate_channels_1=512, intermediate_channels_2=256, output_channels=1, num_models=3, seq_len=512):
+#         super(EmbeddingCombiner4, self).__init__()
+#         self.num_models = num_models
+#         # Apply a Conv1d to reduce embedding dimension from 1024 to 1
+#         # The convolution is applied independently for each model's output
+#         # self.conv1d = nn.Conv1d(in_channels=input_channels,
+#         #                         out_channels=output_channels,
+#         #                         kernel_size=3, stride=1, padding=1)
+#         self.conv1d_1 = nn.Conv1d(in_channels=input_channels,
+#                                 out_channels=intermediate_channels_1,
+#                                 kernel_size=3, stride=1, padding=1)
+#         self.conv1d_2 = nn.Conv1d(in_channels=intermediate_channels_1,
+#                                 out_channels=intermediate_channels_2,
+#                                 kernel_size=3, stride=1, padding=1)
+#         self.conv1d_3 = nn.Conv1d(in_channels=intermediate_channels_2,
+#                                 out_channels=output_channels,
+#                                 kernel_size=3, stride=1, padding=1)
+#         self.seq_len = seq_len
+#         self.relu = nn.LeakyReLU(0.1)
     
-    def forward(self, embeddings):
-        # x shape: (batch_size, num_models, seq_length, embedding_size)
-        stacked_embeddings = torch.stack(embeddings).transpose(0, 1)
-        batch_size, num_models, seq_length, embedding_size = stacked_embeddings.shape
-        # Process each model's output independently
-        att_weights = torch.zeros(batch_size, num_models, seq_length, device=stacked_embeddings.device)
-        for i in range(self.seq_len):
-            # Extract the embeddings for model i
-            model_embeddings = stacked_embeddings[:, :, i, :]  # Shape: (batch_size, num_models, embedding_size)
-            # Reshape for Conv1d: (batch_size, embedding_size, seq_length)
-            model_embeddings = model_embeddings.transpose(1, 2)
-            # Apply convolution to reduce embedding dimension
-            reduced = self.conv1d_1(model_embeddings)  # Shape: (batch_size, 1, num_models)
-            # print("1: ", reduced.size())
-            reduced = self.relu(reduced)
-            reduced = self.conv1d_2(reduced) 
-            reduced = self.relu(reduced)
-            # print("2: ", reduced.size())
-            reduced = self.conv1d_3(reduced) 
-            reduced = self.relu(reduced)
-            # print("3: ", reduce d.size())
-            # Squeeze and assign to output
-            att_weights[:, :, i] = reduced.squeeze(1) # (batch_size, num_models, seq_length)
-        att_weights = att_weights.unsqueeze(-1)
-        weighted_outputs = stacked_embeddings * att_weights
-        combined = weighted_outputs.sum(dim=1)
-        return combined
-"""
+#     def forward(self, embeddings):
+#         # x shape: (batch_size, num_models, seq_length, embedding_size)
+#         stacked_embeddings = torch.stack(embeddings).transpose(0, 1)
+#         batch_size, num_models, seq_length, embedding_size = stacked_embeddings.shape
+#         # Process each model's output independently
+#         att_weights = torch.zeros(batch_size, num_models, seq_length, device=stacked_embeddings.device)
+#         for i in range(self.seq_len):
+#             # Extract the embeddings for model i
+#             model_embeddings = stacked_embeddings[:, :, i, :]  # Shape: (batch_size, num_models, embedding_size)
+#             # Reshape for Conv1d: (batch_size, embedding_size, seq_length)
+#             model_embeddings = model_embeddings.transpose(1, 2)
+#             # Apply convolution to reduce embedding dimension
+#             reduced = self.conv1d_1(model_embeddings)  # Shape: (batch_size, 1, num_models)
+#             # print("1: ", reduced.size())
+#             reduced = self.relu(reduced)
+#             reduced = self.conv1d_2(reduced) 
+#             reduced = self.relu(reduced)
+#             # print("2: ", reduced.size())
+#             reduced = self.conv1d_3(reduced) 
+#             reduced = self.relu(reduced)
+#             # print("3: ", reduce d.size())
+#             # Squeeze and assign to output
+#             att_weights[:, :, i] = reduced.squeeze(1) # (batch_size, num_models, seq_length)
+#         att_weights = att_weights.unsqueeze(-1)
+#         weighted_outputs = stacked_embeddings * att_weights
+#         combined = weighted_outputs.sum(dim=1)
+#         return combined
+
 
 class EmbeddingCombiner(nn.Module):
     def __init__(self, seq_len=512, emb_size=1024, num_models=3):
@@ -194,6 +198,78 @@ class EmbeddingCombiner(nn.Module):
 
         # Apply weights and sum across models
         combined = (stacked_embeddings * weights.unsqueeze(3)).sum(dim=1)  # shape: (batch_size, seq_len, emb_size)
+
+        return combined
+    
+class EmbeddingCombiner4(nn.Module):
+    def __init__(self, seq_len=512, emb_size=1024, num_models=3):
+        super(EmbeddingCombiner4, self).__init__()
+        self.seq_len = seq_len
+        self.emb_size = emb_size
+        self.num_models = num_models
+        
+        # Attention network
+        self.attention_net = nn.Sequential(
+            nn.Conv1d(in_channels=self.emb_size, out_channels=2048, kernel_size=3, stride=1, padding=1),  # First linear layer
+            nn.LeakyReLU(0.1),                                        # Non-linear activation
+            nn.Conv1d(in_channels=2048, out_channels=512, kernel_size=3, stride=1, padding=1),                              # Second linear layer
+            nn.LeakyReLU(0.1),                                        # Another non-linear activation
+            nn.Conv1d(in_channels=512, out_channels=self.num_models, kernel_size=3, stride=1, padding=1),                  # Final layer to output attention weights
+            nn.LeakyReLU(0.1)
+        )
+
+    def forward(self, embeddings):
+        # embeddings: list of tensors of shape (batch_size, seq_len, emb_size)
+        # Stack and transpose to (batch_size, num_models, seq_len, emb_size)
+        stacked_embeddings = torch.stack(embeddings).transpose(0, 1)
+        # att_weights = stacked_embeddings.mean(dim=3) # (8, 3, 512)
+        # # att_weights = word_embeddings.unsqueeze(2) # (8, 3, 1)
+        # att_weights = att_weights.unsqueeze(-1)
+        # weighted_outputs = stacked_embeddings * att_weights
+        # combined = weighted_outputs.sum(dim=1)
+
+        # Apply attention network to each word in the sequence
+        weights = []
+        for i in range(self.seq_len):
+            # Extract i-th word embeddings across all models
+            word_embeddings = stacked_embeddings[:, :, i, :].transpose(1, 2)   # shape: (batch_size, emb_size, num_models)
+            # print("word_embeddings: ", word_embeddings.size()) # (8, 3, 1024)
+            # word_embeddings = word_embeddings.mean(dim=2)  # Mean pooling # (8, 3)
+            # print("word_embeddings: ", word_embeddings.size())
+
+            # Compute attention weights
+            word_embeddings = self.attention_net(word_embeddings).transpose(1, 2)
+            word_embeddings = word_embeddings.mean(dim=2)
+            # print("word_embeddings: ", word_embeddings.size())
+            att_weights = F.softmax(word_embeddings, dim=1)  # shape: (batch_size, num_models)
+            # print("att_weights: ", att_weights.size())
+            weights.append(att_weights.unsqueeze(2))
+
+        # Concatenate weights for all words
+        weights = torch.cat(weights, dim=2)  # shape: (batch_size, num_models, seq_len)
+
+        # Apply weights and sum across models
+        combined = (stacked_embeddings * weights.unsqueeze(3)).sum(dim=1)  # shape: (batch_size, seq_len, emb_size)
+
+        return combined
+    
+class EmbeddingCombiner2(nn.Module):
+    def __init__(self, seq_len=512, emb_size=1024, num_models=3):
+        super(EmbeddingCombiner2, self).__init__()
+        self.seq_len = seq_len
+        self.emb_size = emb_size
+        self.num_models = num_models
+        
+
+    def forward(self, embeddings):
+        # embeddings: list of tensors of shape (batch_size, seq_len, emb_size)
+        # Stack and transpose to (batch_size, num_models, seq_len, emb_size)
+        stacked_embeddings = torch.stack(embeddings).transpose(0, 1)
+        att_weights = stacked_embeddings.mean(dim=3) # (8, 3, 512)
+        # att_weights = word_embeddings.unsqueeze(2) # (8, 3, 1)
+        att_weights = att_weights.unsqueeze(-1)
+        weighted_outputs = stacked_embeddings * att_weights
+        combined = weighted_outputs.sum(dim=1)
 
         return combined
 

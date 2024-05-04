@@ -18,106 +18,106 @@ MODEL_CLASSES = {
 
 logger = logging.getLogger(__name__)
 
-class MainArgs:
-    def __init__(self):
-        # (str) The input training data file (a text file).
-        self.train_data_file = "./data/eme/combined.txt"
-        # (str) The output directory where the model predictions and checkpoints will be written.
-        self.output_dir = "./results/charbert_small/"
-        # (str) An optional input evaluation data file to evaluate the perplexity on (a text file).
-        self.eval_data_file = "./data/wiki/fake_val.txt"
-        # (str) Char vocab for charBert.
-        self.char_vocab = "./src/models/charbert/data/dict/roberta_char_vocab"
-        # (str) Term vocab for charBert.
-        self.term_vocab = "./src/models/charbert/data/dict/term_vocab"
-        # (str) The model architecture to be fine-tuned.
-        self.model_type = "roberta"
-        # (str) The model checkpoint for weights initialization.
-        self.model_name_or_path = "roberta-base"
-        # (bool) Train with masked-language modeling loss instead of language modeling.
-        self.mlm = True
-        # (float) Ratio of tokens to mask for masked language modeling loss.
-        self.mlm_probability = 0.10
-        # (float) Ratio of tokens to mask for masked language modeling loss.
-        self.adv_probability = 0.10
-        # (str) Optional pretrained config name or path if not the same as model_name_or_path.
-        self.config_name = ""
-        # (str) Training data version for cached file.
-        self.data_version = ""
-        # (str) Optional pretrained tokenizer name or path if not the same as model_name_or_path.
-        self.tokenizer_name = ""
-        # (str) Optional directory to store the pre-trained models downloaded from s3 (instead of the default one).
-        self.cache_dir = ""
-        # (int) Optional input sequence length after tokenization.
-        self.block_size = -1
-        # (bool) Whether to run training.
-        self.do_train = True
-        # (bool) Whether to run eval on the dev set.
-        self.do_eval = True
-        # (bool) Whether to output the debug information.
-        self.output_debug = False
-        # (bool) Run evaluation during training at each logging step.
-        self.evaluate_during_training = False
-        # (bool) Set this flag if you are using an uncased model.
-        self.do_lower_case = False
-        # (int) Max number of char for each word.
-        self.char_maxlen_for_word = 6
-        # (int) Batch size per GPU/CPU for training.
-        self.per_gpu_train_batch_size = 32
-        # (int) Batch size per GPU/CPU for evaluation.
-        self.per_gpu_eval_batch_size = 32
-        # (int) Number of updates steps to accumulate before performing a backward/update pass.
-        self.gradient_accumulation_steps = 1
-        # (float) The initial learning rate for Adam.
-        self.learning_rate = 5e-5
-        # (float) Weight decay if we apply some.
-        self.weight_decay = 0.0
-        # (float) Epsilon for Adam optimizer.
-        self.adam_epsilon = 1e-8
-        # (float) Max gradient norm.
-        self.max_grad_norm = 1.0
-        # (float) Total number of training epochs to perform.
-        self.num_train_epochs = 5.0
-        # (int) If > 0: set total number of training steps to perform. Override num_train_epochs.
-        self.max_steps = -1
-        # (int) Linear warmup over warmup_steps.
-        self.warmup_steps = 0
-        # (int) Log every X updates steps.
-        self.logging_steps = 100
-        # (int) Save checkpoint every X updates steps.
-        self.save_steps = 100
-        # (int) Number of lines when read the input data each time.
-        self.input_nraws = 10000
-        # (int) Limit the total amount of checkpoints, delete the older checkpoints in the output_dir, does not delete by default.
-        self.save_total_limit = None
-        # (bool) Evaluate all checkpoints starting with the same prefix as model_name_or_path ending and ending with step number.
-        self.eval_all_checkpoints = False
-        # (bool) Avoid using CUDA when available.
-        self.no_cuda = False
-        # (bool) Overwrite the content of the output directory.
-        self.overwrite_output_dir = True
-        # (bool) Overwrite the cached training and evaluation sets.
-        self.overwrite_cache = False
-        # (int) Random seed for initialization.
-        self.seed = 42
-        # (bool) Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit.
-        self.fp16 = False
-        # (str) For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3'].
-        self.fp16_opt_level = 'O1'
-        # (int) For distributed training: local_rank.
-        self.local_rank = -1
-        # (str) For distant debugging.
-        self.server_ip = ''
-        # (str) For distant debugging.
-        self.server_port = ''
+# class MainArgs:
+#     def __init__(self):
+#         # (str) The input training data file (a text file).
+#         self.train_data_file = "./data/wiki/fake_train.txt"
+#         # (str) The output directory where the model predictions and checkpoints will be written.
+#         self.output_dir = "./results/charbert_small/"
+#         # (str) An optional input evaluation data file to evaluate the perplexity on (a text file).
+#         self.eval_data_file = "./data/wiki/fake_val.txt"
+#         # (str) Char vocab for charBert.
+#         self.char_vocab = "./src/models/charbert/data/dict/roberta_char_vocab"
+#         # (str) Term vocab for charBert.
+#         self.term_vocab = "./src/models/charbert/data/dict/term_vocab"
+#         # (str) The model architecture to be fine-tuned.
+#         self.model_type = "roberta"
+#         # (str) The model checkpoint for weights initialization.
+#         self.model_name_or_path = "roberta-base"
+#         # (bool) Train with masked-language modeling loss instead of language modeling.
+#         self.mlm = True
+#         # (float) Ratio of tokens to mask for masked language modeling loss.
+#         self.mlm_probability = 0.10
+#         # (float) Ratio of tokens to mask for masked language modeling loss.
+#         self.adv_probability = 0.10
+#         # (str) Optional pretrained config name or path if not the same as model_name_or_path.
+#         self.config_name = ""
+#         # (str) Training data version for cached file.
+#         self.data_version = ""
+#         # (str) Optional pretrained tokenizer name or path if not the same as model_name_or_path.
+#         self.tokenizer_name = ""
+#         # (str) Optional directory to store the pre-trained models downloaded from s3 (instead of the default one).
+#         self.cache_dir = ""
+#         # (int) Optional input sequence length after tokenization.
+#         self.block_size = -1
+#         # (bool) Whether to run training.
+#         self.do_train = True
+#         # (bool) Whether to run eval on the dev set.
+#         self.do_eval = True
+#         # (bool) Whether to output the debug information.
+#         self.output_debug = False
+#         # (bool) Run evaluation during training at each logging step.
+#         self.evaluate_during_training = False
+#         # (bool) Set this flag if you are using an uncased model.
+#         self.do_lower_case = False
+#         # (int) Max number of char for each word.
+#         self.char_maxlen_for_word = 6
+#         # (int) Batch size per GPU/CPU for training.
+#         self.per_gpu_train_batch_size = 32
+#         # (int) Batch size per GPU/CPU for evaluation.
+#         self.per_gpu_eval_batch_size = 32
+#         # (int) Number of updates steps to accumulate before performing a backward/update pass.
+#         self.gradient_accumulation_steps = 1
+#         # (float) The initial learning rate for Adam.
+#         self.learning_rate = 5e-5
+#         # (float) Weight decay if we apply some.
+#         self.weight_decay = 0.0
+#         # (float) Epsilon for Adam optimizer.
+#         self.adam_epsilon = 1e-8
+#         # (float) Max gradient norm.
+#         self.max_grad_norm = 1.0
+#         # (float) Total number of training epochs to perform.
+#         self.num_train_epochs = 5.0
+#         # (int) If > 0: set total number of training steps to perform. Override num_train_epochs.
+#         self.max_steps = -1
+#         # (int) Linear warmup over warmup_steps.
+#         self.warmup_steps = 0
+#         # (int) Log every X updates steps.
+#         self.logging_steps = 100
+#         # (int) Save checkpoint every X updates steps.
+#         self.save_steps = 100
+#         # (int) Number of lines when read the input data each time.
+#         self.input_nraws = 10000
+#         # (int) Limit the total amount of checkpoints, delete the older checkpoints in the output_dir, does not delete by default.
+#         self.save_total_limit = None
+#         # (bool) Evaluate all checkpoints starting with the same prefix as model_name_or_path ending and ending with step number.
+#         self.eval_all_checkpoints = False
+#         # (bool) Avoid using CUDA when available.
+#         self.no_cuda = False
+#         # (bool) Overwrite the content of the output directory.
+#         self.overwrite_output_dir = True
+#         # (bool) Overwrite the cached training and evaluation sets.
+#         self.overwrite_cache = False
+#         # (int) Random seed for initialization.
+#         self.seed = 42
+#         # (bool) Whether to use 16-bit (mixed) precision (through NVIDIA apex) instead of 32-bit.
+#         self.fp16 = False
+#         # (str) For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3'].
+#         self.fp16_opt_level = 'O1'
+#         # (int) For distributed training: local_rank.
+#         self.local_rank = -1
+#         # (str) For distant debugging.
+#         self.server_ip = ''
+#         # (str) For distant debugging.
+#         self.server_port = ''
 
 
-my_args = MainArgs()
+# my_args = MainArgs()
 
 def train_charbert_small():
     parser = argparse.ArgumentParser()
 
-    ## Required parameterst
+    ## Required parameters
     parser.add_argument("--train_data_file", default="./data/eme/combined.txt", type=str,
                         help="The input training data file (a text file).")
     parser.add_argument("--output_dir", default="./results/charbert_small/", type=str,
@@ -127,12 +127,12 @@ def train_charbert_small():
     parser.add_argument("--eval_data_file", default=None, type=str,
                         help="An optional input evaluation data file to evaluate the perplexity on (a text file).")
 
-    parser.add_argument("--char_vocab", default="./data/dict/bert_char_vocab", type=str,
+    parser.add_argument("--char_vocab", default="./src/models/charbert/data/dict/roberta_char_vocab", type=str,
                         help="char vocab for charBert")
-    parser.add_argument("--term_vocab", default="/home/rc/wtma/work2/data/wikipedia/term_vocab", type=str,
+    parser.add_argument("--term_vocab", default="./src/models/charbert/data/dict/term_vocab", type=str,
                         help="term vocab for charBert")
 
-    parser.add_argument("--model_type", default="bert", type=str,
+    parser.add_argument("--model_type", default="roberta", type=str,
                         help="The model architecture to be fine-tuned.")
     parser.add_argument("--model_name_or_path", default="bert-base-cased", type=str,
                         help="The model checkpoint for weights initialization.")
@@ -154,8 +154,8 @@ def train_charbert_small():
                         help="Optional directory to store the pre-trained models downloaded from s3 (instread of the default one)")
     parser.add_argument("--block_size", default=-1, type=int,
                         help="Optional input sequence length after tokenization."
-                            "The training dataset will be truncated in block of this size for training."
-                            "Default to the model max input length for single sentence inputs (take into account special tokens).")
+                             "The training dataset will be truncated in block of this size for training."
+                             "Default to the model max input length for single sentence inputs (take into account special tokens).")
     parser.add_argument("--do_train", action='store_true',
                         help="Whether to run training.")
     parser.add_argument("--do_eval", action='store_true',

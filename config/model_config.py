@@ -1,15 +1,15 @@
 from config.config_paths import RESULTS, MODELS
 import torch
 import os
-from transformers import TrOCRProcessor, RobertaTokenizer
+from transformers import TrOCRProcessor, RobertaTokenizer, AutoTokenizer
 from src.models.charbert.modeling.configuration_roberta import RobertaConfig
 import json
 
 # CharBERT Dataset
 
 tokenizer = RobertaTokenizer.from_pretrained("roberta-base",
-                                                do_lower_case=False,
-                                                cache_dir=None)
+                                        do_lower_case=False,
+                                        cache_dir=None)
 class Args:
     def __init__(self):
         self.model_name_or_path = "roberta-base"

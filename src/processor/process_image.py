@@ -23,6 +23,7 @@ def load_en_image(data_name: str) -> None:
     for file in files:
         images[os.path.splitext(file)[0]] = os.path.join(folder, file)
     destination_folder = os.path.join(DATA_PROCESSED, data_name[:data_name.find("_")], "line_image")
+    print(images)
     store_processed_data(data_name, images, destination_folder)
     return
 
@@ -79,5 +80,6 @@ def process_image() -> None:
     logger.info("All image data processed and is stored in data/processed/.")
     return
 
-# if __name__=="__main__":
-#     process_image()
+if __name__=="__main__":
+    # process_image()
+    load_en_image("GW_image")

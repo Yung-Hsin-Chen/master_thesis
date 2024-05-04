@@ -8,7 +8,7 @@ import os
 from zipfile import ZipFile
 import shutil
 from src.utils.helpers import load_data
-from config.config_paths import DATA_RAW
+from config.config_paths import DATA_RAW, DATA_PROCESSED
 from transformers import VisionEncoderDecoderModel
 import config.model_config as cfg
 import torch.nn.functional as F
@@ -18,6 +18,7 @@ import random
 import nltk
 from torchvision import transforms
 from torchvision.transforms import InterpolationMode
+import json
 nltk.download('punkt')
 
 # Extracting the embedding layer from the model
@@ -129,6 +130,8 @@ class CustomDataset(Dataset):
         sample, label: Tuple
             A tuple containing the data sample and its corresponding label.
         """
+        # print(self.data)
+        # print(index)
         sample_path = self.data[index]
         # sample_path = sample_path.replace(".", "/home/user/yunghsin/master_thesis/master_thesis", 1)
         # print(sample_path)
@@ -535,19 +538,39 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
                 lines = [i.rstrip("\n") for i in lines]
                 one_fold = one_fold + (lines,)
             folds.append(one_fold)
+        # print(folds)
         return folds
-    # Get indices for IAM
+    
     def get_indices_iam():
-        fold = tuple()
-        base_path = os.path.join(DATA_RAW, "IAM", "split")
-        # Open the file in read mode
-        for filename in ["trainset.txt", "validationset1.txt", "testset.txt"]:
-            with open(os.path.join(base_path, filename), "r") as file:
-                lines = file.readlines()
-            lines = [i.rstrip("\n") for i in lines]
-            fold = fold + (lines,)
-        folds = [fold]
-        return folds
+        base_path = os.path.join(DATA_PROCESSED, "jh", "ground_truth", "jh_gt.json")
+        with open(base_path, 'r') as file:
+            data = json.load(file)
+        file_list = list(data.keys())
+        random.shuffle(file_list)
+
+        total_files = len(file_list)
+        train_end = int(total_files * 0.8)
+        val_end = train_end + int(total_files * 0.1)
+
+        train_files = file_list[:train_end]
+        val_files = file_list[train_end:val_end]
+        test_files = file_list[val_end:]
+
+        return [[train_files, val_files, test_files]]
+
+    # # Get indices for IAM
+    # def get_indices_iam():
+    #     fold = tuple()
+    #     base_path = os.path.join(DATA_RAW, "IAM", "split")
+    #     # Open the file in read mode
+    #     for filename in ["trainset.txt", "validationset1.txt", "testset.txt"]:
+    #         with open(os.path.join(base_path, filename), "r") as file:
+    #             lines = file.readlines()
+    #         lines = [i.rstrip("\n") for i in lines]
+    #         fold = fold + (lines,)
+    #     folds = [fold]
+    #     return folds
+    
     # Get indices for Bullinger
     def get_indices_bullinger():
         indices_list = list(image.keys())

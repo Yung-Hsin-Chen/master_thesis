@@ -56,7 +56,12 @@ def record_character_mismatches(matches):
         score = align_score/(len(a1)+len(a2))*2
         if score>0.8:
             # print("SCORE: ", score)
+            # print("\n")
+            # print(a1[1:-1])
+            # print(a2[1:-1])
+            # print("\n")
             alignment = next(aligner.align(a1, a2))
+            print(alignment)
 
             # Convert alignment to string and split into lines for analysis
             alignment_str = str(alignment).split('\n')
@@ -147,16 +152,10 @@ def get_pij(threshold=14, plot=False):
     sorted_misread_dict = dict(sorted_misread_list)
     # print(sorted_misread_dict) 
     """
-    if plot:
-        heatmap(mismatches, threshold)
-    mismatch_prob = get_prob(mismatches)
-    # sorted_misread_list = sorted(mismatch_prob.items(), key=lambda item: item[1])
-    # sorted_misread_dict = dict(sorted_misread_list)
-    # print(sorted_misread_dict)
-    # print(mismatch_prob)
-    mismatch_prob = {k[0]:(k[1], v) for k,v in mismatch_prob.items()}
-    # print(mismatch_prob)
-    return mismatch_prob
+    heatmap(mismatches, threshold)
+    # mismatch_prob = get_prob(mismatches)
+    # mismatch_prob = {k[0]:(k[1], v) for k,v in mismatch_prob.items()}
+    # return mismatch_prob
 
 if __name__=="__main__":
-    get_pij(plot=False)
+    get_pij(plot=True)

@@ -27,6 +27,7 @@ data/raw/ICFHR_2016/
 data/raw/Bullinger/
 data/raw/IAM/split/
 data/wiki/
+data/raw/jh/
 
 # Ignore Pipenv and Poetry lock files
 Pipfile.lock

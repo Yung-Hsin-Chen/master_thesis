@@ -41,10 +41,12 @@ def eval(model, **kwargs):
     config_name = kwargs["config_name"]
     text_output = kwargs.get("text_output", False)
     model_name = kwargs["model_name"]
+    text_file = kwargs["text_file"]
 
     start_time = time.time()
     if text_output:
         text_output_path = log_file_path.replace("log_", "")
+        text_output_path = text_output_path[:-4] + "_" + text_file + ".txt"
     # Configure Logging
     # configure_logging(log_file_path)  
     # logging.getLogger("noisy_library_name").setLevel(logging.WARNING)
