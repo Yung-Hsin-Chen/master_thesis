@@ -1,0 +1,96 @@
+\newchap{Introduction and Motivation}
+\label{chap:1_introduction_and_motivation}
+This thesis explores the integration of Optical Character Recognition (OCR) systems with advanced language models to tackle the significant challenges associated with digitizing and processing historical texts. These texts present unique obstacles due to their varied linguistic features and physical deterioration -- issues that traditional OCR technologies often struggle to manage effectively. By exploring methodologies that combine state-of-the-art (SOTA) OCR technology with robust language models, this research aims to enhance text recognition accuracy, adaptability, and utility. Here, \say{adaptability} specifically refers to the development of methods that allow models trained on contemporary data to adeptly handle early modern English, addressing the scarcity of historical labeling data which typically hampers OCR accuracy.
+
+The subsequent contents delve into the current limitations of existing OCR models, highlighting how enhancements in OCR technology can significantly impact the performance of downstream tasks. This discussion underscores the importance of advancing OCR technology. Such an exploration makes a substantial contribution to the field of digital humanities, offering implications for the preservation of cultural heritage and making historical knowledge more accessible and actionable.
+
+OCR has become a key tool for digitizing printed documents \citep{singh2012survey}. While OCR tasks for modern printed materials are typically straightforward, digitizing ancient texts or handwritten documents introduces complex challenges \citep{neudecker2019ocr}. Inadequate OCR can significantly affect downstream tasks such as text classification, named entity recognition (NER), information retrieval (IR), etc, leading to poor data utility. 
+
+\cite{kettunen2022ocr} explores the significant impact of OCR quality on the effectiveness of IR tasks, particularly focusing on historical newspaper collections. Through an experimental setup involving 32 users who evaluated search results from historical newspapers, it was found that improved OCR quality significantly enhances the perceived usefulness of historical newspaper articles. The main findings includes 1) Higher OCR quality led to more favorable relevance assessments, with the average evaluation score for improved OCR results being 7.94\% higher than those obtained with older, lower-quality OCR; 2) Users were more likely to find documents relevant when the underlying text was optically recognized with higher accuracy; 3) Investments in better OCR methods could substantially increase the accessibility and utility of historical text archives.
+
+\cite{nguyen2021survey} also highlights how OCR errors can significantly affect downstream applications such as IR and various natural language processing (NLP) tasks. OCR inaccuracies can disrupt a wide range of NLP applications including NER, part-of-speech (POS) tagging, text summarization, and sentiment analysis. For instance, as the word error rate (WER) increases, the performance of NER tools drops significantly.
+
+
+\cite{ehrmann2023named} outlines several challenges faced by NER systems when applied to historical handwritten documents including 1) Noisy Input; 2) Dynamics of Language; 3) Lack of Resources. 
+
+\paragraph*{Noisy Input}
+\label{par:1_noisy_input}
+Texts derived from historical documents often suffer from quality issues due to the condition of the source material and the process of digitization. OCR and Handwritten Text Recognition (HTR) systems may introduce errors such as misrecognized characters and tokenization problems, severely impacting the accuracy of downstream tasks. The challenge is compounded by the diverse nature of noise in historical texts, ranging from ink bleeds and paper deterioration to varying typographic conventions over time. 
+
+\cite{kurar2020learning} identify additional categories of noise in historical texts. Below in Figure \ref{fig:2_noise_text}, some examples of noise in historical texts are illustrated. The top row displays images showing heterogeneous character heights, ink smears, and ink bleed-through, from left to right, respectively. The bottom row illustrates challenges such as touching lines and large ascenders and descenders, from left to right.
+
+\fig{images/noise_text.png}{fig:2_noise_text}{These are examples of challenges encountered in the Recent cBAD Dataset for historical handwritten text line detection.\\Image souce: \cite{kurar2020learning}}{13}{Examples of Noisy Historical Texts}
+
+\paragraph*{Dynamics of Language}
+\label{par:1_dynamics_of_language}
+The language used in historical documents can significantly differ from modern language due to evolutionary changes in spelling, grammar, and syntax. NER systems must cope with historical spelling variations, outdated naming conventions, and the historical context of terms, which may vary significantly from their modern counterparts. Such linguistic dynamics pose a substantial challenge to maintaining high accuracy in entity recognition and classification.
+
+In Present-Day English, the relationships within and between phrases are primarily indicated by the order of the words. In contrast, Old English relied more heavily on specific endings attached to words to express these relationships. As a result, Old English exhibited a far more flexible word order than its modern counterpart \citep{smith2013essentials}.
+
+For example, in Present-Day English:
+
+% \begin{center}
+% \say{The lord binds the servant}\\
+% \say{The servant binds the lord}
+% \end{center}
+
+These two sentences convey distinctly different meanings, with the word order determining the roles of "the lord" and "the servant" within each sentence. In Old English, however, such clarity was not necessarily dependent on word order due to the grammatical structure that allowed more variability in sentence construction.
+
+Here is how Sentence 1 would be translated into Old English:
+
+% \begin{center}
+% \say{{\oldenglishfont Se hlāford bint þone cnapan.}}\\
+% \say{{\oldenglishfont Þone cnapan bint se hlāford.}}\\
+% \say{{\oldenglishfont Se hlāford þone cnapan bint.}}
+% \end{center}
+
+In Old English, all three variations effectively convey the same meaning, despite the differing word orders. This flexibility highlights the substantial linguistic shift towards fixed word order in English, underscoring the complexities NER systems must navigate when processing historical texts.
+
+
+\paragraph*{Lack of Resources}
+\label{par:1_lack_of_resources}
+A significant scarcity of annotated corpora, language models, and other NLP resources specifically designed for historical document processing substantially hinders the development and training of models tailored to these texts. Moreover, the resources that do exist often lack standardization, adding further complexity to the development, training, and evaluation of effective models.
+
+Consequently, \cite{nguyen2021survey} suggest that post-OCR correction is a crucial approach to overcome these limitations and enhance the accuracy of digitized data. They further explore advanced post-OCR correction techniques in their survey, which includes the integration of sophisticated language models and the application of both statistical and neural machine learning models. These methods, which range from manual to semi-automatic and fully automatic approaches, significantly enhance the quality of text. This improvement in text quality is crucial for the reliability of subsequent NLP tasks, underscoring the ongoing need for enhancements in post-processing technologies.
+
+Several post-OCR correction methods have been applied and shown significant improvements. Most of these methods function sequentially, not in an end-to-end manner. However, \cite{kang2021candidate} suggest that allowing backpropagation to influence both the recognizer and language model concurrently can yield better results than training them separately. This integrated approach allows the recognizer to leverage insights from its own processing as well as feedback from the LM, fostering a deeper, more holistic understanding. Furthermore, the system is engineered to evaluate the relevance of the information provided by the LM, enabling the recognizer to selectively prioritize its influence. Consequently, even if the LM and the recognizer are trained on different domains, the composite model remains effective across both. \cite{kang2021candidate} also argue that the LM can adapt based on the frequent errors produced by the recognizer, thereby enhancing the overall accuracy of the system.
+
+To conclude, the challenge of accurately digitizing and understanding historical texts extends beyond mere academic interest; it is a crucial endeavor aimed at preserving cultural heritage and unlocking the rich historical value embedded within these documents. Traditional OCR systems, though effective with modern texts, frequently encounter difficulties with the unique characteristics of historical languages and scripts. This limitation not only restricts access but also limits the broader scope of digital research.
+
+This study seeks to assess the effectiveness of integrating a recognizer with a language model, not only to enhance performance but also to enable models trained on contemporary texts to adapt to early modern English. We have selected TrOCR, a SOTA OCR model known for its advanced text recognition capabilities, and CharBERT, a variant of the BERT model with an additional character-level processing. By leveraging these sophisticated technologies, our project aims to substantially improve the accuracy and reliability of text digitization processes. This enhancement will make a wider range of historical documents more accessible and useful for academic research, educational purposes, and public engagement. Improved OCR performance on historical documents is expected to forge new pathways for research in the digital humanities, providing scholars and researchers with more accurate tools for textual analysis, linguistic studies, and cultural investigations based on diverse historical archives.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                     Research Questions                                     %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Research Questions}
+\label{sec:1_research_questions}
+In this study, we aim to investigate and address several key research questions that are pivotal to advancing the field of OCR by the integration of OCR with language models. Through this inquiry, we seek to validate new methodologies by proposing a novel model architecture. The research questions will guide the experimental design and analysis, ensuring that the outcomes are robust, insightful, and contribute significantly to the existing knowledge.
+\begin{enumerate}
+    \item \textbf{Domain Adaptation Through Model Fusion: }In the Candidate Fusion paper , they claimed that fusing the recognizer and language model (LM) can make the LM adjust to the domain-specific data. Can fusing TrOCR and CharBERT achieve the same conclusion? In other words, can CharBERT adjust to historical texts even it was trained on modern texts?
+    \item \textbf{Character-Level Information Enhancement: }In the CharBERT paper \citep{ma-etal-2020-charbert}, they claimed that, by using the character level information in addition to the subword level information, \hyperref[sec:2_charbert]{the problems of incomplete modelling and fragile 
+    representation} can be solved. However, the results shown in the paper did not show significant performance improvement over RoBERTa (a strong baseline LM model). Is this statement valid? Can TrOCR combined with CharBERT achieve the claim?
+    \item \textbf{Influence of Language Model on Decoder Output: }Does TrOCR decoder change its output with the presence of the LM?
+    \item \textbf{Impact of Training on Common Errors:} According to \cite{kang2021candidate}, the language model can adapt by learning from the frequent errors generated by the OCR recognizer, thereby enhancing the overall accuracy of the system. If we integrate common errors made by TrOCR into the training process of CharBERT, do the results show improvements? 
+\end{enumerate}
+
+\section{Chapter Overviews}
+\label{sec:1_chapter_overviews}
+Below is an overview of the subsequent chapters. Each chapter explores distinct aspects of the research, starting from foundational studies and progressing towards integrating these findings into a more powerful model. The discussions culminate in evaluating the performance of this composite model.
+
+\paragraph*{Chapter 2: Background and Existing Technologies}
+This chapter reviews recent developments in OCR and post-OCR correction tasks. It introduces two pivotal models: TrOCR \citep{li2023trocr} and CharBERT \citep{ma-etal-2020-charbert}, along with a significant technique, Candidate Fusion \citep{kang2021candidate}, which form the foundation of our proposed model. The chapter also discusses the benefits of incorporating glyph information into the OCR system, setting the stage for the model's architecture.
+
+\paragraph*{Chapter 3: Model Integration and Architecture}
+This chapter details the integration of CharBERT, a BERT-like language model, with TrOCR, a SOTA OCR model. CharBERT will function as an additional corrector within the OCR system, forming an end-to-end post-OCR correction model. The architecture of the composite model is discussed thoroughly, emphasizing its innovative approach.
+
+\paragraph*{Chapter 4: Experimental Design and Methodology}
+This chapter details the experimental framework designed to benchmark and assess the adaptability of the model. It specifically evaluates the impact of incorporating glyph information on overall performance and investigates the model's capacity to process texts from diverse domains. The experimental setups are strategically crafted to address the research questions, ensuring that each test contributes directly to validating the model's effectiveness and versatility.
+
+\paragraph*{Chapter 5 and 6: Results, Significance, and Future Work}
+These chapters analyze the experimental results, discuss their significance, and explore potential future research directions. The findings are expected to demonstrate the effectiveness of the composite model, and its ability to process historical texts without requiring the OCR component to be trained specifically on such texts.
+
+\section{Personal Contribution}
+\label{sec:1_personal_contribution}
+My contribution to this research is centered on enhancing OCR tasks for historical texts, which are frequently constrained by a scarcity of specialized resources. I aim to develop a robust OCR model that not only outperforms SOTA OCR models in accuracy but is also capable of effectively processing historical images. A key innovation of my approach involves utilizing a language model that has been specifically trained on historical texts. This method allows the OCR model to accurately interpret historical documents without necessitating direct training on these specific types of texts.
+
+To achieve this, I have focused on integrating advanced machine learning techniques with deep linguistic insights, creating a system that bridges the gap between contemporary computational capabilities and the nuanced demands of historical text analysis. This approach not only enhances the model's ability to understand texts with varied linguistic features and degraded physical limitations, but also significantly reduces the need for extensive annotated historical text corpora, which are often difficult and expensive to procure. This research not only advances the technical capabilities of OCR systems but also contributes to the broader field of digital humanities by improving access to valuable historical documents. 

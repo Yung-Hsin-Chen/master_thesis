@@ -124,8 +124,8 @@ def train(model, freeze_mode, layers, **kwargs):
     #     model = nn.DataParallel(model)
     # model.cuda()
     # model = nn.DataParallel(model)
-    # charbert_model = initialise_charbert_model(experiment_version="experiment1")
-    # charbert_model = charbert_model.to(device)
+    charbert_model = initialise_charbert_model(experiment_version=None)
+    charbert_model = charbert_model.to(device)
     model = model.to(device)
     # set special tokens used for creating the decoder_input_ids from the labels
     model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
@@ -186,9 +186,9 @@ def train(model, freeze_mode, layers, **kwargs):
                     # batch["labels"] = torch.randint(0, 100, (2, 512), dtype=torch.long).to(device)
                 if k in ["pixel_values", "label_emb", "labels", "attention_mask", "test_decoder_input_ids", "start_ids", "end_ids", "char_input_ids", "input_ids"]:#, "charbert_token_labels", "charbert_char_labels"]:
                     batch[k] = v.to(device)
-            # charbert_output = charbert_model(char_input_ids=batch["char_input_ids"], start_ids=batch["start_ids"], end_ids=batch["end_ids"], input_ids=batch["input_ids"])
-            # charbert_token_label = charbert_output[0]
-            # charbert_char_label = charbert_output[2]
+            charbert_output = charbert_model(char_input_ids=batch["char_input_ids"], start_ids=batch["start_ids"], end_ids=batch["end_ids"], input_ids=batch["input_ids"])
+            charbert_token_label = charbert_output[0]
+            charbert_char_label = charbert_output[2]
             # print("\nMODEL NAME: ", model_name)
             if model_name.startswith("trocr_charbert"):
                 outputs, charbert_token_repr, charbert_char_repr = model(pixel_values=batch["pixel_values"], 
@@ -215,10 +215,10 @@ def train(model, freeze_mode, layers, **kwargs):
             # print(outputs.logits.view(-1, outputs.logits.size(-1)).size())
             # print(batch["labels"].view(-1).size())
             # loss = outputs.loss
-            # loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
-            # loss_2 = 1 - F.cosine_similarity(charbert_token_repr, charbert_token_label).mean()
-            # loss_3 = 1 - F.cosine_similarity(charbert_char_repr, charbert_char_label).mean()
-            # print(loss_1)
+            loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
+            loss_2 = 1 - F.cosine_similarity(charbert_token_repr, charbert_token_label).mean()
+            loss_3 = 1 - F.cosine_similarity(charbert_char_repr, charbert_char_label).mean()
+            # print(loss)
             # print(loss_2)
             # print(loss_3)
             # print(charbert_token_repr.view(-1, charbert_token_repr.size(-1)).size())
@@ -230,7 +230,7 @@ def train(model, freeze_mode, layers, **kwargs):
             # print(type(loss))
                 # print(loss)
                 # print("train loss: ", loss)
-            # loss = loss_1/4 + loss_2 + loss_3
+            loss = loss/4 + loss_2 + loss_3
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             # Check gradient
@@ -270,9 +270,9 @@ def train(model, freeze_mode, layers, **kwargs):
                     if k in ["pixel_values", "label_emb", "labels", "attention_mask", "test_decoder_input_ids", "start_ids", "end_ids", "char_input_ids", "input_ids"]:
                         batch[k] = v.to(device)
 
-                # charbert_output = charbert_model(char_input_ids=batch["char_input_ids"], start_ids=batch["start_ids"], end_ids=batch["end_ids"], input_ids=batch["input_ids"])
-                # charbert_token_label = charbert_output[0]
-                # charbert_char_label = charbert_output[2]
+                charbert_output = charbert_model(char_input_ids=batch["char_input_ids"], start_ids=batch["start_ids"], end_ids=batch["end_ids"], input_ids=batch["input_ids"])
+                charbert_token_label = charbert_output[0]
+                charbert_char_label = charbert_output[2]
                 if model_name.startswith("trocr_charbert"):
                     outputs, charbert_token_repr, charbert_char_repr = model(pixel_values=batch["pixel_values"], decoder_inputs_embeds=batch["label_emb"], 
                                 decoder_attention_mask=batch["attention_mask"], labels=batch["labels"],
@@ -297,13 +297,13 @@ def train(model, freeze_mode, layers, **kwargs):
                     loss = outputs.loss
                     wer, cer = get_wer_cer_per_batch(generated_text, batch["label_str"])
                 # loss = outputs.loss
-                # loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
-                # loss_2 = 1 - F.cosine_similarity(charbert_token_repr, charbert_token_label).mean()
-                # loss_3 = 1 - F.cosine_similarity(charbert_char_repr, charbert_char_label).mean()
+                loss = criterion(outputs.logits.view(-1, outputs.logits.size(-1)), batch["labels"].view(-1))
+                loss_2 = 1 - F.cosine_similarity(charbert_token_repr, charbert_token_label).mean()
+                loss_3 = 1 - F.cosine_similarity(charbert_char_repr, charbert_char_label).mean()
                 # print(loss_1)
                 # print(loss_2)
                 # print(loss_3)
-                # loss = loss_1/4 + loss_2 + loss_3
+                loss = loss/4 + loss_2 + loss_3
                 # print("val loss: ", loss)
                 val_loss += loss.detach()
                 # pred_str = get_str(processor, outputs.logits)
@@ -374,7 +374,9 @@ def train(model, freeze_mode, layers, **kwargs):
                 # print("val loss: ", loss)
                 test_loss += loss.detach()
                 # pred_str = get_str(processor, outputs.logits)
-                if text_output:
+                if text_output and model_name=="trocr":
+                    write_predictions_to_file(generated_text, batch["label_str"], text_output_path)
+                if text_output and model_name.startswith("trocr_charbert"):
                     write_predictions_to_file(pred_str, batch["label_str"], text_output_path)
                 test_wer_sum += wer
                 test_cer_sum += cer

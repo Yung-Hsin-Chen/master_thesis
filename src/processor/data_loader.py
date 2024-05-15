@@ -546,6 +546,7 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
         with open(base_path, 'r') as file:
             data = json.load(file)
         file_list = list(data.keys())
+        random.seed(42)
         random.shuffle(file_list)
 
         total_files = len(file_list)
@@ -587,8 +588,13 @@ def get_split_indices(data_name: str, image: dict, gt: dict) -> List[Tuple[List,
         test_indices = [index for index in indices_list if index.split("__")[0]=="test"]
         folds = [(train_indices, val_indices, test_indices)]
         return folds
+    
+    def get_indices_combined():
+        gw_folds = get_indices_gw()[0]
+        iam_folds = get_indices_iam()[0]
+        return [[list(gw_folds[0])+iam_folds[0], list(gw_folds[1])+iam_folds[1], list(gw_folds[2])+iam_folds[2]]]
     # A dictionary to map data_name to the corresponding function
-    functions = {"GW": get_indices_gw, "IAM": get_indices_iam, "Bullinger": get_indices_bullinger, "ICFHR": get_indices_icfhr}
+    functions = {"GW": get_indices_gw, "IAM": get_indices_iam, "Bullinger": get_indices_bullinger, "ICFHR": get_indices_icfhr, "combined": get_indices_combined}
     return functions.get(data_name, lambda: "Invalid data_name")()
 
 def process_data_loader(image: dict, gt: dict, folds: list, batch_size: int, processor, max_target_length, transform=None, data_name=None) -> dict:
@@ -653,21 +659,23 @@ def get_data_loader(batch_size: int, processor, max_target_length) -> tuple:
     # Split IAM data into train, validation and test datasets, and get the indices
     GW_folds = get_split_indices("GW", data["GW_image"], data["GW_gt"])
     IAM_folds = get_split_indices("IAM", data["IAM_image"], data["IAM_gt"])
+    combined_folds = get_split_indices("combined", data["combined_image"], data["combined_gt"])
     # bullinger_folds = get_split_indices("Bullinger", data["bullinger_image"], data["bullinger_gt"])
     # icfhr_folds = get_split_indices("ICFHR", data["icfhr_image"], data["icfhr_gt"])
 
     # Load the data loaders for all datasets
     gw_data_loaders = process_data_loader(data["GW_image"], data["GW_gt"], GW_folds, batch_size, processor, max_target_length)
     iam_data_loaders = process_data_loader(data["IAM_image"], data["IAM_gt"], IAM_folds, batch_size, processor, max_target_length)
+    combined_data_loaders = process_data_loader(data["combined_image"], data["combined_gt"], combined_folds, batch_size, processor, max_target_length)
     # bullinger_data_loaders = process_data_loader(data["bullinger_image"], data["bullinger_gt"], bullinger_folds, batch_size, processor, max_target_length, "Bullinger")
     # icfhr_data_loaders = process_data_loader(data["icfhr_image"], data["icfhr_gt"], icfhr_folds, batch_size, processor, max_target_length)
     
     bullinger_data_loaders, icfhr_data_loaders = [], []
-    return gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders
+    return gw_data_loaders, iam_data_loaders, combined_data_loaders
 
 if __name__=="__main__":
     data_loader_keys = cfg.trocr_charbert["experiment1"]["data_loader_keys"]
-    gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(**data_loader_keys)
+    gw_data_loaders, iam_data_loaders, combined_data_loaders = get_data_loader(**data_loader_keys)
     test_loader = gw_data_loaders["cv1"]["train"]
     for batch in test_loader:
         for i in list(batch.keys()):

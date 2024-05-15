@@ -75,10 +75,15 @@ def load_data() -> dict:
     file_path = os.path.join(DATA_PROCESSED, "ICFHR_2016", "line_image", "icfhr_image.json")
     with open(file_path, "r") as json_file:
         icfhr_image = json.load(json_file)
+    combined_image = GW_image.copy()
+    combined_image.update(IAM_image)
+    combined_gt = GW_gt.copy()
+    combined_gt.update(IAM_gt)
     return {"GW_image": GW_image, "GW_gt": GW_gt,
             "IAM_image": IAM_image, "IAM_gt": IAM_gt,
             "bullinger_image": bullinger_image, "bullinger_gt": bullinger_gt,
-            "icfhr_image": icfhr_image, "icfhr_gt": icfhr_gt}
+            "icfhr_image": icfhr_image, "icfhr_gt": icfhr_gt,
+            "combined_image": combined_image, "combined_gt": combined_gt}
 
 class DummyLayer(nn.Module):
     def forward(self, *args, **kwargs):

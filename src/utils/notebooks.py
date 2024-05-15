@@ -15,8 +15,8 @@ from src.processor.data_loader import get_data_loader
 # Constants
 GW_GT_PATH = os.path.join(DATA_PROCESSED, "GW", "ground_truth", "GW_gt.json")
 GW_IMAGE_PATH = os.path.join(DATA_PROCESSED, "GW", "line_image", "GW_image.json")
-IAM_GT_PATH = os.path.join(DATA_PROCESSED, "IAM", "ground_truth", "IAM_gt.json")
-IAM_IMAGE_PATH = os.path.join(DATA_PROCESSED, "IAM", "line_image", "IAM_image.json")
+IAM_GT_PATH = os.path.join(DATA_PROCESSED, "jh", "ground_truth", "jh_gt.json")
+IAM_IMAGE_PATH = os.path.join(DATA_PROCESSED, "jh", "line_image", "jh_image.json")
 BULLINGER_GT_PATH = os.path.join(DATA_PROCESSED, "Bullinger", "ground_truth", "bullinger_gt.json")
 BULLINGER_IMAGE_PATH = os.path.join(DATA_PROCESSED, "Bullinger", "line_image", "bullinger_image.json")
 ICFHR_GT_PATH = os.path.join(DATA_PROCESSED, "ICFHR_2016", "ground_truth", "icfhr_gt.json")
@@ -27,12 +27,12 @@ WIKI_VAL_PATH = os.path.join(".", "data", "wiki", "enwiki_val.txt")
 # Dataset Information from website (used for double check)
 # Text line
 GW_TEXT_LINE = 656
-IAM_TEXT_LINE = 13353
+IAM_TEXT_LINE = 6916
 BULLINGER_TEXT_LINE = 165673
 ICFHR_TEXT_LINE = 450
 # Train, val, test set (whole image for ICFHR 2016)
 GW_TRAIN, GW_VAL, GW_TEST = 329, 163, 164
-IAM_TRAIN, IAM_VAL, IAM_TEST = 6161, 900, 1861
+IAM_TRAIN, IAM_VAL, IAM_TEST = 5532, 691, 693
 BULLINGER_TRAIN, BULLINGER_VAL, BULLINGER_TEST = 132538, 16567, 16568
 ICFHR_TRAIN, ICFHR_VAL, ICFHR_TEST = 400, 50, 50
 

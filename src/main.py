@@ -18,6 +18,7 @@ import numpy as np
 import os
 from src.utils.helpers import set_gpu, set_device
 import torch
+from torch.utils.data import ConcatDataset, DataLoader
 
 model_dict = {"train": {"trocr": train_trocr, "trocr_charbert": train_trocr_charbert, "trocr_charbert_small": train_trocr_charbert_small},
             "eval": {"trocr": eval_trocr, "seq_models": eval_seq_models}}
@@ -44,18 +45,28 @@ def main(**kwargs):
     if mode=="eval" and model=="trocr":
         data_loader_keys["batch_size"] = 1
     # print(data_loader_keys)
-    gw_data_loaders, iam_data_loaders, bullinger_data_loaders, icfhr_data_loaders = get_data_loader(**data_loader_keys)
-    data_dict = {"gw": gw_data_loaders, "iam": iam_data_loaders, "bullinger": bullinger_data_loaders, "icfhr": icfhr_data_loaders}
+    gw_data_loaders, iam_data_loaders, combined_data_loaders = get_data_loader(**data_loader_keys)
+    # data_dict = {"gw": gw_data_loaders, "iam": iam_data_loaders, "bullinger": bullinger_data_loaders, "icfhr": icfhr_data_loaders}
+    data_dict = {"gw": gw_data_loaders, "iam": iam_data_loaders, "combined": combined_data_loaders}
     data_loaders = data_dict[data]
     wer_list, cer_list = [], []
+
+    # dataset_gw = data_dict["gw"]["cv1"]["train"].dataset
+    # dataset_iam = data_dict["iam"]["cv1"]["train"].dataset
+    # combined_dataset = ConcatDataset([dataset_gw, dataset_iam])
+    # combined_dataloader = DataLoader(combined_dataset, batch_size=8, shuffle=True)
     # for cv in ["cv1", "cv2", "cv3", "cv4"
     if data=="gw":
         # for cv in ["cv1"]:
         for cv in ["cv1", "cv2", "cv3", "cv4"]:
             if mode=="train":
-                train_loader = data_loaders[cv]["train"]
-                val_loader = data_loaders[cv]["val"]
-                test_loader = data_loaders[cv]["test"]
+                train_loader = data_dict["combined"]["cv1"]["train"]
+                val_loader = data_dict["combined"]["cv1"]["val"]
+                test_loader = data_dict["combined"]["cv1"]["test"]
+                # train_loader = data_loaders[cv]["train"]
+                # val_loader = data_loaders[cv]["val"]
+                # test_loader = data_loaders[cv]["test"]
+                # test_loader = data_dict["iam"]["cv1"]["test"]
                 arguments = {"experiment_version": experiment_version, "train_loader": train_loader, 
                             "val_loader": val_loader, "test_loader": test_loader, "device": device, 
                             "freeze_mode": freeze_mode, "layers": layers, "data": data, "model_name": model
@@ -74,9 +85,13 @@ def main(**kwargs):
         print("CER: ", cer)
     else:
         if mode=="train":
-            train_loader = data_loaders["cv1"]["train"]
-            val_loader = data_loaders["cv1"]["val"]
-            test_loader = data_loaders["cv1"]["test"]
+            train_loader = data_dict["combined"]["cv1"]["train"]
+            val_loader = data_dict["combined"]["cv1"]["val"]
+            test_loader = data_dict["combined"]["cv1"]["test"]
+            # train_loader = data_loaders["cv1"]["train"]
+            # val_loader = data_loaders["cv1"]["val"]
+            # test_loader = data_loaders["cv1"]["test"]
+            # test_loader = data_dict["gw"]["cv1"]["test"]
             arguments = {"experiment_version": experiment_version, "train_loader": train_loader, 
                             "val_loader": val_loader, "test_loader": test_loader, "device": device, 
                             "freeze_mode": freeze_mode, "layers": layers, "data": data, "model_name": model,
@@ -99,10 +114,10 @@ if __name__=="__main__":
         "mode": "train", # eval/train
         "freeze_mode": "freeze", # freeze/not_freeze
         # "layers": ["encoder.pooler", "encoder.layernorm", "encoder.encoder.layer.23"],
-        "layers": [],
+        "layers": ["encoder", "decoder"],
         # "layers": [],
-        "model": "trocr", # trocr/trocr_charbert/trocr_charbert_small
+        "model": "trocr_charbert", # trocr/trocr_charbert/trocr_charbert_small
         "data": "gw", # gw/iam
-        "text_file": "gw_ft"
+        "text_file": "gw_iam_adapt"
     }
     main(**keys)

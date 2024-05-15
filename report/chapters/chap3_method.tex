@@ -7,10 +7,26 @@ In this chapter, I will introduce the composite model of TrOCR and CharBERT by l
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Design Concept}
 \label{sec:3_design_concept}
-CharBERT mitigates the problems of incomplete modelling and fragile representation by including the character encoding in addition to the subword level information. Furthermore, having NLM as the pre-training task makes CharBERT effective at correcting character level typos, which is a desired feature for OCR correcting. 
+CharBERT mitigates the problems of incomplete modelling and fragile representation by including the character encoding in addition to the subword level information. Furthermore, having noisy language model (NLM) as the pre-training task makes CharBERT effective at correcting character level typos, which is a desired feature for OCR correcting. On the other hand, Candidate Fusion claims that having an interaction between the recognizer and the language model (LM) can enhance the performance of OCR. Thus, combining TrOCR and CharBERT is expected have an improvement on the OCR accuracy. 
 
-On the other hand, Candidate Fusion claims that having an interaction between the recogniser and the LM can enhance the performance of OCR. Thus, combining TrOCR and CharBERT is expected have an improvement on the OCR accuracy. 
-\TODO{Rewrite this}
+This synergy allows for a dynamic feedback loop where the recognizer's outputs are continuously refined through the language model's contextual corrections, improving OCR accuracy. By combining TrOCR's efficient image-to-text conversion with CharBERT's precision in error correction, the integrated system not only tackles broad structural and fine-grained typographical errors but also performs robustly across diverse document types and conditions, significantly enhancing both the reliability and accuracy of OCR outputs. This comprehensive approach leverages the strengths of both models, making the combined system exceptionally versatile and effective in various OCR scenarios.
+
+To address the \textcolor{Blue}{research questions (RQ)}, we have designed several experiments (EX), which will be discussed in detail in \Cref{chap:4_experiment}. The corresponding research questions and their associated experiments are outlined below:
+
+\begin{itemize}
+    \item[\textcolor{Blue}{\textbf{RQ2}}] \textcolor{Blue}{\textbf{Influence of Language Model on Decoder Output: }Does TrOCR decoder change its output with the presence of the language model?}
+    \item[\textbf{EX2}] Different combinations of composite model layers will be tested to optimize performance. We will examine whether the text output of this optimized composite model differs from that produced by TrOCR alone.
+    \vspace{7mm}
+    \item[\textcolor{Blue}{\textbf{RQ4}}] \textcolor{Blue}{\textbf{Character-Level Information Enhancement: }In the CharBERT paper, they claimed that, by using the character level information in addition to the subword level information, the problems of incomplete modelling and fragile representation can be solved. However, the results shown in the paper did not show significant performance improvement over RoBERTa (a strong baseline LM model). Is this statement valid? Can TrOCR combined with CharBERT achieve the claim?}
+    \item[\textbf{EX4}] The performance of TrOCR + CharBERT will be compared with TrOCR + RoBERTa to ascertain if character-level information substantively enhances model effectiveness.
+    \vspace{7mm}\item[\textcolor{Blue}{\textbf{RQ1}}] \textcolor{Blue}{\textbf{Domain Adaptation Through Model Fusion: }In the Candidate Fusion paper, they claimed that fusing the recognizer and LM can make the LM adjust to the domain-specific data. Can fusing TrOCR and CharBERT achieve the same conclusion? In other words, can CharBERT adjust to historical texts even it was trained on modern texts?}
+    \item[\textbf{EX1}] We will train CharBERT with limited historical and modern English data and combine it with TrOCR. The performance of this composite model on historical English will be compared to a version trained on historical data. Due to constraints, we will use CharBERT${\text{SMALL}}$ as a baseline for comparison.
+    \vspace{7mm}
+    \item[\textcolor{Blue}{\textbf{RQ3}}] \textcolor{Blue}{\textbf{Impact of Training on Common Errors:} After integrating common errors made by TrOCR into the training process of CharBERT, do the results show improvements? }
+    \item[\textbf{EX3}] We will identify common errors from TrOCR and integrate these into CharBERT's training process to evaluate whether this enhances the composite model's performance compared to training with randomly introduced errors. As with RQ2, CharBERT${\text{SMALL}}$ will serve as a baseline for comparison.
+\end{itemize}
+
+This structured approach ensures a thorough evaluation of how well integrated OCR systems can leverage both deep learning architectures and advanced language models to improve text recognition accuracy across diverse datasets.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                              Data Collection and processing                                %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -19,21 +35,48 @@ On the other hand, Candidate Fusion claims that having an interaction between th
 This section is dedicated to detailing the data collection process for OCR task training and CharBERT$_{\text{SMALL}}$ training. We will outline the types and sources of data harnessed for this study, emphasizing the diversity and volume of the datasets to ensure comprehensive learning. Following the data collection overview, we will delve into the processing techniques applied to the collected data.
 \subsection{Data for OCR} 
 \label{subsec:3_data_for_ocr}
-We focus on the performances of handwritten datasets on the composite model. The data used in this study is the George Washington (GW) handwritten dataset\myfootnote{The George Washington handwritten dataset can be downloaded here: \url{https://fki.tic.heia-fr.ch/databases/washington-database}} and the Joseph Hooker (JH) handwritten dataset\myfootnote{The Joseph Hooker handwritten dataset can be downloaded here: \url{https://github.com/jschaefer738b/JosephHookerHTR}}. They serve as valuable benchmarks for developing and evaluating handwriting recognition systems. Note that to ensure comparability with existing studies, this research adheres to the established train-validation-test splits of the GW and JH datasets.
+We focus on the performances of handwritten datasets on the composite model. The data used in this study is the George Washington (GW) handwritten dataset\myfootnote{The George Washington handwritten dataset can be downloaded here: \url{https://fki.tic.heia-fr.ch/databases/washington-database}} and the Joseph Hooker (JH) handwritten dataset\myfootnote{The Joseph Hooker handwritten dataset can be downloaded here: \url{https://github.com/jschaefer738b/JosephHookerHTR}}. They serve as valuable benchmarks for developing and evaluating handwriting recognition systems. Note that to ensure comparability with existing studies, this research adheres to the established train-validation-test splits of the GW and JH datasets. Detailed information about these datasets is presented in \Cref{tab:3_data_info}.
 
 Although the IAM dataset is a more contemporary collection of English handwriting samples, renowned for its diversity in handwriting styles, this study did not use it since TrOCR is pre-trained on the IAM dataset. The most significant risk of fine-tuning the composite on the same dataset is overfitting. The model may become excessively tailored to the IAM dataset, performing well on this specific dataset but poorly on unseen, real-world data or other similar datasets. In addition, if the model has already been trained to a point where it performs optimally on the IAM dataset, further training the composite model on the same data might yield diminishing returns. The model may not improve significantly and could even start to fit the noise in the dataset as mentioned above.
 
 \paragraph*{George Washington Dataset}
 \label{par:3_george_washington_dataset}
-The GW dataset is a collection of historical letters and diaries handwritten by George Washington and his secretaries in 1755. This dataset comprises various types of documents, including personal correspondence, military orders, and official communications, which provide a unique window into the early American colonial period. The dataset is frequently utilized in research focused on recognizing historical handwriting, which poses unique challenges due to the use of archaic words and phrases, and the degradation of materials over time. The different handwriting styles in the dataset, ranging from Washington's neat writing to the quicker, less tidy ones, make it very useful for developing strong handwriting recognition systems. This dataset not only supports the preservation and accessibility of these important texts but also aids in advancing the technology needed to interpret and digitize aged manuscripts. An example from the GW dataset is shown in \autoref{fig:3_gw_line_image}.
+The GW dataset is a collection of historical letters and diaries handwritten by George Washington and his secretaries in 1755. This dataset comprises various types of documents, including personal correspondence, military orders, and official communications, which provide a unique window into the early American colonial period. The dataset is frequently utilized in research focused on recognizing historical handwriting, which poses unique challenges due to the use of archaic words and phrases, and the degradation of materials over time. The different handwriting styles in the dataset, ranging from Washington's neat writing to the quicker, less tidy ones, make it very useful for developing strong handwriting recognition systems. This dataset not only supports the preservation and accessibility of these important texts but also aids in advancing the technology needed to interpret and digitize aged manuscripts. An example from the GW dataset is shown in \Cref{fig:3_gw_line_image}.
 
-\fig{images/gw_line_image.png}{fig:3_gw_line_image}{Sample of handwritten text from GW dataset. The excerpt reads: only for the publick use, unless by particu}{11.5}{GW Line Image}
+\fig{images/gw_line_image.png}{fig:3_gw_line_image}{Sample of handwritten text from GW dataset. The excerpt reads: only for the publick use, unless by particu.}{11.5}{GW Line Image}
 
 \paragraph*{Joseph Hooker Dataset}
 \label{par:3_joseph_hooker_dataset}
-The JH dataset consists of correspondence between Joseph Dalton Hooker (1817-1911) and other leading scientists of his time. This collection offers unparalleled insights into the scientific dialogues of the era, featuring interactions with notable figures such as Charles Darwin. As such, it is an invaluable resource for historians specializing in science, botany, and the Victorian period. Hooker’s letters are diverse in content, extending beyond mere botanical discussions to include observations from his travels, his perspectives on contemporary scientific debates, his personal reflections, and his professional communications. This rich variety provides a comprehensive view of his intellectual engagement and contributions. An example from the GW dataset is shown in \autoref{fig:3_jh_line_image}.
+The JH dataset consists of correspondence between Joseph Dalton Hooker (1817-1911) and other leading scientists of his time. This collection offers unparalleled insights into the scientific dialogues of the era, featuring interactions with notable figures such as Charles Darwin. As such, it is an invaluable resource for historians specializing in science, botany, and the Victorian period. Hooker’s letters are diverse in content, extending beyond mere botanical discussions to include observations from his travels, his perspectives on contemporary scientific debates, his personal reflections, and his professional communications. This rich variety provides a comprehensive view of his intellectual engagement and contributions. An example from the GW dataset is shown in \Cref{fig:3_jh_line_image}.
 
-\fig{images/jh_line_image.jpg}{fig:3_jh_line_image}{Sample of handwritten text from JH dataset. The excerpt reads: I will send them to the host to be}{11}{JH Line Image}
+\fig{images/jh_line_image.jpg}{fig:3_jh_line_image}{Sample of handwritten text from JH dataset. The excerpt reads: I will send them to the host to be.}{11}{JH Line Image}
+
+\footnotetab{tab:3_data_info}{Data Information}{%
+\begin{threeparttable}
+\begin{tabular}{lrr}
+    \toprule
+    Metric	                                  & GW Dataset     & JH Dataset	\\
+    \midrule
+    Text Line		                          & 656            &6916	\\
+    Train Data                                &329             &5532\\
+    Validation Data                           &168             &691	\\
+    Test Data                                 &163             &693	\\
+    Unique Word instances\mytnote{3}          &1456            &8308	\\
+    Unique letters\mytnote{4}                 &68              &	84\\
+    Average Text Line length\mytnote{5}       &40.23           &28.45	\\
+    Average Word length\mytnote{6}            &6.17            &6.89	\\
+    Percentage of Non-Character\mytnote{7}    &21\%            &	22.4\%\\
+    \bottomrule
+    \end{tabular}
+    \begin{tablenotes}
+        \item[3] {\footnotesize {\fontfamily{cmus}\selectfont The count of distinct words present in the dataset.}}
+        \item[4] {\footnotesize {\fontfamily{cmus}\selectfont The number of distinct characters present in the dataset \\(include punctuations).}}
+        \item[5] {\footnotesize {\fontfamily{cmus}\selectfont The average number of characters (letters and spaces) per text line.}}
+        \item[6] {\footnotesize {\fontfamily{cmus}\selectfont The average number of characters per word in the dataset.}}
+        \item[7] {\footnotesize {\fontfamily{cmus}\selectfont The percentage of characters in the dataset that are not part of the standard alphabet. This may include punctuation marks and other non-alphabetic characters. (characters other than A-Z, a-z, 0-9)}}
+    \end{tablenotes}
+\end{threeparttable}
+}{Data Information}
 
 The Joseph Hooker and George Washington datasets, while serving distinct academic purposes, both play significant roles in the realm of handwritten text recognition (HTR) tasks. The Joseph Hooker dataset, with its extensive collection of 19th-century botanical writings and correspondence, provides a unique challenge for HTR technologies due to the scientific terminology and personal handwriting styles found in the documents. This variety enables developers to fine-tune HTR models to handle complex vocabulary and diverse manuscript formats, which is essential for digital humanities projects focusing on scientific archives.
 
@@ -43,7 +86,7 @@ In both cases, these datasets not only support the preservation and accessibilit
 
 \paragraph*{Transcription Ground Truth Processing}
 \label{par:3_transcription_gound_truth_processing}
-The transcription ground truths of the JH dataset are stored in XML files, where parsing these files is sufficient to retrieve the transcription texts. On the other hand, the transcription ground truths of the GW dataset follow a more complex format. In this dataset, individual characters within words are separated by hyphens (\say{ - }), and words themselves are separated by vertical bars (\say{ \textbar \;}). Additionally, punctuation marks are represented by special characters, with a specific table detailing the replacements for each punctuation mark. The table for the punctuation replacement can be found in this \href{https://github.com/Yung-Hsin-Chen/master_thesis/blob/src/model/config/punctuation_list.json}{link}. For instance, consider the transcription from the GW dataset for the phrase "of the Virginia Regiment." This is encoded as 
+The transcription ground truths of the JH dataset are stored in XML files, where parsing these files is sufficient to retrieve the transcription texts. On the other hand, the transcription ground truths of the GW dataset follow a more complex format. In this dataset, individual characters within words are separated by hyphens (\say{ - }), and words themselves are separated by vertical bars (\say{ \textbar \;}). Additionally, punctuation marks are represented by special characters, with a specific table detailing the replacements for each punctuation mark. The table for the punctuation replacement can be found in this \href{https://github.com/Yung-Hsin-Chen/master_thesis/blob/src/model/config/punctuation_list.json}{link}. For instance, consider the transcription from the GW dataset for the phrase \say{of the Virginia Regiment.} This is encoded as 
 
 \begin{center}
     \texttt{o-f|t-h-e|V-i-r-g-i-n-i-a|R-e-g-i-m-e-n-t-s\_pt} 
@@ -53,7 +96,7 @@ The transcription ground truths of the JH dataset are stored in XML files, where
 
 \paragraph*{Image Processing}
 \label{par:3_image_processing}
-In this study, images are resized and normalized prior to being input into the model. Resizing and normalizing images are standard preprocessing steps in image processing, particularly in the context of machine learning and computer vision. Each of these processes serves important purposes in preparing image data for models, enhancing model performance, and ensuring consistency. This process is illustrated in \autoref{fig:2_image_process}.
+In this study, images are resized and normalized prior to being input into the model. Resizing and normalizing images are standard preprocessing steps in image processing, particularly in the context of machine learning and computer vision. Each of these processes serves important purposes in preparing image data for models, enhancing model performance, and ensuring consistency. This process is illustrated in \Cref{fig:2_image_process}.
 
 In this study, images are initially resized to 384x384 pixels to comply with the input requirements of the pretrained TrOCR model. Resizing images is a common preprocessing step in image processing pipelines, particularly for deep learning, where input dimensions need to be consistent across all data samples for the model to process them.
 
@@ -63,8 +106,64 @@ Following resizing, the images undergo normalization. The normalization specifie
 
 \subsection{Data for Training CharBERT$_{\text{SMALL}}$}
 \label{subsec:3_data_for_training_charbert}
-In the original study, the authors trained CharBERT using a 12GB dataset from Wikipedia. This training process spanned 5 days, utilizing the computational power of two NVIDIA Tesla V100 GPUs. Given constraints in time and computational resources, our approach involves testing a scaled-down version of CharBERT, which we have designated as CharBERT$_{\text{SMALL}}$. This variant was trained on a significantly smaller dataset, specifically 1.13GB of English Wikipedia data, from which sentences were randomly sampled. For example, sentences like "Tony Macrie has been president of the Seashore Lines since he formed the railroad in 1984." were randomly sampled from articles, providing a rich yet manageable training substrate. This adaptation allows us to evaluate the performance of CharBERT under more restricted conditions, ensuring our experiments are feasible within our available resources.
-\TODO{Add eme}
+In the original study, the authors developed CharBERT using a substantial 12GB dataset sourced from Wikipedia. This training was conducted over five days, harnessing the computational capabilities of two NVIDIA Tesla V100 GPUs. Due to constraints in time and available computational resources, our study employs a scaled-down version of CharBERT, hereafter referred to as CharBERT$_{\text{SMALL}}$. This variant has been trained on two considerably smaller datasets: 1.13GB of English Wikipedia data and 637MB of literature from the 16th to 19th centuries, respectively termed as modern CharBERT$_{\text{SMALL}}$ and historical CharBERT$_{\text{SMALL}}$.
+
+The training process for modern CharBERT$_{\text{SMALL}}$ involved randomly sampled sentences from the Wikipedia dataset, such as \say{Tony Macrie has been president of the Seashore Lines since he formed the railroad in 1984.} This approach provided a diverse yet manageable corpus for training, ensuring a broad representation of modern English usage. This methodological adjustment facilitates a comparative analysis between the different implementations of CharBERT: CharBERT$_{\mathcal{P}{ij}}$ —- which integrates common OCR errors into the model and will be detailed later —- and historical CharBERT$_{\text{SMALL}}$. Such comparisons are crucial for assessing the adaptability and effectiveness of CharBERT when trained with more constrained data resources, highlighting the model's potential flexibility and utility in diverse linguistic contexts.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                           Metric                                           %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Metric}
+\label{sec:5_metric}
+\TODO{Put this in methods}
+The metrics used in this study, character error rate (CER) and word error rate (WER), are commonly employed to evaluate the performance of systems in tasks related to optical character recognition (OCR). Both metrics assess how accurately a system transcribes or recognizes text compared to a ground truth transcription. While CER measures accuracy at the character level, WER evaluates it at the word level.
+
+The primary difference between CER and WER lies in their granularity. CER offers a more fine-grained evaluation, making it particularly useful for tasks where character-level precision is essential, such as OCR. WER, on the other hand, is better suited for scenarios where word-level inaccuracies significantly impact the interpretability of the transcribed text, such as in speech recognition tasks.
+
+Another distinction is their sensitivity to errors. CER is highly sensitive to minor errors, which is critical in situations where a single character change can alter the meaning of a word dramatically. For example, changing \say{hat} to \say{hot} by substituting \say{a} with \say{o} completely changes the word's meaning. CER effectively captures these subtle yet crucial errors, proving indispensable for tasks requiring meticulous character-level accuracy.
+
+In contrast, WER focuses on capturing errors that affect the reader's or listener's ability to understand the intended message at the word level. An illustrative example is the digitization of a restaurant menu where the original text, \say{Chicken with Lemon Sauce,} was misinterpreted by the OCR system as \say{Chicken with Lemon Source.} This error, which results in a WER of 20\%, does not significantly diminish the readability of the item but introduces a notable semantic error. The term \say{Sauce,} referring to a culinary liquid, is replaced by \say{Source,} which implies origin, potentially misleading readers and affecting their understanding of the menu item. Thus, WER highlights how even minor word-level errors can impact the semantic integrity of the content.
+
+Despite these differences, both CER and WER are crucial for benchmarking and improving models in OCR, speech recognition, and similar domains. They enable developers to identify shortcomings, compare different model architectures, and track progress over time.
+
+\subsection{Character Error Rate (CER)}
+\label{subsec:5_cer}
+CER is typically expressed as a percentage that represents the proportion of characters incorrectly predicted by the system. It is calculated based on the number of character-level operations required to transform the system output into the ground truth text. These operations include insertions, deletions, and substitutions of characters.
+
+The formula for calculating CER is as follows:
+
+\begin{equation}
+    \text{CER} = \frac{I+D+S}{N}
+\end{equation}
+
+In this equation:
+\begin{itemize}
+    \item $I$ represents the number of insertions required,
+    \item $D$ denotes the number of deletions,
+    \item $S$ signifies the number of substitutions needed to achieve a match with the ground truth,
+    \item $N$ is the total number of characters in the ground truth text.
+\end{itemize}
+
+This method quantifies the system's accuracy at the character level, highlighting its precision in detail.
+
+\subsection{Word Error Rate (WER)}
+\label{subsec:5_wer}
+WER is calculated in a manner similar to CER but focuses on the word level. It measures the number of word-level insertions, deletions, and substitutions required to transform the system's output into the ground truth.
+
+The formula for calculating WER is as follows:
+
+\begin{equation}
+    \text{WER} = \frac{I+D+S}{N}
+\end{equation}
+
+In this equation:
+\begin{itemize}
+    \item $I$ represents the number of insertions needed,
+    \item $D$ denotes the number of deletions,
+    \item $S$ signifies the number of substitutions necessary to match the ground truth,
+    \item $N$ s the total number of words in the ground truth text.
+\end{itemize}
+
+This calculation provides a quantitative measure of the system's performance at recognizing or transcribing words accurately, offering insights into its effectiveness in understanding and processing language at the word level.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                     Model Architecture                                     %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -72,7 +171,7 @@ In the original study, the authors trained CharBERT using a 12GB dataset from Wi
 \label{sec:3_composite_model_architecture}
 The end-to-end composite model described in this thesis integrates TrOCR and CharBERT to enhance text recognition accuracy. TrOCR is responsible for the initial text recognition task, while CharBERT functions as a corrector, refining the outputs from TrOCR. Specifically, the input to the TrOCR decoder is first corrected by CharBERT before it is processed by the TrOCR decoder. This step ensures that the TrOCR decoder works with embeddings that have been optimized by CharBERT, potentially improving the accuracy of the text recognition. In this section, we will delve into the architectures of both TrOCR and CharBERT, and discuss the methodology behind their integration within the composite model.
 
-As depicted in \autoref{fig:3_composite_model}, the process begins with the image being processed by the TrOCR encoder. Subsequently, the input to the TrOCR decoder is first refined by CharBERT (highlighted in purple) before being fed into the TrOCR Decoder, following the standard transformer architecture.
+As depicted in \Cref{fig:3_composite_model}, the process begins with the image being processed by the TrOCR encoder. Subsequently, the input to the TrOCR decoder is first refined by CharBERT (highlighted in purple) before being fed into the TrOCR Decoder, following the standard transformer architecture.
 
 \fig{images/composite_model.png}{fig:3_composite_model}{Schematic of the integrated workflow in the composite model combining TrOCR and CharBERT. }{6}{Workflow in the Composite Model}
 
@@ -90,13 +189,13 @@ The text decoder takes the encoder output, decoder input IDs, and padding attent
 
 The encoder output is a set of features extracted from the pixel values of the image. These features represent a transformed version of the input image, capturing not only the patterns but also the arrangements and relationships among elements within the image.
 
-Decoder input IDs are tensors of token IDs converted from the label texts. These include three special tokens: \texttt{<bos>}, \texttt{<eos>}, and padding. The ID \texttt{<bos>}, represented by the number 0, indicates the start of the text, while the ID \texttt{<eos>}, denoted by the number 2, signifies the end of the text. Padding, a series of the number 1, is appended after \texttt{<eos>} to ensure all input IDs are of uniform length. The decoder input IDs, generated automatically by the TrOCR tokenizer, start with \texttt{<bos>} and end with \texttt{<eos>} and padding, mimicking the inference process during training\myfootnote{During inference, the decoder output from the previous step becomes the new decoder input. However, as no output sequence has been generated at the first step, the initial decoder input comprises only the \texttt{<bos>} token. This is processed by the decoder to produce an output, which is then used to update the decoder input.}. The whole process is illustrated in \autoref{fig:3_trocr_inputs}.
+Decoder input IDs are tensors of token IDs converted from the label texts. These include three special tokens: \texttt{<bos>}, \texttt{<eos>}, and padding. The ID \texttt{<bos>}, represented by the number 0, indicates the start of the text, while the ID \texttt{<eos>}, denoted by the number 2, signifies the end of the text. Padding, a series of the number 1, is appended after \texttt{<eos>} to ensure all input IDs are of uniform length. The decoder input IDs, generated automatically by the TrOCR tokenizer, start with \texttt{<bos>} and end with \texttt{<eos>} and padding, mimicking the inference process during training\myfootnote{During inference, the decoder output from the previous step becomes the new decoder input. However, as no output sequence has been generated at the first step, the initial decoder input comprises only the \texttt{<bos>} token. This is processed by the decoder to produce an output, which is then used to update the decoder input.}. 
 
 The padding attention mask, another input for the decoder, determines which parts of the data the TrOCR should ignore, consisting of 0s and 1s where the 0s cover the padding portions of the decoder input IDs.
 
-The label tensor used for loss calculation is the decoder input IDs minus the \texttt{<bos>} token. Since the TrOCR model is based on the VisionEncoderDecoderModel, it requires label paddings to be set to -100. Thus, the padding token in the label tensor is replaced with -100 instead of 1s.
+The label tensor used for loss calculation is the decoder input IDs minus the \texttt{<bos>} token. Since the TrOCR model is based on the VisionEncoderDecoderModel, it requires label paddings to be set to -100. Thus, the padding token in the label tensor is replaced with -100 instead of 1s. The whole process is illustrated in \Cref{fig:3_trocr_inputs}.
 
-\fig{images/trocr_inputs.png}{fig:3_trocr_inputs}{Processing pipeline for transforming label text into padded input IDs for the TrOCR model.}{18}{TrOCR Input Processing}
+\fig{images/trocr_inputs.png}{fig:3_trocr_inputs}{Processing pipeline for transforming label text into padded input IDs for the TrOCR model.}{16}{TrOCR Input Processing}
 
 \paragraph*{Inside the Decoder}
 \label{par:3_inside_the_decoder}
@@ -104,11 +203,11 @@ Let's first consider the original decoder before adapting it to integrate with C
 
 \subsection{Corrector - CharBERT}
 \label{subsec:3_corrector_charbert}
-CharBERT features a dual-channel architecture, comprising token and character channels. The token channel mirrors the structure of BERT or RoBERTa, depending on the initialization. In this study, we will specifically focus on CharBERT\textsubscript{RoBERTa}. Henceforth in this document, any reference to 'CharBERT' will pertain exclusively to CharBERT\textsubscript{RoBERTa}, unless otherwise specified. Unlike BERT and RoBERTa, which output a single embedding, CharBERT generates both token-level and character-level embeddings. Given that the token channel's architecture is identical to that of BERT/RoBERTa, the subsequent sections will concentrate on the character channel and its heterogeneous interactions.
+CharBERT features a dual-channel architecture, comprising token and character channels. The token channel mirrors the structure of BERT or RoBERTa, depending on the initialization. In this study, we will specifically focus on CharBERT\textsubscript{RoBERTa}. Henceforth in this document, any reference to \say{CharBERT} will pertain exclusively to CharBERT\textsubscript{RoBERTa}, unless otherwise specified. Unlike BERT and RoBERTa, which output a single embedding, CharBERT generates both token-level and character-level embeddings. Given that the token channel's architecture is identical to that of BERT/RoBERTa, the subsequent sections will concentrate on the character channel and its heterogeneous interactions.
 
 \paragraph*{Character Channel \& Heterogeneous Interaction}
 \label{par:3_character_channel_heterogeneous_interaction}
-"The character channel of CharBERT begins by splitting the input text into individual characters and converting these characters into IDs via a dictionary lookup. These IDs are then embedded, followed by processing through a bidirectional GRU (Bi-GRU) layer to generate the output embeddings. These embeddings, at both the character and token levels, are subsequently passed through a transformer and undergo heterogeneous interaction, which is comprised of two parts: fusion and divide. The fusion process allows the embeddings to enrich each other through the use of a feedforward neural network (FFNN) and a convolutional neural network (CNN), enhancing their mutual characteristics. Conversely, the divide process ensures that each set of embeddings retains its unique features, facilitated by an FFNN and a residual connection. This residual connection is crucial as it helps preserve the distinct information from each embedding type. CharBERT repeats the transformer and heterogeneous interaction cycles to capture more features and information inherent in the input texts.
+The character channel of CharBERT begins by splitting the input text into individual characters and converting these characters into IDs via a dictionary lookup. These IDs are then embedded, followed by processing through a bidirectional GRU (Bi-GRU) layer to generate the output embeddings. These embeddings, at both the character and token levels, are subsequently passed through a transformer and undergo heterogeneous interaction, which is comprised of two parts: fusion and divide. The fusion process allows the embeddings to enrich each other through the use of a FFNN and a convolutional neural network (CNN), enhancing their mutual characteristics. Conversely, the divide process ensures that each set of embeddings retains its unique features, facilitated by an FFNN and a residual connection. This residual connection is crucial as it helps preserve the distinct information from each embedding type. CharBERT repeats the transformer and heterogeneous interaction cycles to capture more features and information inherent in the input texts.
 
 \subsection{Composite Model}
 \label{subsec:3_composite_model}
@@ -118,13 +217,13 @@ The composite model is ingeniously designed to integrate TrOCR and CharBERT. Dur
 \label{par:3_adapted_trocr}
 Before addressing the first problem, it is crucial to thoroughly understand the issue. The TrOCR decoder is specifically designed to accept token IDs as input, which are then mapped to embeddings. These embeddings are subsequently augmented with positional encoding before being fed into the Transformer decoder. The challenge arises from the outputs of CharBERT, which are embeddings rather than token IDs, leading to a compatibility issue. If we were to resolve this problem by converting CharBERT's embeddings back into token IDs for input into the TrOCR decoder, a new issue surfaces. Using token IDs as intermediaries between model components is problematic because token IDs are integers, while during the training process, the model weights are updated as floating-point numbers. Converting these weights to integers is not practical; while rounding could technically convert floats to integers, this approach would likely distort the learning process and could render the results meaningless for the intended task. Therefore, the only viable solution is to adapt the TrOCR decoder to accept embeddings directly.
 
-A straightforward solution involves repositioning the embedding layer from the TrOCR decoder to precede CharBERT. This adjustment ensures that token IDs are initially converted to TrOCR embeddings, which are then input into CharBERT for correction. Consequently, the adapted TrOCR can accept embeddings directly, bypassing the need for token IDs. This modification not only ensures that the outputs from CharBERT are seamlessly integrated into the TrOCR decoder but also eliminates the use of token IDs between model components. This entire modification process is illustrated in \autoref{fig:3_adapted_trocr}. 
+A straightforward solution involves repositioning the embedding layer from the TrOCR decoder to precede CharBERT. This adjustment ensures that token IDs are initially converted to TrOCR embeddings, which are then input into CharBERT for correction. Consequently, the adapted TrOCR can accept embeddings directly, bypassing the need for token IDs. This modification not only ensures that the outputs from CharBERT are seamlessly integrated into the TrOCR decoder but also eliminates the use of token IDs between model components. This entire modification process is illustrated in \Cref{fig:3_adapted_trocr}. 
 
 \fig{images/adapted_trocr.png}{fig:3_adapted_trocr}{\textbf{Comparison of the TrOCR Decoder architecture} \\On the left, the original TrOCR Decoder structure includes the Decoder Input, TrOCR Decoder Embedding Layer, and Attention Mechanisms. On the right, the adapted TrOCR Decoder structure shows the repositioning of the TrOCR Decoder Embedding Layer below CharBERT, indicating the integration of CharBERT into the decoder process to enhance input handling before the attention mechanisms.}{12}{Adapted TrOCR}
 
 \paragraph*{Adapted CharBERT}
 \label{par:3_adapted_charbert}
-"The second problem addresses the mismatch between the data types of input and output. According to the modifications described in \hyperref[par:3_adapted_trocr]{Adapted TrOCR}, the TrOCR decoder input is now an embedding, which should be processed by CharBERT for correction. However, CharBERT traditionally only accepts text as input. Therefore, it becomes essential to develop an adapted version of CharBERT that can handle token and character embeddings directly as inputs. In this revised model, CharBERT no longer converts text into IDs and then into embeddings; instead, it receives pre-processed embeddings directly. This adaptation allows both token and character embeddings to be processed through their respective channels in CharBERT. A comparison between the original and the adapted CharBERT models is illustrated in \autoref{fig:3_adapted_charbert}.
+The second problem addresses the mismatch between the data types of input and output. According to the modifications described in \hyperref[par:3_adapted_trocr]{Adapted TrOCR}, the TrOCR decoder input is now an embedding, which should be processed by CharBERT for correction. However, CharBERT traditionally only accepts text as input. Therefore, it becomes essential to develop an adapted version of CharBERT that can handle token and character embeddings directly as inputs. In this revised model, CharBERT no longer converts text into IDs and then into embeddings; instead, it receives pre-processed embeddings directly. This adaptation allows both token and character embeddings to be processed through their respective channels in CharBERT. A comparison between the original and the adapted CharBERT models is illustrated in \Cref{fig:3_adapted_charbert}.
 
 \fig{images/adapted_charbert.png}{fig:3_adapted_charbert}{\textbf{Comparison of the CharBERT architecture}\\On the left, the original CharBERT model processes text into token and character embeddings, which are then fed into the attention mechanisms. On the right, the adapted CharBERT directly receives token and character embeddings as inputs, bypassing the initial text processing stage, and processes them through the same attention mechanisms.}{15}{Adapted CharBERT}
 
@@ -132,9 +231,9 @@ A straightforward solution involves repositioning the embedding layer from the T
 \label{par:3_tensor_transform}
 The third problem presents a more complex challenge. The TrOCR decoder relies on embeddings that are unique to TrOCR. Even for identical texts, the embedding representations generated by TrOCR and CharBERT differ significantly, further complicated by CharBERT's dual-channel embeddings. Not only do the models represent the same text differently, but their embedding dimensions are also incompatible. As a result, even though CharBERT is capable of processing embeddings directly, the TrOCR decoder input cannot be directly integrated into CharBERT without modifications. To overcome this issue, an architecture comprising CNN and FFNN is utilized. This strategy is designed to adjust the dimensions of the TrOCR decoder input to match those of the CharBERT token and character embeddings. Additionally, this dimensional transformation facilitates an effective alignment of representations between TrOCR and CharBERT. To clarify the architecture of the tensor transformation, dimensions will be noted after each input and output, using the format \texttt{(batch size, embedding size)}.
 
-\fig{images/tensor_transform.png}{fig:3_tensor_transform}{\textbf{Architectural flow of the adapted CharBERT and its integration with the TrOCR decoder through tensor transformation}\\The diagram shows how token and character embeddings from the adapted CharBERT are processed through separate tensor transformation pathways to align their dimensions and formats with the requirements of the TrOCR decoder input. Each transformation pathway involves a series of convolutional (Conv) and activation (Act) layers, interspersed with batch normalization (Batch Norm) and further refined by feedforward neural networks (FFNN) and additional activation layers, culminating in the combined decoder input.}{11}{Tensor Transform}
+\fig{images/tensor_transform.png}{fig:3_tensor_transform}{\textbf{Architectural flow of the adapted CharBERT and its integration with the TrOCR decoder through tensor transformation}\\The diagram shows how token and character embeddings from the adapted CharBERT are processed through separate tensor transformation pathways to align their dimensions and formats with the requirements of the TrOCR decoder input. Each transformation pathway involves a series of convolutional (Conv) and activation (Act) layers, interspersed with batch normalization (Batch Norm) and further refined by FFNN and additional activation layers, culminating in the combined decoder input.}{11}{Tensor Transform}
 
-"The objective of the tensor transform architecture is to adjust the dimensions of the TrOCR decoder input, which are initially set at \texttt{(batch size, 512, 1024)}, to match the dimensions required by CharBERT's token embeddings \texttt{(batch size, 510, 768)} and character embeddings \texttt{(batch size, 3060, 256)}. In this architecture, the second dimension represents the sequence length, and the third dimension represents the embedding size. The transformation process is divided into two distinct stages. In the first stage, the decoder input passes through a series of CNN layers, which are interspersed with LeakyReLU activation functions and batch normalization, specifically designed to adjust the sequence dimension (dim=1). Subsequently, the output from the first stage is processed through FFNN layers, with interspersed LeakyReLU activations, in the second stage to modify the embedding dimension (dim=2).
+The objective of the tensor transform architecture is to adjust the dimensions of the TrOCR decoder input, which are initially set at \texttt{(batch size, 512, 1024)}, to match the dimensions required by CharBERT's token embeddings \texttt{(batch size, 510, 768)} and character embeddings \texttt{(batch size, 3060, 256)}. In this architecture, the second dimension represents the sequence length, and the third dimension represents the embedding size. The transformation process is divided into two distinct stages. In the first stage, the decoder input passes through a series of CNN layers, which are interspersed with LeakyReLU activation functions and batch normalization, specifically designed to adjust the sequence dimension (dim=1). Subsequently, the output from the first stage is processed through FFNN layers, with interspersed LeakyReLU activations, in the second stage to modify the embedding dimension (dim=2).
 
 \begin{equation} \label{eq:3_tensor_transform_cnn}
     \begin{split}
@@ -203,7 +302,7 @@ The second tensor combination module is designed to dynamically allocate attenti
 
 \subparagraph*{Tensor Combine 3: Linear Layers as Attention Net}
 \label{subpar:3_linear_layers_as_attention_net}
-"The third tensor combination module builds upon the second module by incorporating linear layers as the attention network. Rather than merely performing mean pooling, this module employs linear layers interspersed with activation functions to more effectively capture relevant information when determining the weights. The process is described as follows:
+The third tensor combination module builds upon the second module by incorporating linear layers as the attention network. Rather than merely performing mean pooling, this module employs linear layers interspersed with activation functions to more effectively capture relevant information when determining the weights. The process is described as follows:
 \begin{equation} \label{eq:3_tensor_combine_linear_1}
     \begin{split}
         &\mathbf{T'}_{\text{norm}} = \text{Feature\_Norm}(\mathbf{T}')\\
@@ -231,7 +330,7 @@ The second tensor combination module is designed to dynamically allocate attenti
 \end{equation}
 \subparagraph*{Tensor Combine 4: Convolutional Layers as Attention Net}
 \label{subpar:3_convolutional_layers_as_attention_net}
-"The fourth tensor combination module substitutes linear layers with convolutional layers in the attention network. The equations below illustrate this attention network, which differs from the one described in \hyperref[subpar:3_linear_layers_as_attention_net]{Tensor Transform - Linear Layers as Attention Net}.
+The fourth tensor combination module substitutes linear layers with convolutional layers in the attention network. The equations below illustrate this attention network, which differs from the one described in \hyperref[subpar:3_linear_layers_as_attention_net]{Tensor Transform - Linear Layers as Attention Net}.
 \begin{equation} \label{eq:3_tensor_combine_conv}
     \tcbset{fonttitle=\scriptsize}
         \tcboxmath[colback=white,colframe=RoyalBlue]{\begin{split}
@@ -248,6 +347,16 @@ The second tensor combination module is designed to dynamically allocate attenti
 \fig{images/combine_3_4.png}{fig:3_combine_3_4}{\textbf{Architecture of the Tensor Combine Module 3 and 4}\\For each input sequence, the tensors are stacked and transformed through either linear or convolutional layers (detailed in the right two panels) to generate attention weights via a softmax function. The weights are then applied to compute a weighted mean, resulting in an attention-modified combined representation, which is subsequently fed into the TrOCR decoder.}{15}{Tensor Combine Module 3 and 4}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                          CharBERT Training and Evaluation Criteria                         %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Training CharBERT$_{\text{SMALL}}$}
+\label{sec:4_training_charbert_small}
+The training of CharBERT$_{\text{SMALL}}$ closely follow the methodology outlined by the original authors. The model undergoes training using pre-training objectives, specifically masked language modeling (MLM) and noisy language model (NLM), across a large text corpus. Training entails backpropagation and weight optimization to minimize prediction errors for both MLM and NLM tasks.
+
+While maintaining adherence to the \href{https://github.com/mawentao277/CharBERT/blob/main/shell/mlm.sh}{hyperparameters recommended by the original authors}, we made adjustments to the batch size, increasing it from the suggested size of 4 to 16, to expedite the computation process. The training process utilized five A100 GPUs, each equipped with 80GB of RAM, and spanned six days, comprising five training epochs.
+
+We train 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                    Glyph Incorporation                                     %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Glyph Incorporation}
@@ -258,15 +367,25 @@ By leveraging $\mathcal{P}_{ij}$, we refine our training methodology to introduc
 
 \subsection{Get $\mathcal{P}_{ij}$}
 \label{subsec:3_get_pij}
-To obtain $\mathcal{P}_{ij}$, it is first necessary to calculate the frequency of each character misrecognized by the recognizer (TrOCR), termed as \emph{misrecognized frequency}. This process begins with employing the basic TrOCR model to process the GW and IAM datasets. After generating text outputs with TrOCR, these are compared with the corresponding text labels to determine the frequencies of characters that were misrecognized.
+To obtain $\mathcal{P}_{ij}$, it is first necessary to calculate the frequency of each character misrecognized by the recognizer (TrOCR), termed as \emph{misrecognized frequency}. This process begins with employing the basic TrOCR model to process the GW and JH datasets. After generating text outputs with TrOCR, these are compared with the corresponding text labels to determine the frequencies of characters that were misrecognized.
 
-To align the generated outputs with the labels, we utilize the \say{Bio} package in Python, specifically referring to Biopython. This toolkit is primarily designed for biological computation, handling data such as DNA, RNA, and protein sequences, and offers extensive features for sequence analysis and alignments.
+To align the generated outputs with the labels, we utilize the \say{Bio} package in Python, specifically referring to Biopython. This toolkit is primarily designed for biological computation, handling data such as DNA, RNA, and protein sequences, and offers extensive features for sequence analysis and alignments. It also provides extensive features for sequence analysis and alignments, making it highly suitable for our needs. Below, we present an example of how the Bio package aligns OCR output with a label. For the OCR output \say{Company} and the label \say{company}, the toolkit not only matches each corresponding character but also identifies missing or misrecognised ones with vertical lines. This clear visualization allows us to easily determine which characters are frequently misrecognised by our recognition model. This example is particularly useful for understanding common recognition errors and adjusting the model accordingly.
 
-Although Biopython is not inherently designed for processing natural language texts, its tools for sequence matching and regular expressions can be adapted for text analysis applications. For instance, in our context, we can apply Biopython’s methodologies to perform precise character-by-character matching within text strings, identifying and annotating discrepancies. This approach demonstrates how Biopython’s core functionalities can be repurposed for non-biological applications, providing valuable methods for text data analysis and enhancing our understanding of text misrecognition patterns.
-\FIG{Add example}
+\begin{center}
+    \begin{minipage}{0.3\textwidth} 
+    \begin{verbatim}
+    0 *C-ompany*  9
+    0 |--||||||| 10
+    0 *-company*  9
+    \end{verbatim}
+    \end{minipage}
+\end{center}
+
+
+Although Biopython is not inherently designed for processing natural language texts, its tools for sequence matching and regular expressions can be adapted for text analysis applications. For instance, in our context, we can apply Biopython's methodologies to perform precise character-by-character matching within text strings, identifying and annotating discrepancies. This approach demonstrates how Biopython's core functionalities can be repurposed for non-biological applications, providing valuable methods for text data analysis and enhancing our understanding of text misrecognition patterns.
 
 \subsection{Training CharBERT$_{\mathcal{P}_{ij}}$}
 \label{subsec:3_training_charbert_pij}
-To train CharBERT$_{\text{SMALL}}$, we rigorously follow the methodologies delineated in the original CharBERT study. Specifically, the text undergoes processing through the dual-channel architecture, which encompasses both token and character channels, as elaborated in \href{subsec:3_corrector_charbert}{Subsection 3.3.3}. Additionally, we adhere to the hyperparameter settings outlined in the original CharBERT publication, details of which are available at this \href{https://github.com/mawentao277/CharBERT}{link}.
+To train CharBERT$_{\mathcal{P}_{ij}}$, we meticulously adhere to the methodologies outlined in the original CharBERT study. This involves processing text through the model's dual-channel architecture, which includes both token and character channels, as detailed in \Cref{subsec:3_corrector_charbert}. We also faithfully follow the hyperparameter settings recommended in the CharBERT publication, which are documented extensively at this \href{https://github.com/mawentao277/CharBERT}{link}.
 
-This adherence ensures that our training regimen remains consistent with established benchmarks, facilitating reliable comparisons and validations of our findings. The dual-channel architecture enables CharBERT to comprehensively analyze textual information at both granular and holistic levels, enhancing its learning efficacy. By maintaining the original hyperparameters, we aim to replicate the environment under which CharBERT was initially validated, thereby ensuring that any deviations in performance or outcomes can be attributed to the differences in training data or integration nuances rather than changes in the fundamental training conditions.
+In the conventional CharBERT training regimen, the model is typically conditioned by randomly adding, deleting, or swapping characters within the input text to simulate typical typographical errors, thereby training CharBERT to correct them. For our specific application focusing on OCR corrections, we have modified this approach by replacing the random swapping of characters with targeted replacements. These replacements are guided by the misrecognition probabilities $\mathcal{P}{ij}$, which were derived from the analysis of character frequencies in misrecognized words by the TrOCR system, as discussed earlier. This modification reflects the error patterns more commonly observed in OCR outputs, ensuring that our training process closely mimics real-world OCR challenges and optimizes CharBERT${\text{SMALL}}$ for more accurate error correction in this context.

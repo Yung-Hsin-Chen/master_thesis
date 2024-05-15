@@ -92,6 +92,8 @@
 \newcounter{myfootnote}[chapter]
 \renewcommand{\thefootnote}{\themyfootnote}
 \newcommand{\myfootnote}[1]{\stepcounter{myfootnote}\footnote{#1}}
+\newcommand{\mytablefootnote}[1]{\stepcounter{myfootnote}\tablefootnote{#1}}
+\newcommand{\mytnote}[1]{\stepcounter{myfootnote}\tnote{#1}}
 
 % command to import a figure
 \newcommand{\fig}[5]{
@@ -105,11 +107,32 @@
   \end{figure}
 }
 
+\newcommand{\twofig}[9]{
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}  % Adjusted for better fit
+        \centering  % Use \centering for consistency
+        \includegraphics[width=#3\textwidth]{#1}
+        \caption{}
+        \label{#2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}  % Adjusted for better fit
+        \centering
+        \includegraphics[width=#6\textwidth]{#4}
+        \caption{}
+        \label{#5}
+    \end{subfigure}
+    \caption[#9]{#8}  % Detailed caption for the figure
+    \label{#7}
+  \end{figure}
+}
+
 \newcommand{\figtable}[4]{
   \begin{figure}[h]
     \begin{center}
       {  
-	\footnotesize
+  \footnotesize
 	\sffamily
 	#3
       }
@@ -124,9 +147,10 @@
   \begin{table}[h]
     \begin{center}
       {  
-	\footnotesize
+	\normalsize
 	\sffamily
-	\renewcommand{\arraystretch}{1.4}
+	\renewcommand{\arraystretch}{1.5}
+  \setlength{\tabcolsep}{10pt}
 	#3
       }
     \end{center}
@@ -135,6 +159,32 @@
     \label{#1}
   \end{table}
 }
+
+\newcommand{\footnotetab}[4]{
+  \begin{table}[h]
+    \begin{center}
+      {  
+	\normalsize
+	\sffamily
+	\renewcommand{\arraystretch}{1.5}
+  \setlength{\tabcolsep}{10pt}
+	#3
+      }
+    \end{center}
+    \stepcounter{mytable}
+    \caption[#4]{#2}
+    \label{#1}
+  \end{table}
+}
+% \begin{table}[ht]
+%   \centering
+%   \begin{tabular}{cc}
+%       Header1 & Header2 \\
+%       Row1    & Data\tablefootnote{Footnote inside table.} \\
+%   \end{tabular}
+%   \caption{Table with footnote}
+%   \label{tab:my_table}
+%   \end{table}
 
 % command to refere to a figure
 \newcommand{\reffig}[1]{Figure \ref{#1}}
@@ -201,3 +251,12 @@
 \newcommandx{\FIG}[2][1=]{\todo[linecolor=ForestGreen,backgroundcolor=LimeGreen!25,bordercolor=ForestGreen,#1]{#2}}
 
 \usepackage{dirtytalk}
+\usepackage{fancyvrb}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{tablefootnote}
+\usepackage[flushleft]{threeparttable}
+% \usepackage{fontspec}
+% \newfontfamily\oldenglishfont{Junicode}
+
+\usepackage{cleveref}

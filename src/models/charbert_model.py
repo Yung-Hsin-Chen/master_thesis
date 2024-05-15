@@ -53,9 +53,9 @@ def initialise_charbert_model(experiment_version=None):
     if experiment_version:
         # print("here")
         model = get_fine_tuned_param(experiment_version)
-    # else:
-    #     model, state_dict, charbert_state_dict = get_pretrain_param()
-    #     model.load_state_dict(state_dict, strict=False)
+    else:
+        model, state_dict, charbert_state_dict = get_pretrain_param()
+        model.load_state_dict(state_dict, strict=False)
     #     # Check if the parameters are loaded correctly
     #     for name, param in model.named_parameters():
     #         # Set the print options to increase threshold
