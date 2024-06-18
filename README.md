@@ -1,5 +1,6 @@
-## TrOCR meets CharBERT - On-Going
-- [TrOCR meets CharBERT - On-Going](#trocr-meets-charbert---on-going)
+## TrOCR meets CharBERT
+This paper is accepted for presentation at ICDAR, 2024. In Proceedings of the ICDAR, 2024.
+- [TrOCR meets CharBERT](#trocr-meets-charbert)
 - [Data](#data)
 - [Get Report](#get-report)
 - [Run Source Codes](#run-source-codes)
@@ -7,7 +8,7 @@
 
 ## Data
 Data used in the project can be downloaded online.
-1. [IAM Handwritten Dataset](https://fki.tic.heia-fr.ch/databases/iam-handwriting-database)
+1. [JH Handwritten Dataset](https://github.com/jschaefer738b/JosephHookerHTR)
 2. [GW Handwritten Dataset](https://fki.tic.heia-fr.ch/databases/washington-database)
 
 ## Get Report
