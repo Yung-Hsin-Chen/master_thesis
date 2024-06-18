@@ -61,7 +61,7 @@ def record_character_mismatches(matches):
             # print(a2[1:-1])
             # print("\n")
             alignment = next(aligner.align(a1, a2))
-            print(alignment)
+            # print(alignment)
 
             # Convert alignment to string and split into lines for analysis
             alignment_str = str(alignment).split('\n')
@@ -113,11 +113,14 @@ def heatmap(mismatches, threshold):
         i, j = char_index[incorrect], char_index[correct]
         freq_matrix[i, j] = count
 
+    print(mismatches)
+
     # Normalize the matrix if desired (here we're just using raw counts)
     # For normalization, you could divide each cell by the total number of mismatches, for example
 
     # Generate the heatmap
     plt.figure(figsize=(10, 8))
+    print(freq_matrix)
     sns.heatmap(freq_matrix, annot=False, cmap='YlOrBr', xticklabels=characters, yticklabels=characters)
     # sns.heatmap(freq_matrix, annot=False, cmap='flag', xticklabels=characters, yticklabels=characters)
     plt.title('Heatmap of Character Misrecognitions')

@@ -60,12 +60,12 @@ def main(**kwargs):
         # for cv in ["cv1"]:
         for cv in ["cv1", "cv2", "cv3", "cv4"]:
             if mode=="train":
-                train_loader = data_dict["combined"]["cv1"]["train"]
-                val_loader = data_dict["combined"]["cv1"]["val"]
-                test_loader = data_dict["combined"]["cv1"]["test"]
-                # train_loader = data_loaders[cv]["train"]
-                # val_loader = data_loaders[cv]["val"]
-                # test_loader = data_loaders[cv]["test"]
+                # train_loader = data_dict["combined"]["cv1"]["train"]
+                # val_loader = data_dict["combined"]["cv1"]["val"]
+                # test_loader = data_dict["combined"]["cv1"]["test"]
+                train_loader = data_loaders[cv]["train"]
+                val_loader = data_loaders[cv]["val"]
+                test_loader = data_loaders[cv]["test"]
                 # test_loader = data_dict["iam"]["cv1"]["test"]
                 arguments = {"experiment_version": experiment_version, "train_loader": train_loader, 
                             "val_loader": val_loader, "test_loader": test_loader, "device": device, 
@@ -118,6 +118,6 @@ if __name__=="__main__":
         # "layers": [],
         "model": "trocr_charbert", # trocr/trocr_charbert/trocr_charbert_small
         "data": "gw", # gw/iam
-        "text_file": "gw_iam_adapt"
+        "text_file": "gw_no_batch_norm"
     }
     main(**keys)

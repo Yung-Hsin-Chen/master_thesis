@@ -113,6 +113,7 @@
     \begin{subfigure}[b]{0.45\textwidth}  % Adjusted for better fit
         \centering  % Use \centering for consistency
         \includegraphics[width=#3\textwidth]{#1}
+        % \stepcounter{myfigure}
         \caption{}
         \label{#2}
     \end{subfigure}
@@ -120,9 +121,13 @@
     \begin{subfigure}[b]{0.45\textwidth}  % Adjusted for better fit
         \centering
         \includegraphics[width=#6\textwidth]{#4}
+        % \stepcounter{myfigure}
         \caption{}
         \label{#5}
     \end{subfigure}
+    \stepcounter{myfigure}
+    % \addtocounter{figure}{-1} 
+    \refstepcounter{figure}
     \caption[#9]{#8}  % Detailed caption for the figure
     \label{#7}
   \end{figure}
@@ -256,7 +261,8 @@
 \usepackage{enumitem}
 \usepackage{tablefootnote}
 \usepackage[flushleft]{threeparttable}
-% \usepackage{fontspec}
-% \newfontfamily\oldenglishfont{Junicode}
+\usepackage{fontspec}
+\newfontfamily\oldenglishfont{Junicode}
 
 \usepackage{cleveref}
+\usepackage{pdflscape}

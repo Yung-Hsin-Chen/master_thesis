@@ -57,31 +57,31 @@ class TensorTransform(nn.Module):
     def forward(self, x):
         # Apply first convolution layer
         x = self.conv1(x)
-        x = self.batch_norm_cnn1(x)
+        # x = self.batch_norm_cnn1(x)
         x = self.relu(x)
         x = self.dropout(x)
         # Apply second convolution layer
         x = self.conv2(x)
-        x = self.batch_norm_cnn2(x)
+        # x = self.batch_norm_cnn2(x)
         x = self.relu(x)
         x = self.dropout(x)
         # Apply third convolution layer
         x = self.conv3(x)
-        x = self.batch_norm_cnn3(x)
+        # x = self.batch_norm_cnn3(x)
         x = self.relu(x)
         x = self.dropout(x)
         # Flatten
         # Apply first FFNN layer
         x = self.ffnn1(x)
         x = x.transpose(1, 2) 
-        x = self.batch_norm_ffnn1(x)
+        # x = self.batch_norm_ffnn1(x)
         x = self.relu(x)
         x = self.dropout(x)
         x = x.transpose(1, 2) 
         # Apply second FFNN layer
         x = self.ffnn2(x)
         x = x.transpose(1, 2) 
-        x = self.batch_norm_ffnn2(x)
+        # x = self.batch_norm_ffnn2(x)
         x = self.relu(x)
         x = self.dropout(x)
         x = x.transpose(1, 2) 

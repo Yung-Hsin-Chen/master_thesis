@@ -1,0 +1,42 @@
+\newchap{Conclusion}
+\label{chap:6_conclusion}
+In this study, we aimed to enhance OCR performance and overcome the limitations of physical documents by integrating language models (LM) into OCR models as a corrector. TrOCR and CharBERT were chosen for their state-of-the-art (SOTA) results and suitability for our task respectively. The study sought to answer how the composite model affects OCR performance, improves domain adaptation, and benefits from incorporating common OCR errors during training. We conducted a comprehensive analysis of our composite OCR model, integrating various components and techniques to enhance text recognition and correction accuracy. Our findings provide valuable insights into the effectiveness of different model configurations and the impact of fine-tuning on OCR performance. Below, we present a summary of findings and future work.
+
+\section{Summary of Findings}
+In this section, we discuss the summary of findings through our experiments, highlighting the key insights and advancements made. This study has demonstrated the efficacy of integrating language models with OCR systems to enhance text recognition and correction accuracy. The following sections detail the specific outcomes and implications of the work.
+
+\paragraph*{Pij Matrix Analysis}
+We began by examining the $\mathcal{P}_{ij}$ matrix, which quantifies the probabilities of character misrecognitions. This analysis highlighted common errors, such as the frequent misrecognition of visually similar characters, and provided a clear understanding of the error dynamics within our model. These insights are crucial for refining our language model to address specific character pairs prone to misrecognition, thereby enhancing the overall accuracy and reliability of the OCR system.
+
+\paragraph*{Component Analysis and Benchmarking}
+The integration of CharBERT with TrOCR proved to be highly effective in preserving the authenticity of original texts while minimizing over-correction tendencies. This hybrid approach, particularly when the TrOCR encoder and decoder were frozen, demonstrated enhanced performance in post-OCR corrections, leveraging both visual information and linguistic knowledge to make more informed decisions about text amendments.
+
+Our experiments with dropout mechanisms and tensor module combinations further highlighted the necessity for tailored configurations based on dataset-specific characteristics. The variability in model performance across different dropout rates and tensor modules indicates that optimal settings must be carefully selected to match the unique features of each dataset.
+
+The benchmarking against GPT-4o illustrated the limitations of using language models without access to image information for post-OCR correction. While GPT-4o is powerful, its lack of image context and over-correction tendencies resulted in suboptimal performance compared to our TrOCR-CharBERT model.
+
+\paragraph*{Cross-Dataset Performance}
+Despite the good results from our composite model, the cross-dataset performance analysis underscored the challenges of domain adaptation and the benefits of training on diverse datasets. Models trained on a combined dataset (GW and JH) exhibited improved generalization capabilities, confirming the importance of incorporating a broad spectrum of data characteristics during the training phase.
+
+\paragraph*{Domain Adaptability}
+Our investigation into the adaptability of CharBERT to historical texts revealed that even LMs trained on contemporary English can effectively process historical data. This adaptability highlights the robustness of language models like CharBERT, which can fine-tune to the nuances of different textual styles while maintaining generalization capacity.
+
+\paragraph*{Common OCR Errors Integration}
+Finally, the TrOCR-CharBERT${\mathcal{P}{ij}}$ model, which incorporates common OCR mistakes into its training process, demonstrated improved performance. This approach, particularly effective for more homogeneous datasets like GW, underscores the value of leveraging large, diverse training data to enhance OCR accuracy and robustness.
+
+Although the composite model did not excel in cross-dataset performance when trained on a single dataset and did not significantly outperform fine-tuned TrOCR despite its larger parameter size, it still has notable merits. Access to image information enables the LM to correct words more accurately and prevent over-correction. Integrating common OCR errors into the LM training process also enhances the model's performance by making it more aware of frequent recognition mistakes. Additionally, this model can reduce the need for extensive domain-specific training data, as the LM can adapt to and correct text from different time periods, even when trained on contemporary data. Thus, integrating a recognizer and a language model remains a valid and promising approach, offering significant benefits worth further exploration.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                         Future Work                                        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Future Work}
+Our study demonstrates the effectiveness of integrating fine-tuning, component freezing, dropout mechanisms, and tailored tensor modules to optimize OCR model performance. The hybrid TrOCR-CharBERT model, with its balanced approach to leveraging visual and linguistic information, stands out as a robust solution for historical text recognition and correction. Future work should focus on enhancing domain adaptability and generalization across diverse handwriting datasets, as well as making the model more lightweight.
+
+Potential areas for future research include:
+
+\paragraph*{Enhanced Domain Adaptability}
+Future models should adapt to an even broader range of textual styles and domains, including non-English scripts and older periods of English. This expansion can widen the applications of OCR tasks and assist users with different backgrounds and mother tongues. Additionally, developing a multilingual language model could enable the accurate OCR of documents containing mixed languages.
+
+\paragraph*{Weight Reduction}
+Despite the benefits of the composite model, it is computationally intensive to train. Future work should also focus on making it lightweight while maintaining performance. Reducing the model's size and computational requirements can enhance its efficiency and applicability.
+
+In conclusion, our research highlights the potential of combining advanced OCR and language models to achieve high accuracy in text recognition and correction tasks. By continuing to innovate and refine these techniques, we can significantly improve the accessibility and usability of digitized text from a wide range of sources.

@@ -1,69 +1,75 @@
 
 \newchap{Results and Discussion}
 \label{chap:5_results_and_discussion}
-
+In this chapter, we present a detailed analysis of the performance of our composite model, focusing on its effectiveness in recognizing and correcting text. These results address the research questions posed in this study. The chapter begins with an examination of the $\mathcal{P}_{ij}$ matrix, which quantifies the probabilities of character misrecognitions, highlighting common errors and providing insights into the error dynamics of the model. These insights will be integrated into the model for evaluation. This is followed by a component analysis and benchmarking results, where we evaluate the impact of fine-tuning, freezing specific layers, integrating dropout mechanisms, and combining different tensor modules on model performance. We then benchmark the TrOCR-CharBERT model against GPT-4o. The chapter also explores the cross-dataset performance, illustrating the challenges of domain adaptation and the benefits of training on diverse datasets. Next, we discuss the results of the TrOCR-historical CharBERT$_{\text{SMALL}}$, investigating whether the language model (LM) trained on historical data enables TrOCR-CharBERT to adapt as well as TrOCR-historical CharBERT$_{\text{SMALL}}$. Finally, we examine the TrOCR-CharBERT$_{\mathcal{P}_{ij}}$ model, which incorporates common OCR mistakes. This analysis shows improved performance and underscores the importance of leveraging large, diverse training data for enhancing OCR accuracy and robustness.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%                                           Results                                          %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{$\mathcal{P}_{ij}$ Matrix}
 \label{sec:5_pij_matrix}
-As detailed in \hyperref[subsec:3_get_pij]{Subsection 3.4.1}, the $\mathcal{P}_{ij}$ matrix encapsulates the probabilities of a correct character $i$ being misrecognized as another character $j$. This matrix is a pivotal component in our analysis, providing a quantitative measure of the likelihood of error between different character transitions within the OCR process. Below, we present a subset of the matrix, highlighting the top 14 most commonly misrecognized characters. These entries have been selected due to their higher frequency of occurrence, which suggests significant areas where the CharBERT model may benefit from further training. The visual representation of these misrecognition probabilities, as shown in \autoref{fig:5_pij_matrix}, provides a clear and immediate insight into the error dynamics of the model. 
+As detailed in \Cref{subsec:3_get_pij}, the $\mathcal{P}_{ij}$ matrix encapsulates the probabilities of a correct character $i$ being misrecognized as another character $j$. This matrix provides a quantitative measure of the likelihood of error between different character transitions within the OCR process. Below, we present a subset of the matrix, highlighting the top 8 most commonly misrecognized characters. The visual representation of these misrecognition probabilities, as shown in \Cref{fig:5_pij_matrix}, provides a clear and immediate insight into the error dynamics of the model. 
+
+Notably, characters such as \say{,} and \say{.,} \say{C} and \say{b,} \say{C} and \say{c,} and \say{7} and \say{9} are frequently misrecognized, suggesting visual similarities that the OCR model struggles to distinguish. The visualization provides immediate insights into the error dynamics, identifying specific character pairs prone to misrecognition. This information is crucial for refining the our LM, as targeted improvements can be made to address these common errors. Overall, understanding these error patterns is essential for enhancing the composite model's accuracy and reliability.
 
 \fig{images/pij_matrix.png}{fig:5_pij_matrix}{\textbf{Heatmap of Character Misrecognitions $\mathcal{P}_{ij}$}\\This visual representation illustrates the frequency of common misrecognitions between various characters, as outlined in our study. The x-axis represents the correct characters, and the y-axis shows the characters as they were misrecognized by the OCR system. The color gradient, ranging from light yellow to dark brown, indicates the relative frequency of each misrecognition event, with darker shades representing higher frequencies. This analysis helps identify specific characters that are prone to misrecognition, facilitating targeted improvements in the OCR model.}{15}{$\mathcal{P}_{ij}$ Matrix}
 
 \section{Component Analysis and Benchmarking Results}
 \label{sec:5_component_analysis_and_benchmarking_results}
-As outlined in \hyperref[subsec:4_component_analysis_and_benchmarking]{Subsection 4.4.1}, several analytical experiments were conducted to optimize the model's performance. These experiments included comparing the effects of freezing specific layers to determine their impact on learning, integrating dropout mechanisms to enhance generalization, evaluating different combinations of tensor modules for optimal processing, assessing various loss functions to improve training efficiency, and benchmarking the model against GPT-4 to gauge its competitive standing.
+As outlined in \Cref{subsec:4_component_analysis_and_benchmarking}, several analytical experiments were conducted to optimize the model's performance. These experiments included comparing the effects of freezing specific layers to determine their impact on learning, integrating dropout mechanisms to enhance generalization, evaluating different combinations of tensor modules for optimal processing, assessing various loss functions to improve training efficiency, and benchmarking the model against GPT-4o to examine its competitive standing.
 
 \subsection{Baseline Models}
 \label{subsec:5_baseline_models}
-For the GW dataset, fine-tuning significantly improved model accuracy. When fine-tuning was not applied, the WER and CER were relatively high at 37.76\% and 15.40\%, respectively. However, after fine-tuning, these rates dropped to 14.44\% for WER and 4.78\% for CER, showcasing a substantial enhancement in model performance.
+The results of the baseline models are shown in \Cref{tab:5_res}. For the George Washington (GW) dataset, fine-tuning significantly improved model accuracy. When fine-tuning was not applied, the WER and CER were relatively high at 37.76\% and 15.40\%, respectively. However, after fine-tuning, these rates dropped to 14.44\% for WER and 4.78\% for CER, showcasing a substantial enhancement in model performance.
 
-Similarly, for the JH dataset, the benefits of fine-tuning were pronounced. Without fine-tuning, the model performed poorly, with a WER of 91.31\% and a CER of 58.57\%. Post fine-tuning, these figures improved to 36.97\% for WER and 20.28\% for CER, indicating a marked improvement in the model's ability to accurately transcribe text.
+Similarly, for the Joseph Hooker (JH) dataset, the benefits of fine-tuning were pronounced. Without fine-tuning, the model performed poorly, with a WER of 91.31\% and a CER of 58.57\%. Post fine-tuning, these figures improved to 36.97\% for WER and 20.28\% for CER, indicating a marked improvement in the model's ability to accurately transcribe text.
 
 These results clearly demonstrate that fine-tuning has a significant positive effect on reducing error rates and thereby enhancing the overall accuracy of the model across different datasets.
 
 \tab{tab:5_res}{Baseline Model Results}{%
-    \begin{tabular}{ll|rrl}
+    \begin{tabular}{llrr}
         \toprule
-        Dataset	& Fine-Tune                                 & WER	& CER	& File Name	\\
+        Dataset	& Fine-Tune                                 & WER	& CER		\\
         \midrule
-        GW		& False	                                	& 37.76	& 15.40	& gw\\
-        GW		& True	                        	        & 14.44 & 4.78	& gw\_ft\\
+        GW		& False	                                	& 37.76	& 15.40	\\
+        GW		& True	                        	        & 14.44 & 4.78	\\
         \midrule
-        JH		& False		                                & 91.31 & 58.57 & iam\\
-        JH		& True 		                                & 36.97 & 20.28 & iam\_ft\\
+        JH		& False		                                & 91.31 & 58.57 \\
+        JH		& True 		                                & 36.97 & 20.28 \\
         \bottomrule
     \end{tabular}
 }{Baseline Model Results}
 
-\paragraph*{Output Texts Analysis - Over-Correction} 
+\paragraph*{Output Texts Analysis -- Over-Correction} 
 Upon examining the GW dataset TrOCR outputs without fine-tuning, it becomes apparent that TrOCR tends to over-correct the text. As illustrated below, TrOCR autocorrects \say{Expamples} (an original misspelling by George Washington) to \say{Examples,} the correct form of the word. Additionally, it completes the truncated word \say{gene} as \say{general} presuming the word was inadvertently cut short. 
 
 \begin{center}
     \begin{minipage}{1.0\textwidth}
     \begin{Verbatim}[commandchars=\\\{\}]
         {\small\textcolor{Gray}{Test on GW Dataset Without Fine-Tuning}}
+        label:  est occasion for Expamples, will be morally im 
+        output: cut occasion for Examples, will be morally in-
+
+        {\small\textcolor{Gray}{Test on GW Dataset Without Fine-Tuning}}
         label:  have a very good effect. The Commonalty in gene
         output: have a very good effect. Then commonly in general
 
-        {\small\textcolor{Gray}{Test on GW Dataset Without Fine-Tuning}}
-        label:  est occasion for Expamples, will be morally im 
-        output: cut occasion for Examples, will be morally in-
+        {\small\textcolor{Gray}{Test on GW Dataset After Fine-Tuning}}
+        label:  that were expected in; and to wait the ar
+        output: That were expected in; and to wait the arm
     \end{Verbatim}
-    \end{minipage}
+\end{minipage}
 \end{center}
 
-This tendency to over-correct is particularly noticeable at the end of sentences where the last word is truncated, a frequent occurrence in the George Washington (GW) dataset. TrOCR often attempts to complete these cut-off words, or it may substitute them with a different word that, while seemingly appropriate, is irrelevant to the original token image. In some cases, TrOCR even transforms the incomplete word into a completely fabricated term.
+This tendency to over-correct is particularly noticeable at the end of sentences where the last word is truncated, a frequent occurrence in the GW dataset. TrOCR often attempts to complete these cut-off words, or it may substitute them with a different word that, while seemingly appropriate, is irrelevant to the original token image. In some cases, TrOCR even transforms the incomplete word into a non-existent word.
 
-Notably, this tendency to over-correct persists even after fine-tuning, indicating that TrOCR consistently aims to standardize text regardless of the context. In the case of the George Washington (GW) testing dataset, which includes 30 labels ending with unfinished words, the fine-tuned TrOCR correctly resolved only 5 of these instances. Often, it either attempted to complete them or altered them into entirely different words. In contrast, the best-performing integration of TrOCR with CharBERT correctly handled 10 of these cases, attempting to complete the word only once, compared to the eight times observed with the fine-tuned TrOCR. This improvement demonstrates that adding a language model (LM) to the end-to-end OCR system provides valuable access to both language and image information, enhancing the model's ability to process and preserve the textual integrity of historical documents. The distribution of these outcomes is depicted in Figure \ref{fig:2_complete}.
+Notably, this tendency to over-correct persists even after fine-tuning (such as changing \say{ar} to \say{arm} in the example above), indicating that TrOCR consistently aims to standardize text regardless of the context. In the case of the GW testing dataset, which includes 30 labels ending with unfinished words, the fine-tuned TrOCR correctly resolved only 5 of these instances. Often, it either attempted to complete them or altered them into entirely different words. In contrast, the best-performing integration of TrOCR with CharBERT correctly handled 10 of these cases, attempting to complete the word only once, compared to the eight times observed with the fine-tuned TrOCR. This improvement demonstrates that adding an LM to the end-to-end OCR system provides valuable access to both language and image information, enhancing the model's ability to process and preserve the textual integrity of historical documents. The distribution of these outcomes is depicted in \Cref{fig:5_complete}.
 
-\fig{images/complete.png}{fig:2_complete}{\textbf{Comparison of Outcomes for TrOCR Fine-Tuned vs. Best Performed TrOCR-CharBERT}\\This figure illustrates the percentage of outcomes for unfinished word scenarios within the GW dataset, comparing the fine-tuned TrOCR and the TrOCR-CharBERT. The categories \say{Complete word,} \say{Other word,} and \say{Not a word} indicate whether the model attempted to complete the unfinished words, substituted them with a different word it deemed fit, or transformed them into non-words, respectively. The pie charts reveal that the integration with CharBERT significantly reduces the instances of attempting to complete words erroneously, demonstrating its ability to more accurately preserve the original text integrity.}{17}{TrOCR Output Pie Chart}
+\fig{images/complete.png}{fig:5_complete}{\textbf{Comparison of Outcomes for TrOCR Fine-Tuned vs. Best Performed TrOCR-CharBERT}\\This figure illustrates the percentage of outcomes for unfinished word scenarios within the GW dataset, comparing the fine-tuned TrOCR and the TrOCR-CharBERT. Fine-tuned TrOCR has 25 incorrect unfinished transcriptions, while TrOCR-CharBERT has 20. The categories \say{Complete word,} \say{Other word,} and \say{Not a word} indicate whether the model attempted to complete the unfinished words, substituted them with a different word it deemed fit, or transformed them into non-words, respectively. The pie charts reveal that the integration with CharBERT significantly reduces the instances of attempting to complete words erroneously, demonstrating its ability to more accurately preserve the original text integrity.}{17}{TrOCR Output Pie Chart}
 
 The findings from the TrOCR outputs highlight its inherent ability to correct and complete words based on its learned understanding from training data. While this functionality showcases TrOCR's robustness in rectifying spelling errors and incomplete entries, it also introduces potential inaccuracies when dealing with OCR tasks where original spellings and phrasings are crucial for authenticity. The model's tendency to standardize text could be a drawback in contexts where the preservation of original language nuances is necessary.
 
-\paragraph*{Output Texts Analysis - Poor Performance on JH Dataset}
-The performance on the JH dataset is notably poor. This may be attributed, firstly, to Joseph Hooker's tendency to write in an ascending manner, which often results in cropping that inadvertently includes lines from adjacent text, as depicted in \autoref{fig:5_ascend}. Such cropping may distract the TrOCR from accurately recognizing the text. Secondly, the elegance of Joseph Hooker's handwriting, while aesthetically pleasing, presents readability challenges due to its cursive style and unique letter formations. Additionally, a few images (fewer than 10) contain printed rather than handwritten letters, as illustrated in \autoref{fig:5_the_camp}. In this example, TrOCR recognized \say{THE Camp.} instead of the correct label \say{THE CAMP.} as shown below. Despite the fact that TrOCR's handwritten model can recognize printed letters, it struggles with correct capitalization. Although these instances are relatively rare, they still contribute to the overall error rate of the task.
+\paragraph*{Output Texts Analysis -- Poor Performance on JH Dataset}
+The performance on the JH dataset is notably poor. This may be attributed, firstly, to Joseph Hooker's tendency to write in an ascending manner, which often results in cropping that inadvertently includes lines from adjacent text, as depicted in Figure \hyperref[fig:5_ascend_]{24a}. Such cropping may distract the TrOCR from accurately recognizing the text. Secondly, the elegance of Joseph Hooker's handwriting, while aesthetically pleasing, presents readability challenges due to its cursive style and unique letter formations. Additionally, a few images (fewer than 10) contain printed rather than handwritten letters, as illustrated in \hyperref[fig:5_the_camp_]{24a}. In this example, TrOCR recognized \say{THE Camp.} instead of the correct label \say{THE CAMP.} as shown below. Despite the fact that TrOCR's handwritten model can recognize printed letters, it struggles with correct capitalization. Although these instances are relatively rare, they still contribute to the overall error rate of the task.
 
 \begin{center}
     \begin{minipage}{0.7\textwidth}
@@ -75,36 +81,39 @@ The performance on the JH dataset is notably poor. This may be attributed, first
     \end{minipage}
 \end{center}
 
-\twofig{images/ascend.jpg}{fig:5_ascend}{1.3}{images/the_camp.jpg}{fig:5_the_camp}{0.5}{fig:5_jh_poor_image}{\textbf{JH Dataset Poor Image Examples}\\The subpar performance on the JH dataset is largely due to Joseph Hooker's ascending handwriting style, which often leads to line cropping and text overlap, as shown in Figure a. This can interfere with accurate text recognition. Moreover, Hooker's cursive handwriting, while visually appealing, is challenging to read due to unique letter formations. A few instances of printed text, rather than handwritten, are also present, shown in Figure b, contributing to the overall error rate.}{JH Dataset Poor Image Examples}
+\twofig{images/ascend.jpg}{fig:5_ascend_}{1.3}{images/the_camp.jpg}{fig:5_the_camp_}{0.5}{fig:5_jh_poor_image}{\textbf{JH Dataset Poor Image Examples}\\The subpar performance on the JH dataset is largely due to Joseph Hooker's ascending handwriting style, which often leads to line cropping and text overlap, as shown in Figure (a). This can interfere with accurate text recognition. Moreover, Hooker's cursive handwriting, while visually appealing, is challenging to read due to unique letter formations. A few instances of printed text, rather than handwritten, are also present, shown in Figure (b), contributing to the overall error rate.}{JH Dataset Poor Image Examples}
 
 \subsection{Freezing Specific Layers}
 \label{subsec:5_freezing_specific_layers}
-For the GW dataset, results showed significant variation depending on the configuration of frozen components. The lowest WER and CER were observed when both the TrOCR encoder and decoder were frozen. This suggests that the model performs optimally when only the components connecting CharBERT and TrOCR, as well as the CharBERT components themselves, are trainable. Other configurations involving freezing combinations did not yield as favorable outcomes.
+The result of this analysis is shown in \Cref{tab:5_res_freeze}. For the GW dataset, results showed significant variation depending on the configuration of frozen components. The lowest WER and CER were observed when both the TrOCR encoder and decoder were frozen. This suggests that the model performs optimally when only the components connecting CharBERT and TrOCR, as well as the CharBERT components themselves, are trainable. Other configurations involving freezing combinations did not yield as favorable outcomes.
 
 Conversely, the JH dataset exhibited less variability in response to component freezing. Although freezing both the TrOCR encoder and decoder also yielded marginally better results compared to other configurations, the improvements were not as pronounced as those observed in the GW dataset. This indicates a dataset-specific response to the freezing of model components, highlighting the need for tailored strategies depending on the characteristics of the data being processed.
 
-This experience underscore a significant variation in the performance of the TrOCR model across two datasets, GW and JH, in response to different component freezing configurations. For the GW dataset, the best performance—indicated by the lowest WER and CER—was achieved when both the TrOCR encoder and decoder were frozen, suggesting optimal functionality when only the CharBERT-related components are active. In contrast, the JH dataset demonstrated less sensitivity to component freezing, with marginal improvements observed when both the encoder and decoder were frozen, compared to other configurations. These results highlight the importance of customizing model training strategies to accommodate the specific attributes and requirements of different datasets.
+This experiment indicates that the TrOCR encoder and decoder should remain frozen, as they are thoroughly trained on a large dataset, and further training may disrupt the patterns they have captured. On the other hand, CharBERT is essential and must be trained, as the model performs best when CharBERT and the connecting components are trainable. This suggests that CharBERT needs to be trained to adapt to the specific characteristics of the dataset, indicating its importance in the overall model performance. This finding will be elaborated on later.
+
+On the other hand, the composite model performs better on WER but worse on CER comparing to TrOCR after fine-tuning. The model is effective at correctly identifying the overall words, including their boundaries and identities within the text. However, despite accurately recognizing many words, it struggles with the finer details of spelling and character composition within those words. This suggests that the LM component is strong, aiding the model in predicting words correctly based on context, while the character recognition component may be weaker. Although character-level tokenization is expected to help maintain the finer details of words, this observation indicates that it might not be as effective as anticipated. The model's over-reliance on the context provided by the LM component may lead it to prioritize getting the overall word correct at the expense of character accuracy.
+
 
 \tab{tab:5_res_freeze}{Freezing Specific Layers Results}{%
-\begin{tabular}{ll|rrl}
+\begin{tabular}{llrr}
     \toprule
-    Dataset	& Freeze                                  	& WER	& CER	& File Name	\\
+    Dataset	& Freeze                                  	& WER	& CER		\\
     \midrule
-    GW		& None	                                	& 17.13	& 10.17	& gw\_none\\
-    GW		& TrOCR encoder	                        	& 25.09	& 15.39	& gw\_encoder\\
-    GW	    & TrOCR decoder	                            & 17.46	& 10.49	& gw\_decoder\\
-    GW	    & TrOCR encoder, decoder	                & 12.84	& 5.88	& gw\_01\\
+    GW		& None	                                	& 17.13	& 10.17	\\
+    GW		& TrOCR encoder	                        	& 25.09	& 15.39	\\
+    GW	    & TrOCR decoder	                            & 17.46	& 10.49	\\
+    GW	    & TrOCR encoder, decoder	                & 12.84	& 5.88	\\
     \midrule
-    JH		& None		                                & 36.06 & 22.11 & iam\_none\\
-    JH		& TrOCR encoder		                        & 34.74 & 22.32 & iam\_encoder\\
-    JH	    & TrOCR decoder                          	& 35.17 & 21.95 & iam\_decoder\\
-    JH	    & TrOCR encoder, decoder	                & 35.63	& 21.90	& iam\_encoder\_decoder\\ 
+    JH		& None		                                & 36.06 & 22.11 \\
+    JH		& TrOCR encoder		                        & 34.74 & 22.32 \\
+    JH	    & TrOCR decoder                          	& 35.17 & 21.95 \\
+    JH	    & TrOCR encoder, decoder	                & 35.63	& 21.90	\\ 
     \bottomrule
     \end{tabular}
 }{Freezing Specific Layers Results}
 
-\paragraph*{Output Texts Analysis - TrOCR combined with CharBERT}
-When TrOCR is combined with CharBERT, the enhanced model achieves more precise post-corrections. Unlike TrOCR alone, which may over-correct or erroneously complete words, this hybrid approach maintains the authenticity of the original images. For example, as discussed in \hyperref[subsec:5_baseline_models]{Subsection 5.3.1}, TrOCR incorrectly extends \say{gene} to \say{general} and correct \say{Expamples} to \say{Examples.} By integrating CharBERT, the model leverages both visual information and linguistic knowledge, enabling it to make more informed decisions about when to amend text and when to preserve the original input. This is particularly effective in the JH dataset, where the combined model correctly recognizes \say{THE CAMP.,} accurately handling printed letters without the capitalization errors seen with TrOCR alone.
+\paragraph*{Output Texts Analysis -- TrOCR combined with CharBERT}
+When TrOCR is combined with CharBERT, the enhanced model achieves more precise post-corrections. Unlike TrOCR alone, which may over-correct or erroneously complete words, this hybrid approach maintains the authenticity of the original images. For example, as discussed in \Cref{subsec:5_baseline_models}, TrOCR incorrectly extends \say{gene} to \say{general} and correct \say{Expamples} to \say{Examples.} By integrating CharBERT, the model leverages both visual information and linguistic knowledge, enabling it to make more informed decisions about when to amend text and when to preserve the original input. This is particularly effective in the JH dataset, where the combined model correctly recognizes \say{THE CAMP.,} accurately handling printed letters without the capitalization errors seen with TrOCR alone.
 
 \begin{center}
     \begin{minipage}{1.0\textwidth}
@@ -124,7 +133,7 @@ When TrOCR is combined with CharBERT, the enhanced model achieves more precise p
     \end{minipage}
 \end{center}
 
-\paragraph*{Output Texts Analysis - Effects on Freezing Different Layers}
+\paragraph*{Output Texts Analysis -- Effects on Freezing Different Layers}
 Although the integration of TrOCR with CharBERT significantly enhances OCR and post-OCR correction tasks, these benefits are primarily observed when the encoder and decoder are frozen. Models with other component configurations perform suboptimally. They do not over-correct or complete sentences as TrOCR alone does, yet the accuracy of their output remains questionable, as demonstrated by the following examples:
 
 \begin{center}
@@ -148,7 +157,7 @@ Although the integration of TrOCR with CharBERT significantly enhances OCR and p
 This discrepancy may stem from several factors:
 
 \subparagraph*{Feature Stability}
-Freezing the encoder and decoder in TrOCR maintains the stability of the features extracted from images. As a transformer-based OCR model, TrOCR is adept at effectively extracting text. By freezing these components, the pre-trained weights, which are proficient at capturing crucial image features, remain unaltered during additional training with CharBERT. This preservation is essential for accurate OCR.
+Freezing the encoder and decoder in TrOCR maintains the stability of the features extracted from images. As a transformer-based OCR model, TrOCR is effective at effectively extracting text. By freezing these components, the pre-trained weights, which are proficient at capturing crucial image features, remain unaltered during additional training with CharBERT. This preservation is essential for accurate OCR. In addition, activating both components could cause CharBERT's gradient during backpropagation to negatively impact TrOCR's feature extraction, degrading core OCR functionality. Freezing focuses optimization on linguistic corrections without undermining OCR capabilities.
 
 \subparagraph*{Avoiding Catastrophic Forgetting}
 In fine-tuning deep learning models for new tasks, there is a risk of catastrophic forgetting, where the model loses its previously learned knowledge—here, its OCR capabilities. Freezing the encoder and decoder helps prevent this loss.
@@ -157,61 +166,58 @@ In fine-tuning deep learning models for new tasks, there is a risk of catastroph
 With the OCR components frozen, CharBERT primarily enhances language understanding and error correction, based on the context it detects. CharBERT, designed to handle textual inaccuracies and contextual understanding, thus focuses on refining the text output.
 
 \subparagraph*{Reducing Overfitting}
-Allowing the TrOCR encoder and decoder to be trainable may lead to overfitting, where the model becomes excessively specialized to the training data nuances, compromising its ability to generalize. Freezing mitigates this risk.
-
-\subparagraph*{Balanced Training Dynamics}
-Activating both components could cause CharBERT’s gradient during backpropagation to negatively impact TrOCR’s feature extraction, degrading core OCR functionality. Freezing focuses optimization on linguistic corrections without undermining OCR capabilities.
+Allowing the TrOCR encoder and decoder to be trainable may lead to overfitting, where the model becomes excessively specialized to the training data, compromising its ability to generalize. Freezing mitigates this risk.
 
 \subsection{Integrating Dropout Mechanisms}
 \label{subsec:5_integrating_dropout_mechanisms}
-For both datasets, varying the dropout rates demonstrated minimal impact on the model's performance. However, the GW dataset exhibited a more pronounced response to changes in dropout rates compared to the JH dataset. This suggests that the influence of dropout is dataset-specific, highlighting the necessity for tailored dropout configurations that are carefully calibrated based on the characteristics of the dataset and the desired outcomes of the model. This approach ensures optimized performance while addressing the unique demands of each dataset.
+The result of this analysis is shown in \Cref{tab:5_res_dropout}. For both datasets, varying the dropout rates demonstrated minimal impact on the model's performance. However, the GW dataset exhibited a more pronounced response to changes in dropout rates compared to the JH dataset. This suggests that the influence of dropout is dataset-specific, highlighting the necessity for tailored dropout configurations that are based on the characteristics of the dataset.
 
 \tab{tab:5_res_dropout}{Integrating Dropout Mechanisms Results}{
-\begin{tabular}{ll|rrl}
+\begin{tabular}{llrrl}
     \toprule
-    Dataset	& Dropout Rate	& WER	& CER	& File Name	\\
+    Dataset	& Dropout Rate	& WER	& CER		\\
     \midrule
-    GW		& -		        & 13.11	& 5.78	& gw\_00 \\
-    GW		& 0.1	    	& 12.84 & 5.88  & gw\_01 \\
-    GW		& 0.2	        & 12.88 & 6.26	& gw\_02 \\
-    GW		& 0.5	        & 13.80 & 6.39	& gw\_05 \\
+    GW		& -		        & 13.11	& 5.78	 \\
+    GW		& 0.1	    	& 12.84 & 5.88  \\
+    GW		& 0.2	        & 12.88 & 6.26 \\
+    GW		& 0.5	        & 13.80 & 6.39 \\
     \midrule
-    JH		& -		        & 35.30 & 21.33 & iam\_00 \\
-    JH		& 0.1		    & 35.63 & 21.90 & iam\_encoder\_decoder \\
-    JH		& 0.2	        & 35.13 & 22.76 & iam\_02 \\
-    JH		& 0.5	        & 35.30 & 22.77 & iam\_05 \\
+    JH		& -		        & 35.30 & 21.33  \\
+    JH		& 0.1		    & 35.63 & 21.90  \\
+    JH		& 0.2	        & 35.13 & 22.76  \\
+    JH		& 0.5	        & 35.30 & 22.77  \\
     \bottomrule
     \end{tabular}
 }{Integrating Dropout Mechanisms Results}
 
-\paragraph*{Output Texts Analysis - Effects of Different Dropout Rates}
-The impact of varying dropout rates on the output texts is evident, although it is challenging to determine which rate enhances language understanding the most. Each rate results in some correct and some incorrect recognitions, suggesting a nuanced effect on model performance. This observation may be attributed to the model's architecture. Both TrOCR and CharBERT, being based on transformer architecture and designed for error correction, respectively, likely exhibit a high degree of inherent robustness against overfitting due to their sophisticated designs and pre-trained weights. As dropout is primarily a tool to prevent overfitting, its contribution may be less significant if the model already generalizes well. Moreover, given that TrOCR and CharBERT are tasked with interpreting complex dependencies and contextual nuances, the random deactivation of neurons through dropout could disrupt more than assist. This disruption is particularly problematic in tasks requiring the interaction of all neurons to capture complex data patterns. Notably, lower dropout rates (such as 0 or 0.1) tend to perform better compared to higher rates (0.2 and 0.5), possibly due to these factors.
+\paragraph*{Output Texts Analysis -- Effects of Different Dropout Rates}
+The impact of varying dropout rates on the output texts is evident, although it is challenging to determine which rate enhances language understanding the most. Each rate results in some correct and some incorrect recognitions, suggesting a nuanced effect on model performance. This observation may be attributed to the model's architecture. Both TrOCR and CharBERT, being based on transformer architecture and designed for error correction, respectively, likely exhibit a high degree of inherent robustness against overfitting due to their sophisticated designs and pre-trained weights. As dropout is primarily a tool to prevent overfitting, its contribution may be less significant if the model already generalizes well. Moreover, given that TrOCR and CharBERT are tasked with interpreting complex dependencies and contextual nuances, the random deactivation of neurons through dropout could disrupt more than assist. Notably, lower dropout rates (such as 0 or 0.1) tend to perform better compared to higher rates (0.2 and 0.5), possibly due to these factors.
 
 \subsection{Comparing Combined Tensor Modules}
 \label{subsec:5_comparing_combined_tensor_modules}
-For both datasets, \hyperref[subpar:3_linear_layers_as_attention_net]{Module 3} performs sligthly better than \hyperref[subpar:3_adding]{Module 1} and \hyperref[subpar:3_convolutional_layers_as_attention_net]{Module 4}, but significantly better than \hyperref[subpar:3_mean_pooling]{Module 2}. 
+The result of this analysis is shown in \Cref{tab:5_res_combine_tensor}. For both datasets, \hyperref[subpar:3_linear_layers_as_attention_net]{Module 3} performs slightly better than \hyperref[subpar:3_adding]{Module 1} and \hyperref[subpar:3_convolutional_layers_as_attention_net]{Module 4}, but significantly better than \hyperref[subpar:3_mean_pooling]{Module 2}. 
 
-These results indicate that the effectiveness of specific tensor modules varies significantly between the two datasets, with certain configurations like linear layers as attention mechanisms consistently outperforming others such as mean pooling. This variability underscores the importance of selecting tensor modules based on dataset-specific characteristics to optimize model performance. The study clearly illustrates the need for meticulous configuration and testing of different components within OCR models to achieve optimal results.
+These results indicate that the effectiveness of specific tensor modules varies significantly between the two datasets. Certain configurations like linear layers as attention mechanisms consistently outperforming others such as mean pooling. This variability underscores the importance of selecting tensor modules based on dataset-specific characteristics to optimize model performance. 
 
 \tab{tab:5_res_combine_tensor}{Comparing Combined Tensor Modules Results}{
-\begin{tabular}{ll|rrl}
+\begin{tabular}{llrr}
     \toprule
-    Dataset	& Combined Tensor Modules                                                 & WER	   & CER   & File Name	\\
+    Dataset	& Combined Tensor Modules                                                 & WER	   & CER   	\\
     \midrule
-    GW		& \hyperref[subpar:3_adding]{Module 1}	                                  & 13.63  & 6.61  & gw\_c1 \\
-    GW		& \hyperref[subpar:3_mean_pooling]{Module 2}	                          & 30.66  & 18.85 & gw\_c2 \\
-    GW		& \hyperref[subpar:3_linear_layers_as_attention_net]{Module 3}	          & 12.84  & 5.88  & gw\_01 \\
-    GW		& \hyperref[subpar:3_convolutional_layers_as_attention_net]{Module 4}	  & 13.31  & 6.29  & gw\_c4 \\
+    GW		& \hyperref[subpar:3_adding]{Module 1}	                                  & 13.63  & 6.61   \\
+    GW		& \hyperref[subpar:3_mean_pooling]{Module 2}	                          & 30.66  & 18.85  \\
+    GW		& \hyperref[subpar:3_linear_layers_as_attention_net]{Module 3}	          & 12.84  & 5.88   \\
+    GW		& \hyperref[subpar:3_convolutional_layers_as_attention_net]{Module 4}	  & 13.31  & 6.29   \\
     \midrule
-    JH		& \hyperref[subpar:3_adding]{Module 1}                                    & 34.52  & 20.61 & iam\_c1 \\
-    JH		& \hyperref[subpar:3_mean_pooling]{Module 2}	                          & 44.99  & 30.14 & iam\_c2 \\
-    JH		& \hyperref[subpar:3_linear_layers_as_attention_net]{Module 3}	          & 35.63  & 21.90 & iam\_encoder\_decoder \\
-    JH		& \hyperref[subpar:3_convolutional_layers_as_attention_net]{Module 4}	  & 43.00  & 25.24 & iam\_c4 \\
+    JH		& \hyperref[subpar:3_adding]{Module 1}                                    & 34.52  & 20.61   \\
+    JH		& \hyperref[subpar:3_mean_pooling]{Module 2}	                          & 44.99  & 30.14   \\
+    JH		& \hyperref[subpar:3_linear_layers_as_attention_net]{Module 3}	          & 35.63  & 21.90  \\
+    JH		& \hyperref[subpar:3_convolutional_layers_as_attention_net]{Module 4}	  & 43.00  & 25.24   \\
     \bottomrule
 \end{tabular}
 }{Comparing Combined Tensor Modules Results}
 
-\paragraph*{Output Texts Analysis - Effects of Different Combined Tensor Modules}
+\paragraph*{Output Texts Analysis -- Effects of Different Combined Tensor Modules}
 In the comparative analysis of tensor combine modules applied to the GW and JH datasets, it is evident that Module 2 consistently underperforms. This module, which utilizes mean pooling to dynamically allocate attention weights across the embedding dimensions of stacked tensors, simplifies the model by focusing on average features. However, this approach likely leads to an oversimplification of the representation, obscuring critical nuances and distinct handwriting traits that are essential for accurate character recognition. The inherent simplicity of mean pooling fails to capture the complex variations and subtleties in historical handwritten texts, resulting in suboptimal performance.
 
 Conversely, Module 3, which employs linear layers for attention-based feature weighting, excels with the GW dataset. This module's sophisticated attention mechanism adaptively enhances and focuses on relevant features, which proves particularly effective for the GW dataset. The dataset, characterized by subtle variations in handwriting style from multiple authors, benefits from the nuanced differentiation that the linear layers provide, thereby improving both accuracy and robustness.
@@ -224,87 +230,140 @@ This analysis highlights the critical importance of tailoring the tensor combini
 
 \subsection{Comparing Loss Functions}
 \label{subsec:5_comparing_loss_functions}
+The result of this analysis is shown in \Cref{tab:5_res_loss}. For both datasets, loss function 3 performs the worst. However, for the GW dataset, loss functions 1 and 2 perform equally well, while for the JH dataset, loss function 1 performs significantly better than loss function 2.
 
-\textcolor{red}{The table titled "Comparing Loss Functions Results" provides a detailed analysis of how three different loss functions impact the performance of OCR systems across two distinct datasets: the George Washington (GW) and Joseph Hooker (JH) datasets. For each dataset, the effectiveness of each loss function is evaluated based on the Word Error Rate (WER) and Character Error Rate (CER). Notably, Loss Function 1 appears to yield the lowest WER and CER in the GW dataset, suggesting it may be the most effective of the three for this particular set of data. However, the performance varies significantly in the JH dataset, where the error rates are generally higher, indicating a greater challenge in character recognition or possibly the complexity of the dataset itself. This comparison is crucial for understanding which loss functions might provide the best balance between word and character recognition accuracy in different OCR applications.}
+hese results underscore the importance of the loss from TrOCR, as evidenced by the superior performance of loss function 1, which relies solely on the TrOCR loss. Conversely, loss functions 2 and 3, which incorporate CharBERT token and character losses, show a decline in performance as the contribution of CharBERT losses increases. This indicates that overemphasizing CharBERT losses may negatively impact overall model performance.
 
-\tab{tab:5_loss}{Comparing Loss Functions Results}{
-\begin{tabular}{ll|rrl}
+This might be because CharBERT and TrOCR are specialized for different aspects of the task. TrOCR is directly optimized for OCR tasks, whereas CharBERT, being a general LM, may not effectively capture the specific nuances required for OCR without additional fine-tuning specifically tailored to OCR tasks.
+
+\tab{tab:5_res_loss}{Comparing Loss Functions Results}{
+\begin{tabular}{llrr}
     \toprule
-    Dataset	& Loss Function	    & WER	& CER	& File Name	\\
+    Dataset	& Loss Function	    & WER	& CER		\\
     \midrule
-    GW		& \:\:1	            & 12.84	& 5.88  & gw\_01	\\
-    GW		& \:\:2		        & 13.30 & 5.81  & gw\_loss2\\
-    GW		& \:\:3	            & 14.19 & 6.85  & gw\_loss3\\
+    GW		& \:\:1	            & 12.84	& 5.88  	\\
+    GW		& \:\:2		        & 13.30 & 5.81 \\
+    GW		& \:\:3	            & 14.19 & 6.85 \\
     \midrule
-    JH		& \:\:1		        & 35.63 & 21.90 & iam\_encoder\_decoder \\
-    JH		& \:\:2		        & 44.71 & 26.20	& iam\_loss2\\
-    JH		& \:\:3		        & 40.72 & 27.92 & iam\_loss3\\
+    JH		& \:\:1		        & 35.63 & 21.90  \\
+    JH		& \:\:2		        & 44.71 & 26.20	\\
+    JH		& \:\:3		        & 40.72 & 27.92 \\
     \bottomrule
 \end{tabular}
 }{Comparing Loss Functions Results}
 
-\subsection{Benchmarking Against GPT-4}
+\subsection{Benchmarking Against GPT-4o}
 \label{subsec:5_benchmarking_against_gpt-4}
+The results of this analysis are presented in \Cref{tab:5_res_gp4o}. Although GPT-4o is a powerful LM, its performance as a post-OCR corrector still suffers. This outcome is expected, as GPT-4o only has access to the output texts from the TrOCR model, rather than the original image information. Moreover, GPT-4o is not particularly renowned for its correction capabilities. However, better OCR results significantly improved the quality of post-OCR corrections. For example, the post-correction of outputs from the fine-tuned TrOCR model is significantly better than those from the non-fine-tuned TrOCR model. This improvement underscores the importance of refined OCR processes in reducing errors and enhancing text quality in subsequent correction stages.
 
-\tab{tab:5_gp4}{Benchmarking Against GPT-4 Results}{
-\begin{tabular}{l|rr}
+\tab{tab:5_res_gp4o}{Benchmarking Against GPT-4o Results}{
+\begin{tabular}{llrr}
     \toprule
-    Model	& WER	& CER		\\
+    Dataset &  Model	                                    & WER	& CER		\\
     \midrule
-    TrOCR-CharBERT		& 	& 	\\
-    GPT-4 Post Correction	&  & 	\\
-    GPT-4 Image Recognition		&  & 	\\
+    GW      &  TrOCR-CharBERT		                        & 12.84 & 5.88	\\
+    GW      &  TrOCR + GPT-4o Post Correction	            & 38.58 & 14.30	\\
+    GW      &  fine-tuned TrOCR + GPT-4o Post Correction	& 25.97 & 7.26	\\
     \bottomrule
     \end{tabular}
-}{Benchmarking Against GPT-4 Results}
+}{Benchmarking Against GPT-4o Results}
+
+GPT-4o also exhibits an overcorrection tendency similar to TrOCR, as it lacks access to image information. This limitation makes it difficult for GPT-4o to determine which words to amend and which to retain, relying solely on the text outputs from the OCR model. For instance, it often corrects or completes words such as \say{Expamples} to \say{examples,} and \say{Treasu} to \say{Treasury,} as illustrated in the following examples.
+
+\begin{center}
+    \begin{minipage}{1.0\textwidth}
+    \begin{Verbatim}[commandchars=\\\{\}]
+        {\small\textcolor{Gray}{Test on TrOCR outputs with GPT-4o as post corrector}}
+        label:  est occasion for Expamples, will be morally im
+        output: Cut occasion for examples, will be morally in- 
+
+        {\small\textcolor{Gray}{Test on fine-tuned TrOCR outputs with GPT-4o as post corrector}}
+        label:  settle with the Committee to the Treasu
+        output: Settle with the committee; to the Treasury
+    \end{Verbatim}
+    \end{minipage}
+\end{center}
 
 \section{Model Cross-Dataset Performance Results}
 \label{sec:5_model_adaptability_results}
-The model's performance when trained on the George Washington (GW) dataset and tested on the Joseph Hooker (JH) dataset highlights a significant domain shift that the model struggles to manage effectively. The limited variability or the non-generalizable nature of the features learned from the GW dataset results in poor adaptability to the JH dataset. Conversely, the model trained on the JH dataset, although not excelling, performs better when tested on the GW dataset. These results suggest that the JH dataset likely offers a richer and more varied range of handwriting styles and complexities, making models trained on it more robust when applied to different datasets.
+The result of this analysis is shown in \Cref{tab:5_res_cross_dataset}. The model's performance when trained on the GW dataset and tested on the JH dataset highlights a significant domain shift that the model struggles to manage effectively. The limited variability or the non-generalizable nature of the features learned from the GW dataset results in poor adaptability to the JH dataset. Conversely, the model trained on the JH dataset, although not excelling, performs better when tested on the GW dataset. These results suggest that the JH dataset likely offers a richer and more varied range of handwriting styles and complexities, making models trained on it more robust when applied to different datasets.
 
-This inference aligns with earlier discussions in \autoref{subsec:5_comparing_combined_tensor_modules}, suggesting that the JH dataset's complexity and diversity might explain why Module 3 do not perform as well on it. In contrast, the GW dataset appears to be more homogeneous and specific in style, which hampers its generalization capabilities when confronted with the varied and complex data characteristics of the JH dataset. This analysis underscores the need for OCR models that can adapt across significantly diverse handwriting datasets and highlights the importance of incorporating a broad spectrum of data characteristics during the training phase to enhance model robustness and versatility.
+This inference aligns with earlier discussions in \Cref{subsec:5_comparing_combined_tensor_modules}, suggesting that the JH dataset's complexity and diversity might explain why Module 3 do not perform as well on it. In contrast, the GW dataset appears to be more homogeneous and specific in style, which hampers its generalization capabilities when confronted with the varied and complex data characteristics of the JH dataset. This analysis underscores the need for OCR models that can adapt across significantly diverse handwriting datasets and highlights the importance of incorporating a broad spectrum of data characteristics during the training phase to enhance model robustness and versatility.
 
-\tab{tab:5_cross_dataset}{Model Cross-Dataset Performance Results}{
-\begin{tabular}{ll|rrl}
+The poor performance highlighted a significant domain shift that the model struggled to manage effectively. Thus, we added another test with the model trained on both datasets, hoping that a combined dataset would provide a richer and more varied range of handwriting styles and complexities. The rationale behind this approach is based on the idea that models trained on a diverse dataset can learn a wider array of features and patterns, making them better suited to handle variations in new, unseen data. This concept is supported by findings in various cross-dataset studies, which show that training on comprehensive datasets can mitigate the limitations of domain-specific training and enhance generalization capabilities
+
+The third experiment, where the model is trained on both the GW and JH datasets (GW+JH), indicate a significant improvement in performance across both datasets. The model trained on the combined dataset are substantially better than the performance metrics observed when the model is trained on either dataset alone. This suggests that incorporating a broader and more diverse range of handwriting styles and complexities during training enhances the model's ability to generalize and adapt to different datasets.
+
+This improved performance aligns with observations in cross-dataset studies where models benefit from the increased variability and richer feature representations available in more diverse datasets. It underscores the importance of training OCR models on comprehensive datasets to improve their robustness and adaptability across various handwriting styles and conditions \citep{laroca2022}.
+
+In summary, integrating a wide spectrum of data characteristics during the training phase is crucial for developing more versatile and robust OCR models. This combined training approach mitigates the limitations observed when models are trained on more homogeneous datasets, as seen in the previous experiments.
+
+\tab{tab:5_res_cross_dataset}{Model Cross-Dataset Performance Results}{
+\begin{tabular}{llrr}
     \toprule
-    Training Dataset	& Testing Dataset	& WER	& CER	& File Name	\\
+    Training Dataset	& Testing Dataset	& WER	& CER		\\
     \midrule
-    GW		            & JH                & 96.96	& 82.64 & gw\_adapt	\\
-    JH		            & GW 	            & 40.30 & 27.23 & iam\_adapt\\
+    GW		            & JH                & 96.96	& 82.64 \\
+    JH		            & GW 	            & 40.30 & 27.23 \\
+    GW+JH		        & GW+JH 	        & 32.41 & 20.13\\
     \bottomrule
 \end{tabular}
 }{Model Cross-Dataset Performance Results}
 
 \section{Model Domain Adaptability Results}
 \label{sec:5_model_domain_adaptability_results}
+The result of this analysis is shown in \Cref{tab:5_res_adapt}. From the results, we can see that TrOCR combined with historical CharBERT$_{\text{SMALL}}$ (CharBERT trained on 15$^{\text{th}}$ -- 18$^{\text{th}}$ Century English) performs better than TrOCR combined with modern CharBERT$_{\text{SMALL}}$ (CharBERT trained on contemporary English). This is expected since the GW dataset consists of 18th-century texts. However, the performance difference between the two was not substantial. This indicates that the candidate fusion paper was correct: CharBERT can adapt to historical texts even when trained on modern texts. The LM can adapt to a specific dataset corpus while still retaining its ability to generalize.
 
-\tab{tab:5_adapt}{Model Domain Adaptability Results}{
-    \begin{tabular}{lllrrl}
+The findings from the candidate fusion paper suggest that the integration of a recognizer with an LM enhances recognition accuracy and allows the model to adapt to domain-specific data. Our results align with these findings, demonstrating that CharBERT's flexibility enables it to effectively process historical texts despite its modern training. This adaptability underscores the robustness of the LM, which can fine-tune itself to the nuances of different time periods and textual styles while maintaining a broad generalization capacity. 
+
+These results also highlight the potential for reducing the need for extensive domain-specific training data for the post-correction model. By leveraging a strong LM like CharBERT, trained on contemporary texts, and integrating it with an OCR system, we can achieve high recognition accuracy even on specialized datasets. This approach can enhance the efficiency of OCR applications across various domains.
+
+\tab{tab:5_res_adapt}{Model Domain Adaptability Results}{
+    \begin{tabular}{lllrr}
         \toprule
-        Training Dataset & LM Training Data                                     & WER   & CER   & File Name  \\
+        Training Dataset & LM Training Data                                     & WER   & CER    \\
         \midrule
-        GW               & Contemporary English                                 & 13.88 & 6.51  & gw\_small  \\
-        GW               & 15$^{\text{th}}$ -- 18$^{\text{th}}$ Century English &  &   & gw\_pij \\
-        \midrule
-        JH               & Contemporary English                                 &       &       & iam\_small \\
-        JH               & 15$^{\text{th}}$ -- 18$^{\text{th}}$ Century English &       &       & iam\_pij \\
+        GW               & Contemporary English                                 & 13.88 & 6.51  \\
+        GW               & 15$^{\text{th}}$ -- 18$^{\text{th}}$ Century English & 13.18 & 6.05 \\
         \bottomrule
     \end{tabular}
 }{Model Domain Adaptability Results}
 
 \section{TrOCR-CharBERT$_{\mathcal{P}_{ij}}$ Results}
 \label{sec:5_trocr_charbert_pij_results}
+The result of this analysis is shown in \Cref{tab:5_res_pij}. The TrOCR-CharBERT$_{\text{SMALL}}$ model serves as the baseline for this analysis. The model that incorporates the common mistakes (TrOCR-CharBERT$_{\mathcal{P}{ij}}$) shows improved performance over the baseline model (TrOCR-CharBERT$_{\text{SMALL}}$) for both datasets. This is evidenced by the lower WER and CER values, particularly for the GW dataset. 
+
+The results suggest that integrating knowledge about common OCR mistakes into the model helps to refine its predictions. This refinement is more pronounced in the GW dataset, indicating that the nature of errors in this dataset may be more systematically addressable. For the JH dataset, while the performance improvement is less marked, there is still a reduction in WER from 34.42 to 33.95. Interestingly, the CER slightly increases from 21.60 to 21.86, which might indicate that while some errors are corrected, new ones might be introduced due to the complexity and variability in the JH dataset. 
+
+In summary, integrating common OCR mistakes into the training process enhances model performance, particularly for more homogeneous datasets like GW. If we use CharBERT trained with a large amount of data, we can expect even better performance than the best-performing TrOCR-CharBERT model above.
 
 \tab{tab:5_res_pij}{TrOCR-CharBERT\ensuremath{_{\mathcal{P}_{ij}}} Results}{
-\begin{tabular}{lllrrl}
+\begin{tabular}{lllrr}
     \toprule
-    Training Dataset    & Model                                & $\mathcal{P}_{ij}$    & WER   & CER   & File Name  \\
+    Training Dataset    & Model                                & $\mathcal{P}_{ij}$    & WER   & CER     \\
     \midrule
-    GW                  & TrOCR\_CharBERT$_{\text{SMALL}}$     & False                 & 13.88 & 6.51  & gw\_small  \\
-    GW                  & TrOCR\_CharBERT$_{\mathcal{P}_{ij}}$ & True                  & 12.94 & 6.03  & gw\_pij \\
+    GW                  & TrOCR\_CharBERT$_{\text{SMALL}}$     & False                 & 13.88 & 6.51   \\
+    GW                  & TrOCR\_CharBERT$_{\mathcal{P}_{ij}}$ & True                  & 12.94 & 6.03   \\
     \midrule
-    JH                  & TrOCR\_CharBERT$_{\text{SMALL}}$     & False                 &       &       & iam\_small \\
-    JH                  & TrOCR\_CharBERT$_{\mathcal{P}_{ij}}$ & True                  &       &       & iam\_pij \\
+    JH                  & TrOCR\_CharBERT$_{\text{SMALL}}$     & False                 & 34.42 & 21.60  \\
+    JH                  & TrOCR\_CharBERT$_{\mathcal{P}_{ij}}$ & True                  & 33.95 & 21.86  \\
     \bottomrule
 \end{tabular}
 }{TrOCR-CharBERT\ensuremath{_{\mathcal{P}_{ij}}} Results}
+
+% \section{TrOCR-RoBERTa Results}
+% \label{sec:5_trocr_roberta_results}
+
+% \tab{tab:5_res_roberta}{TrOCR-RoBERTa Results}{
+% \begin{tabular}{lllrrl}
+%     \toprule
+%     Training Dataset    & Model               & WER   & CER   & File Name  \\
+%     \midrule
+%     GW                  & TrOCR\_CharBERT     & 12.84 & 5.88  & gw\_01  \\
+%     GW                  & TrOCR\_RoBERTa      & 13.43 & 8.86  &  \\
+%     \midrule
+%     JH                  & TrOCR\_CharBERT     & 35.63 & 21.90 & iam\_encoder\_decoder\\
+%     JH                  & TrOCR\_RoBERTa      & 27.82 & 21.93  &  \\
+%     \bottomrule
+% \end{tabular}
+% }{TrOCR-RoBERTa Results}

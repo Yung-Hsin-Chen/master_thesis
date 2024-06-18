@@ -21,7 +21,7 @@ def load_model():
 def get_fine_tuned_param(experiment_version):
     prefix = "roberta."
     model = load_model()
-    model_path = os.path.join(MODELS, "charbert_small", "checkpoint-8500", "pytorch_model.bin")
+    model_path = os.path.join(MODELS, "charbert_small", "checkpoint-9500", "pytorch_model.bin")
     fine_tuned_weights = torch.load(model_path)
     # print("\nPRETRAINED MODEL PARAM")
     # print(fine_tuned_weights.keys())
