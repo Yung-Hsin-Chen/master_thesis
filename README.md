@@ -1,10 +1,13 @@
-## TrOCR meets CharBERT
-This paper is accepted for presentation at ICDAR, 2024. In Proceedings of the ICDAR, 2024.
+# TrOCR meets CharBERT
 - [TrOCR meets CharBERT](#trocr-meets-charbert)
-- [Data](#data)
-- [Get Report](#get-report)
-- [Run Source Codes](#run-source-codes)
-- [Folder Structure](#folder-structure)
+  - [Paper](#paper)
+  - [Data](#data)
+  - [Get Report](#get-report)
+  - [Run Source Codes](#run-source-codes)
+  - [Folder Structure](#folder-structure)
+
+## Paper
+[This paper](https://github.com/Yung-Hsin-Chen/master_thesis/blob/master/trocr_meets_language_models.pdf) is accepted for presentation at ICDAR, 2024. In Proceedings of the ICDAR, 2024.
 
 ## Data
 Data used in the project can be downloaded online.
